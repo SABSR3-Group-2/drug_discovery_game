@@ -2,7 +2,7 @@ import pandas as pd
 import os.path
 
 
-def MolChoose(R1,R2,DataSource="data/2011.Pickett-et-al.AutomatedLeadOptimizationOfMMP-12InhibitorsUsingAGeneticAlgorithm.csv"):
+def MolChoose(R1,R2,DataSource="data/r_groups_pIC50.csv"):
     """a function to return the source data on the molecule specified by the provided R1 and R2 values
     
 
@@ -11,7 +11,7 @@ def MolChoose(R1,R2,DataSource="data/2011.Pickett-et-al.AutomatedLeadOptimizatio
     :type R1: String 
     :param R2: Tag specifying R2 group
     :type R2: String
-    :param DataSource: file path to file providing full molecule smile strings, defaults to data/2011.Pickett-et-al.AutomatedLeadOptimizationOfMMP-12InhibitorsUsingAGeneticAlgorithm.csv
+    :param DataSource: file path to file providing full molecule smile strings, defaults to data/r_groups_pIC50.csv
     :type DataSource: String
     ...
     :raises FileNotFoundError: the file listing the data as named in DataSource is not able to be opened
