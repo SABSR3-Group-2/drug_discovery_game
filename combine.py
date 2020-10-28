@@ -36,7 +36,4 @@ def MolChoose(R1,R2,DataSource="data/2011.Pickett-et-al.AutomatedLeadOptimizatio
          selectedrow = selectedrows.loc[selectedrows[R2col] == R2]
     except KeyError:
         raise RuntimeError("no \""+str(R2col)+"\" collumn in \""+str(DataSource)+"\"")
-    
     return selectedrow
-
-print(MolChoose("A06","B01"))
