@@ -37,9 +37,6 @@ def MolChoose(R1,R2,DataSource="data/2011.Pickett-et-al.AutomatedLeadOptimizatio
     except KeyError:
         raise RuntimeError("no \""+str(R2col)+"\" collumn in \""+str(DataSource)+"\"")
     
-    origninalset = pd.read_csv(DataSource)
-    selectedrows = origninalset.loc[origninalset['Abtag'] == R1]
-    selectedrow = selectedrows.loc[selectedrows['Btag'] == R2]
     return selectedrow
 
 print(MolChoose("A06","B01"))
