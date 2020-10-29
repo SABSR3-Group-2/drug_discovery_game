@@ -5,7 +5,7 @@ from rdkit.Chem import Draw
 R1list = ["A01","A11","A21","A31","A41"]
 R2list = ["B01","B11","B21","B31","B41"]
 
-brokendownfile = "localrepo/drug_discovery_game/data/r_groups_pIC50.csv"
+brokendownfile = "/home/sabsr3/Softwear Engineering Module/MainProject/localrepo/drug_discovery_game/data/r_groups_pIC50.csv"
 R1col = "Atag"
 try:
     brokendown = pd.read_csv(brokendownfile)
@@ -26,4 +26,24 @@ PandasTools.AddMoleculeColumnToFrame(R1options, smilesCol='Smiles', molCol='Mol'
 
 print(R1options)
 img=Draw.MolsToGridImage(R1options["Mol"][:],molsPerRow=1,subImgSize=(200,200),legends=["1","2","3","4","5"])#list(R1options["tag"])) 
-img.save('Images/testR1image.png') 
+img.save('/home/sabsr3/Softwear Engineering Module/MainProject/localrepo/drug_discovery_game/Images/testR1image.png') 
+
+
+def getOptions():
+    R1list = ["A01","A11","A21","A31","A41"]
+    R2list = ["B01","B11","B21","B31","B41"]
+
+
+def getSets(File, GroupList, GroupSelect="R1"):
+    R1options = pd.DataFrame(columns=["tag","Smiles"])
+    colName = "Atag"
+    for option in range(len(GroupList)):
+        commonOtherR = brokendown.loc[brokendown[colName] == GroupList[option]]
+        print(commonOtherR)
+        commonOtherR = commonOtherR.iloc[0]
+        R1atributes = [commonOtherR[colName],commonOtherR[GroupSelect]]
+        R1options.loc[option] = R1atributes
+    print(R1options)
+    PandasTools.AddMoleculeColumnToFrame(R1options, smilesCol='Smiles', molCol='Mol')
+
+getSets(0,R2list,"R1")
