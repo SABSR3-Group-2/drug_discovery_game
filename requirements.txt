@@ -1,0 +1,6 @@
+pandas
+rdkit
+setuptools
+io
+pytest
+unittest
