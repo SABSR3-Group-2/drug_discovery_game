@@ -24,15 +24,14 @@ class Get_r_groups:
             scaffold = Chem.MolFromSmiles(self.smiles)
             mols = [Chem.MolFromSmiles(x) for x in data['smiles']]
             for col in data.columns:
-                # rename pic50 column to just pic50
-            test_frame = {'Core': mols, 'R1': mols, 'R2': mols}
-            groups_frame = pd.DataFrame(test_frame, columns=['Core', 'R1', 'R2'])
+                if 'pic50' in col:
+                    data.rename(columns={col: 'pic50'}, inplace=True)
+            groups, _ = rdRGD.RGroupDecompose([scaffold], mols, asSmiles=True)
+            groups_frame = pd.DataFrame(groups)
             for new_col, index in zip(['atag', 'btag', 'pic50'], [1, 3, 5]):
                 groups_frame.insert(index, new_col, data[new_col])
         except FileNotFoundError:
             print("File specified " + self.filename + " does not exist.")
         except KeyError:
-            raise RuntimeError("No smiles column in " + self.filename)
+            raise RuntimeError(self.filename + " mising correct column names.")
         return groups_frame
-
-Get_r_groups('spreadsheet2.csv', 'O=S(C1=CC=CC=C1)(NCC(O)=O)=O').get_r()
