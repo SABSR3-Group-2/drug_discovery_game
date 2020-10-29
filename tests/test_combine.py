@@ -4,7 +4,7 @@ import pytest
 import unittest
 import pandas as pd
 import os.path
-from .. import combine
+import combine
 
 def test_molchoose_nofile():
     """Tests that the FileNotFoundError works as expected"""
