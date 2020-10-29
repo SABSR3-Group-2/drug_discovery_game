@@ -4,11 +4,10 @@ from rdkit.Chem import Draw, AllChem
 import pandas as pd
 from rdkit import RDLogger
 
-file_name = 'data/r_groups_pIC50.csv'
-data = pd.read_csv(file_name, delimiter=',')
 RDLogger.DisableLog('rdApp.*')
 
-def get_selection(r_group, no_picks):
+def get_selection(r_group, no_picks, DataSource='data/r_groups_pIC50.csv):
+    data = pd.read_csv(DataSource, delimiter=',')
     r_groups = data[r_group]
     mols = [Chem.MolFromSmiles(mol) for mol in r_groups]
     fps = [Chem.AllChem.GetMorganFingerprintAsBitVect(x, 2) for x in mols]
@@ -21,5 +20,3 @@ def get_selection(r_group, no_picks):
 
     elif r_group == 'R2':
         return Draw.MolsToGridImage(mol_picks, legends=list(data['Btag'][picks]))
-
-get_selection('R1', 6)
