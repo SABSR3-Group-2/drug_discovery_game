@@ -1,5 +1,3 @@
 pandas
 setuptools
-io
 pytest
-unittest
