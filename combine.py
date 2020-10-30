@@ -25,15 +25,18 @@ def MolChoose(R1,R2,DataSource="data/r_groups_pIC50.csv"):
     R1col = 'Atag'
     R2col = 'Btag'
     try:
-        origninalset = pd.read_csv(DataSource)
-    except FileNotFoundError:
-        print("file specified ("+str(DataSource)+") appers to not exist. the file must exist")
+        originalset = pd.read_csv(DataSource)
+    except FileNotFoundError as e:   
+        print("The specified file ("+str(DataSource)+") cannot be found")
+        raise e
     try:
-        selectedrows = origninalset.loc[origninalset[R1col] == R1]
-    except KeyError:
-        raise RuntimeError("no \""+str(R1col)+"\" collumn in \""+str(DataSource)+"\"")
+        selectedrows = originalset.loc[originalset[R1col] == R1]
+    except KeyError as k:
+        print('No \""+str(R1col)+"\" in \""+str(DataSource)+"\"')
+        raise k
     try:
          selectedrow = selectedrows.loc[selectedrows[R2col] == R2]
-    except KeyError:
-        raise RuntimeError("no \""+str(R2col)+"\" collumn in \""+str(DataSource)+"\"")
+    except KeyError as k:
+        print('No \""+str(R2col)+"\" in \""+str(DataSource)+"\"')
+        raise k
     return selectedrow
