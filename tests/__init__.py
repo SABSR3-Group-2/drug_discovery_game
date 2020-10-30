@@ -1,1 +1,1 @@
-from drug_discovery_game import combine
+from game_scripts import combine
