@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -e .
+        pip install -e drug_discovery_game
     - name: Test with unittest
       run: |
         python -m unittest
