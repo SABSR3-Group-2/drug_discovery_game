@@ -36,7 +36,7 @@ class game:
 
         """
 
-        RList = self.steffunciton(GroupSelect)
+        RList = self.get_selection(GroupSelect)
         try:
             decomp = pd.read_csv(self.decompFile)
         except FileNotFoundError:
@@ -44,8 +44,9 @@ class game:
             self.decompFile = input()
         decomp = pd.read_csv(self.decompFile)
         rOptions = self.getSets(decomp, RList, GroupSelect)
-        img = Draw.MolsToGridImage(rOptions["Mol"][:], molsPerRow=len(rOptions["Mol"]), subImgSize=(400, 400), legends=list(rOptions["tag"]))
-        img.save('/home/sabsr3/Softwear Engineering Module/MainProject/localrepo/drug_discovery_game/Images/test'+str(GroupSelect)+'image.png')
+        img = Draw.MolsToGridImage(rOptions["Mol"][:], molsPerRow=len(rOptions["Mol"]), legends=list(rOptions["tag"]))# , subImgSize=(400, 400))
+        #img.show()
+        img.save('Images/test'+str(GroupSelect)+'image.png')
         return rOptions
 
     def getSets(self, decomp, GroupList, GroupSelect="R1"):
@@ -71,8 +72,6 @@ class game:
         return rOptions
 
     def makeChoice(self,options):
-        print("options")
-        print(options)
         validChoice = False
         while validChoice == False:
             for i in range(len(self.rgroupslist)):
@@ -84,13 +83,13 @@ class game:
                     self.currrentchoice[i] = Rchoice
 
             print("you have selected: " + str(self.currrentchoice))
-            self.chosenmolecule = "a" # MolChoose(self.currrentchoice[0], self.currrentchoice[1])
+            self.chosenmolecule = MolChoose(self.currrentchoice[0], self.currrentchoice[1])
             if str(type(self.chosenmolecule)) == "<class 'pandas.core.frame.DataFrame'>":
                 validChoice = True
             else:
                 print("That choice was invalid:")
                 print(self.chosenmolecule)
-                retry = input("do you want to reselect again? [\033[4mY\033[0mes/no]")
+                retry = input("do you want to reselect again? [\033[4mY\033[0mes/no]:")
                 if ("Exit" in retry) or ("exit" in retry) or ("No" in retry) or ("no" in retry) or (retry == "E") or (retry == "e"):
                     self.Exit = True
                     return
@@ -102,7 +101,8 @@ class game:
         # placeholder
         print("giveFeedback() is a place holder")
 
-    def steffunciton(self, group):
+    def get_selection(self, group):
+        #placeholder for full get_selection fucntion
         if group == "R1":
             return ["A01", "A11", "A21"]
         elif group == "R2":
