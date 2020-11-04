@@ -1,5 +1,7 @@
 from rdkit import Chem
 from rdkit.Chem import rdRGroupDecomposition as rdRGD
+from rdkit.Chem import AllChem
+from rdkit import RDLogger
 import pandas as pd
 
 
@@ -16,6 +18,15 @@ class Get_r_groups:
     def __init__(self, filename, smiles):
         self.filename = filename
         self.smiles = smiles
+        self.get_r()
+
+    def remove_h(self, r1):
+        RDLogger.DisableLog('rdApp.*')
+        mol = Chem.MolFromSmiles(r1)
+        substruct = Chem.MolFromSmiles('[H][*:1]')
+        mol = AllChem.DeleteSubstructs(mol, substruct)
+        Chem.SanitizeMol(mol)
+        return Chem.MolToSmiles(mol)
 
     def get_r(self):
         try:
@@ -30,6 +41,7 @@ class Get_r_groups:
             groups_frame = pd.DataFrame(groups)
             for new_col, index in zip(['atag', 'btag', 'pic50'], [1, 3, 5]):
                 groups_frame.insert(index, new_col, data[new_col])
+            groups_frame['R1'] = groups_frame['R1'].apply(self.remove_h)
         except FileNotFoundError:
             print("File specified " + self.filename + " does not exist.")
         except KeyError:
