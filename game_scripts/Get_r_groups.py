@@ -18,7 +18,6 @@ class Get_r_groups:
     def __init__(self, filename, smiles):
         self.filename = filename
         self.smiles = smiles
-        self.get_r()
 
     def remove_h(self, r1):
         RDLogger.DisableLog('rdApp.*')
