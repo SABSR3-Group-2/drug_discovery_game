@@ -1,5 +1,5 @@
 import unittest
-from Get_r_groups import Get_r_groups
+from game_scripts import Get_r_groups
 from rdkit.Chem import PandasTools
 from rdkit import Chem
 import pandas as pd
