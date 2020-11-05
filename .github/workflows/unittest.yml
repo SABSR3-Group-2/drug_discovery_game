@@ -27,4 +27,4 @@ jobs:
         $CONDA/bin/conda env update --file requirements.txt --name base
         conda list
         conda install -c conda-forge rdkit
-        $CONDA_PYTHON_EXE -m unittest
+        $CONDA/bin/python -m unittest
