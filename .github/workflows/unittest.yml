@@ -29,5 +29,5 @@ jobs:
         conda install -c conda-forge rdkit
     - name: Test with unittest
       run: |
-        conda install unittest
+#        conda install unittest
         $CONDA/bin/unittest
