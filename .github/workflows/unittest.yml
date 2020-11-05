@@ -29,5 +29,5 @@ jobs:
 #        conda activate base
     - name: Test with unittest
       run: |
-        conda install unittest
-        $CONDA/bin/unittest
+        conda install pytest
+        $CONDA/bin/pytest
