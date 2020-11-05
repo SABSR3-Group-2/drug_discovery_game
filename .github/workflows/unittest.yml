@@ -25,6 +25,7 @@ jobs:
       run: |
         conda update -n base -c defaults conda        
         $CONDA/bin/conda env update --file requirements.txt --name base
+        conda init base
         conda activate base
     - name: Test with unittest
       run: |
