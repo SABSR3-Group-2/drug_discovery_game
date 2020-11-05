@@ -1,5 +1,6 @@
+import pytest
 import unittest
-from Get_r_groups import Get_r_groups
+from game_scripts import Get_r_groups
 from rdkit.Chem import PandasTools
 from rdkit import Chem
 import pandas as pd
@@ -40,24 +41,30 @@ class ImportTest(unittest.TestCase):
 
         """
 
-        output_csv = Get_r_groups('test_input.csv', 'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]').get_r()
+        output_csv = Get_r_groups.Get_r_groups('tests/test_input.csv', 'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]').get_r()
         test_output = pd.DataFrame.from_dict({'Core': ['O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]',
                                                        'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]',
                                                        'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]',
                                                        'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]',
                                                        'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]'],
-                                              'pIC50': ['6.5', '6.8', 'Assay Failed', '7.1', '5.1'],
-                                              'Btag': ['B01', 'B02', 'B03', 'B04', 'B05'],
-                                              'Atag': ['A01', 'A01', 'A01', 'A01', 'A01'],
+                                              'atag': ['A01', 'A01', 'A01', 'A01', 'A01'],
                                               'R1': ['Oc1ccc(C[*:1])cc1',
                                                      'Oc1ccc(C[*:1])cc1',
                                                      'Oc1ccc(C[*:1])cc1',
                                                      'Oc1ccc(C[*:1])cc1',
                                                      'Oc1ccc(C[*:1])cc1'],
+                                              'btag': ['B01', 'B02', 'B03', 'B04', 'B05'],
+                                              
                                               'R2': ['c1ccc([*:2])cc1',
                                                      'Brc1ccc([*:2])cc1',
                                                      'O=[N+]([O-])c1cccc([*:2])c1',
                                                      'Cc1ccc([*:2])cc1',
-                                                     'c1ccc2c(c1)oc1c([*:2])cccc12']
+                                                     'c1ccc2c(c1)oc1c([*:2])cccc12'],
+                                            'pic50': ['6.5', '6.8', 'Assay Failed', '7.1', '5.1'],
                                               })
         assert_frame_equal(output_csv, test_output)
+
+i = ImportTest()
+i.test_ROMol()
+i.test_get_r()
+
