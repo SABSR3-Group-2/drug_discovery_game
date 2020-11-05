@@ -25,6 +25,7 @@ jobs:
       run: |
         conda update -n base -c defaults conda        
         $CONDA/bin/conda env update --file requirements.txt --name base
+        python --version
         conda install -c rdkit rdkit
     - name: Test with unittest
       run: |
