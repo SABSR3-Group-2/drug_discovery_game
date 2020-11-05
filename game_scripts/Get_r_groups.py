@@ -44,5 +44,5 @@ class Get_r_groups:
         except FileNotFoundError:
             print("File specified " + self.filename + " does not exist.")
         except KeyError:
-            raise RuntimeError(self.filename + " mising correct column names.")
+            raise RuntimeError(self.filename + " missing correct column names.")
         return groups_frame
