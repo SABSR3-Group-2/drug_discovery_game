@@ -1,7 +1,6 @@
 """Tests that the combine.py script functions as expected"""
 
 import pytest
-import unittest
 import pandas as pd
 import os.path
 from game_scripts import combine
