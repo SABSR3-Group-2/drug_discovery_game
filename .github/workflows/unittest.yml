@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -26,7 +26,7 @@ jobs:
         conda update -n base -c defaults conda        
         $CONDA/bin/conda env update --file requirements.txt --name base
         python --version
-        conda install -c rdkit rdkit
+        conda install -c conda-forge rdkit
     - name: Test with unittest
       run: |
         conda install pytest
