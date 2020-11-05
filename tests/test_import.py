@@ -41,7 +41,7 @@ class ImportTest(unittest.TestCase):
 
         """
 
-        output_csv = Get_r_groups('test_input.csv', 'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]').get_r()
+        output_csv = Get_r_groups.Get_r_groups('test_input.csv', 'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]').get_r()
         test_output = pd.DataFrame.from_dict({'Core': ['O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]',
                                                        'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]',
                                                        'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]',
