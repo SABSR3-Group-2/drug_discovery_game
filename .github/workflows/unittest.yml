@@ -23,7 +23,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        conda update -n base -c defaults conda        
         $CONDA/bin/conda env update --file requirements.txt --name base
+        $CONDA activate base
     - name: Test with unittest
       run: |
         python -m unittest
