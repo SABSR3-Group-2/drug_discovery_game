@@ -21,11 +21,14 @@ class Get_r_groups:
 
     def remove_h(self, r1):
         RDLogger.DisableLog('rdApp.*')
-        mol = Chem.MolFromSmiles(r1)
-        substruct = Chem.MolFromSmiles('[H][*:1]')
-        mol = AllChem.DeleteSubstructs(mol, substruct)
-        Chem.SanitizeMol(mol)
-        return Chem.MolToSmiles(mol)
+        if r1 == '[H][*:1].[H][*:1]':
+            return '[H][*:1]'
+        else:
+            mol = Chem.MolFromSmiles(r1)
+            substruct = Chem.MolFromSmiles('[H][*:1]')
+            mol = AllChem.DeleteSubstructs(mol, substruct)
+            Chem.SanitizeMol(mol)
+            return Chem.MolToSmiles(mol)
 
     def get_r(self):
         try:
