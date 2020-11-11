@@ -44,7 +44,7 @@ class Get_r_groups:
             R_cols = [col for col in groups_frame.columns if 'R' in col]
             for col in R_cols:
                 num = int(col[1])
-                letter = chr(ord('a') + num - 1).upper()
+                letter = chr(ord('a') + num - 1)
                 tag = letter + 'tag'
                 groups_frame.insert(
                     loc=groups_frame.columns.get_loc(col),
@@ -52,11 +52,11 @@ class Get_r_groups:
                     value=groups_frame[col].factorize()[0] + 1
                     )
                 groups_frame[tag] = groups_frame[tag].apply("{:02d}".format)
-                groups_frame[tag] = letter + groups_frame[tag].astype(str)
+                groups_frame[tag] = letter.upper() + groups_frame[tag].astype(str)
             groups_frame['pic50'] = data['pic50']
             groups_frame['R1'] = groups_frame['R1'].apply(self.remove_h)
         except FileNotFoundError:
             print("File specified " + self.filename + " does not exist.")
         except KeyError:
-            raise RuntimeError(self.filename + " missing correct column names.")
+            raise RuntimeError(self.filename + " missing correct col names.")
         return groups_frame
