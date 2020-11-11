@@ -53,8 +53,8 @@ class Get_r_groups:
                     )
                 groups_frame[tag] = groups_frame[tag].apply("{:02d}".format)
                 groups_frame[tag] = letter.upper() + groups_frame[tag].astype(str)
+                groups_frame[col] = groups_frame[col].apply(self.remove_h)
             groups_frame['pic50'] = data['pic50']
-            groups_frame['R1'] = groups_frame['R1'].apply(self.remove_h)
         except FileNotFoundError:
             print("File specified " + self.filename + " does not exist.")
         except KeyError:
