@@ -46,7 +46,11 @@ class Get_r_groups:
                 num = int(col[1])
                 letter = chr(ord('a') + num - 1).upper()
                 tag = letter + 'tag'
-                groups_frame[tag] = groups_frame[col].factorize()[0] + 1
+                groups_frame.insert(
+                    loc=groups_frame.columns.get_loc(col),
+                    column=tag,
+                    value=groups_frame[col].factorize()[0] + 1
+                    )
                 groups_frame[tag] = groups_frame[tag].apply("{:02d}".format)
                 groups_frame[tag] = letter + groups_frame[tag].astype(str)
             groups_frame['pic50'] = data['pic50']
