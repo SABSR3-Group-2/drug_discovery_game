@@ -21,11 +21,14 @@ class Get_r_groups:
 
     def remove_h(self, r1):
         RDLogger.DisableLog('rdApp.*')
-        mol = Chem.MolFromSmiles(r1)
-        substruct = Chem.MolFromSmiles('[H][*:1]')
-        mol = AllChem.DeleteSubstructs(mol, substruct)
-        Chem.SanitizeMol(mol)
-        return Chem.MolToSmiles(mol)
+        if r1 == '[H][*:1].[H][*:1]':
+            return '[H][*:1]'
+        else:
+            mol = Chem.MolFromSmiles(r1)
+            substruct = Chem.MolFromSmiles('[H][*:1]')
+            mol = AllChem.DeleteSubstructs(mol, substruct)
+            Chem.SanitizeMol(mol)
+            return Chem.MolToSmiles(mol)
 
     def get_r(self):
         try:
@@ -38,11 +41,22 @@ class Get_r_groups:
                     data.rename(columns={col: 'pic50'}, inplace=True)
             groups, _ = rdRGD.RGroupDecompose([scaffold], mols, asSmiles=True)
             groups_frame = pd.DataFrame(groups)
-            for new_col, index in zip(['atag', 'btag', 'pic50'], [1, 3, 5]):
-                groups_frame.insert(index, new_col, data[new_col])
+            R_cols = [col for col in groups_frame.columns if 'R' in col]
+            for col in R_cols:
+                num = int(col[1])
+                letter = chr(ord('a') + num - 1)
+                tag = letter + 'tag'
+                groups_frame.insert(
+                    loc=groups_frame.columns.get_loc(col),
+                    column=tag,
+                    value=groups_frame[col].factorize()[0] + 1
+                    )
+                groups_frame[tag] = groups_frame[tag].apply("{:02d}".format)
+                groups_frame[tag] = letter.upper() + groups_frame[tag].astype(str)
+            groups_frame['pic50'] = data['pic50']
             groups_frame['R1'] = groups_frame['R1'].apply(self.remove_h)
         except FileNotFoundError:
             print("File specified " + self.filename + " does not exist.")
         except KeyError:
-            raise RuntimeError(self.filename + " missing correct column names.")
+            raise RuntimeError(self.filename + " missing correct col names.")
         return groups_frame
