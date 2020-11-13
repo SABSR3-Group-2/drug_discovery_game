@@ -31,6 +31,7 @@ class game:
 
     def play(self,termlimit=5):
         self.__scores = []
+        self.choiceHistory = []
         self.__loopnumber = 1
         self.Exit = False
         while self.Exit is False:
@@ -53,6 +54,7 @@ class game:
                 self.chosenmolecule = MolChoose(self.currrentchoice[0], self.currrentchoice[1])
             if self.Exit == True:
                 break
+            self.choiceHistory.append(self.currrentchoice)
             self.giveFeedback()
             self.__loopnumber += 1
             if self.__loopnumber > termlimit:
@@ -185,6 +187,48 @@ class game:
     def endgame(self):
         print("Thank you for playing")
         print(self.__scores)
+        self.plotscores()
+
+    def plotscores(self):
+        import numpy as np
+        import matplotlib.pyplot as plt
+        print(self.choiceHistory)
+        numericscorelist = []
+        fig, ax = plt.subplots()
+        for scorenum in range(len(self.__scores)):
+            currentscore = self.__scores[scorenum]
+            if currentscore == " Not Made":
+                colour = "grey"
+                currentscore = 0.0
+                labelText = "Not Made"
+            elif  currentscore == " Assay Failed":
+                colour = "red"
+                currentscore = 0.0
+                labelText = "Assay Failed"
+            elif currentscore == " Inactive":
+                colour = "blue"
+                currentscore = 0.0
+                labelText = "Inactive"
+
+            else:
+                currentscore = float(str(currentscore).replace(" ",''))
+                colour = "limegreen"
+
+                labelText = "pIC50"
+            print(str(scorenum)+" "+str(currentscore))
+            ax.scatter(float(scorenum), float(currentscore), c=colour, label=labelText)
+            ax.annotate(str(self.choiceHistory[scorenum]).replace("\'",''), (scorenum, currentscore))
+            numericscorelist.append(float(currentscore))
+
+        #ax.legend(False)
+        ax.set_xlim(0,len(numericscorelist))
+        ax.set_ylim(0,max(numericscorelist))
+
+        plt.title('Chosen Molecule pIC50')
+        plt.xlabel("Round")
+        plt.ylabel("pIC50")
+        plt.show()
+        plt.savefig('Images/CurrentImage.png')
 
 
     def democheat(self):
