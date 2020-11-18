@@ -34,6 +34,7 @@ class game:
         self.choiceHistory = []
         self.__loopnumber = 1
         self.Exit = False
+        self.UpdateCurrentImage() 
         while self.Exit is False:
             print("\n\nRound "+str(self.__loopnumber)+" of "+str(termlimit))
             self.currrentchoice = list([])
@@ -155,27 +156,27 @@ class game:
         return checkcombo
         
 
-    def UpdateCurrentImage(self, Smiles):
+    def UpdateCurrentImage(self):
         # print("- Updatinging current")
         # print(type(Smiles))
-        currentmol = Chem.MolFromSmiles(Smiles.to_string(index=False))
+        #currentmol = Chem.MolFromSmiles(Smiles.to_string(index=False))
         # print(Smiles.to_string(index=False))
         # print(Chem.MolFromSmiles(Smiles.to_string(index=False)))
         # print(currentmol)
 
         from rdkit.Chem.Draw import rdMolDraw2D
-        mol = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]  |$;;;;R1;;;;;;;;R2;;$|')
+        mol = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]  |$;;;;;;;;;;;;R2;;;R1$|')
         #print(mol.GetAtomWithIdx(3).GetProp("atomLabel"))
         d = rdMolDraw2D.MolDraw2DCairo(250, 200) # or MolDraw2DSVG to get SVGs
-        mol.GetAtomWithIdx(4).SetProp('atomNote', 'R1')
-        mol.GetBondWithIdx(12).SetProp('atomNote', 'R2')
+        #mol.GetAtomWithIdx(15).SetProp('atomNote', 'R1')
+        #mol.GetBondWithIdx(12).SetProp('atomNote', 'R2')
         d.drawOptions().addStereoAnnotation = True
-        d.drawOptions().addAtomIndices = True
+        #d.drawOptions().addAtomIndices = True
         d.DrawMolecule(mol)
         d.FinishDrawing()
         d.WriteDrawingText('Images/CurrentImage.png')
 
-        img = Chem.Draw.MolToImageFile(currentmol,'Images/CurrentImage.png',includeAtomNumbers=True)
+        #img = Chem.Draw.MolToImageFile(currentmol,'Images/CurrentImage.png',includeAtomNumbers=True)
         #img = Draw.MolsToGridImage(currentmol,  subImgSize=(400, 400))
         #img.save('Images/CurrentImage.png')
 
@@ -191,7 +192,7 @@ class game:
         # print(list(self.chosenmolecule.columns) )
         currentstring = self.chosenmolecule.iloc[:,1]
         # print(currentstring)
-        self.UpdateCurrentImage(currentstring) #.values[0]
+        self.UpdateCurrentImage() #.values[0]
 
     # def get_selection(self, group):
     #     #placeholder for full get_selection fucntion
@@ -232,8 +233,6 @@ class game:
                 labelText = "Inactive"
 
             else:
-                if (type(currentscore) is not int) and (type(currentscore) is not float):
-                    print("potential issue: "+str(currentscore))
                 currentscore = float(str(currentscore).replace(" ",''))
                 colour = "limegreen"
                 labelText = "pIC50"
