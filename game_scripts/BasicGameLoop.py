@@ -19,7 +19,7 @@ class game:
     def __init__(self, rgroupslist=["R1", "R2"], decompFile="/home/sabsr3/Softwear Engineering Module/MainProject/drug_discovery_game/data/r_group_decomp.csv"):
         self.democheat()
         print("--------------------\nNew Game Started\n--------------------")
-        print("to exit the game at enter \"Exit\"")
+        print("to exit the game type \"Exit\"")
         self.decompFile = decompFile
         self.Options = []
         # self.Options.append(self.getOptions("R1"))
@@ -76,7 +76,7 @@ class game:
             self.decompFile = input()
         decomp = pd.read_csv(self.decompFile)
 
-        self.Rlist = [get_selection("R1", 5, decomp)[0], get_selection("R2", 5, decomp)[0]] 
+        self.Rlist = [get_selection("R1", 3, decomp)[0], get_selection("R2", 3, decomp)[0]] 
         rOptions = self.getSets(decomp, self.Rlist, GroupSelect)
         img = Draw.MolsToGridImage(rOptions["Mol"][:], molsPerRow=len(rOptions["Mol"]), legends=list(rOptions["tag"]))# , subImgSize=(400, 400))
         #img.show()
@@ -142,26 +142,42 @@ class game:
         return Rchoice
 
     def molCheck(self):
-        checkcombo = True
-        for choice in self.currrentchoice:
-            goodchoice =False
-            for set in self.currentoptions:
-                if choice in list(set.loc[:,'tag']):
-                    goodchoice = True
-            if goodchoice == False:
-                print("\n\n######################## Oh, that looks wrong ########################\n\""+str(choice)+"\" was not found in the option set, please reselect your R Groups\n######################################################################\n")
+        for groupnum in range(len(self.currrentchoice)):
+            checkcombo = True
+            checkresults = []
+            if self.currrentchoice[groupnum] in list(self.currentoptions[groupnum].loc[:,"tag"]):
+                checkresults.append(True)
+            else:
+                checkresults.append(False)
                 checkcombo = False
+                print("\n\n######################## Oh, that looks wrong ########################\n\""+str(self.currrentchoice[groupnum])+"\" was not found in the option set of options"+str(list(self.currentoptions[groupnum].loc[:,"tag"]))+",\n please reselect your R Groups\nto exit the game type \"Exit\"\n######################################################################\n")
         self.goodcombo = checkcombo
         return checkcombo
         
 
     def UpdateCurrentImage(self, Smiles):
-        print("- Updatinging current")
-        print(str(Smiles[1]))
-        currentmol = rdkit.Chem.MolFromSmiles(str(Smiles))
-        print(currentmol)
-        img = Draw.MolsToGridImage(currentmol,  molsPerRow=1, subImgSize=(400, 400))
-        img.save('Images/CurrentImage.png')
+        # print("- Updatinging current")
+        # print(type(Smiles))
+        currentmol = Chem.MolFromSmiles(Smiles.to_string(index=False))
+        # print(Smiles.to_string(index=False))
+        # print(Chem.MolFromSmiles(Smiles.to_string(index=False)))
+        # print(currentmol)
+
+        from rdkit.Chem.Draw import rdMolDraw2D
+        mol = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]  |$;;;;R1;;;;;;;;R2;;$|')
+        #print(mol.GetAtomWithIdx(3).GetProp("atomLabel"))
+        d = rdMolDraw2D.MolDraw2DCairo(250, 200) # or MolDraw2DSVG to get SVGs
+        mol.GetAtomWithIdx(4).SetProp('atomNote', 'R1')
+        mol.GetBondWithIdx(12).SetProp('atomNote', 'R2')
+        d.drawOptions().addStereoAnnotation = True
+        d.drawOptions().addAtomIndices = True
+        d.DrawMolecule(mol)
+        d.FinishDrawing()
+        d.WriteDrawingText('Images/CurrentImage.png')
+
+        img = Chem.Draw.MolToImageFile(currentmol,'Images/CurrentImage.png',includeAtomNumbers=True)
+        #img = Draw.MolsToGridImage(currentmol,  subImgSize=(400, 400))
+        #img.save('Images/CurrentImage.png')
 
 
     def giveFeedback(self):
@@ -171,10 +187,11 @@ class game:
         pIC50 = self.chosenmolecule.loc[:,"pIC50"].to_string(index=False)
         print("\n- that molecule's pIC50 is "+str(pIC50))
         self.__scores.append(pIC50)
-        #print((self.chosenmolecule))
-        #currentstring = self.chosenmolecule.loc["Core"]
-        #print(currentstring)
-        #self.UpdateCurrentImage(currentstring) #.values[0]
+        # print((self.chosenmolecule))
+        # print(list(self.chosenmolecule.columns) )
+        currentstring = self.chosenmolecule.iloc[:,1]
+        # print(currentstring)
+        self.UpdateCurrentImage(currentstring) #.values[0]
 
     # def get_selection(self, group):
     #     #placeholder for full get_selection fucntion
@@ -205,15 +222,20 @@ class game:
                 colour = "red"
                 currentscore = 0.0
                 labelText = "Assay Failed"
+            elif  currentscore == " Not Assayed":
+                colour = "red"
+                currentscore = 0.0
+                labelText = "Not Assayed"
             elif currentscore == " Inactive":
                 colour = "blue"
                 currentscore = 0.0
                 labelText = "Inactive"
 
             else:
+                if (type(currentscore) is not int) and (type(currentscore) is not float):
+                    print("potential issue: "+str(currentscore))
                 currentscore = float(str(currentscore).replace(" ",''))
                 colour = "limegreen"
-
                 labelText = "pIC50"
             print(str(scorenum)+" "+str(currentscore))
             ax.scatter(float(scorenum), float(currentscore), c=colour, label=labelText)
