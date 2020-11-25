@@ -62,7 +62,6 @@ class game:
 
     def getOptions(self, GroupSelect="R1"):
         """
-
         """
         # RList = self.get_selection(GroupSelect) #add self. if local
         try:
@@ -80,8 +79,6 @@ class game:
 
     def getSets(self, decomp, GroupList, GroupSelect="R1"):
         """function that when given a list of rgoup names will return a pandas dataframe with the corrosponding rgorup data from the file containing data on the rgroups.
-
-
         """
         rOptions = pd.DataFrame(columns=["tag", "Smiles"])  # setup dataframe
         if GroupSelect == "R1":  # if reading first R group
@@ -124,8 +121,8 @@ class game:
         return Rchoice
 
     def molCheck(self):
+        checkcombo = True
         for groupnum in range(len(self.currrentchoice)):
-            checkcombo = True
             checkresults = []
             if self.currrentchoice[groupnum] in list(self.currentoptions[groupnum].loc[:, "tag"]):
                 checkresults.append(True)
