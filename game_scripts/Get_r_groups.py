@@ -60,3 +60,7 @@ class Get_r_groups:
         except KeyError:
             raise RuntimeError(self.filename + " missing correct col names.")
         return groups_frame
+
+c = Get_r_groups('../../data/2010 ACS MedChemLett SI.csv','O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]')
+c.get_r()
+print(c)
