@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         conda update -n base -c defaults conda        
-        $CONDA/bin/conda env update --file requirements.txt --name base
+        $CONDA/bin/conda env update --file environment.yml --name base
         python -c 'import pytest'
         conda install -c conda-forge rdkit
         pytest
