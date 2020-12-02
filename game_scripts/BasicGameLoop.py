@@ -2,7 +2,7 @@ import pandas as pd
 import rdkit
 from combine import MolChoose
 import os
-from r_groups_selection import get_selection
+from select_mols import get_selection
 from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem import PandasTools
