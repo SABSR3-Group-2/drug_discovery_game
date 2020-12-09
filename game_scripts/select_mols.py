@@ -15,7 +15,7 @@ def remove_h(r):
     :return: sanitized r group as a Smile
     :rtype: Smile string
     """
-    RDLogger.DisableLog('rdApp.*')
+    RDLogger.DisableLog('rdApp.*')  # don't print warning message for hydrogen removal
     if r == '[H][*:1].[H][*:1]':
         return '[H][*:1]'
     else:
@@ -100,6 +100,8 @@ def get_selection(r_group, no_picks, data):
     :return: [[R group identifiers], [R group SMILES]]
     :rtype: nested list
     """
+    RDLogger.DisableLog('rdApp.*')  # don't print warning message for hydrogen removal
+
     r_groups = data[r_group.upper()]  # subset the data to only the given r group (either 'R1' or 'R2')
     mols = [Chem.MolFromSmiles(mol) for mol in r_groups]
     fps = [Chem.AllChem.GetMorganFingerprintAsBitVect(x, 2) for x in mols]  # make fingerprints
