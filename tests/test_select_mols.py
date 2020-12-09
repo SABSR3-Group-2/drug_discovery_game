@@ -24,3 +24,10 @@ def test_correct_number():
     test_data = pd.read_csv(os.path.join(cwd, 'test_get_selec.csv'))
     test_selection = select_mols.get_selection('R2', 4, test_data)
     assert len(test_selection[0]) == 4
+
+
+# # Test the read_mols function
+# def test_read_mols():
+#     """Tests that a dataframe is returned with the correct columns"""
+#
+#     select_mols.read_mols()
