@@ -88,7 +88,8 @@ def rank_mols(data, feature):
 
 
 def get_selection(r_group, no_picks, data):
-    """Selects a specified number of either R1 or R2 groups from a provided Dataframe of groups.
+    """Selects a specified number of either R1 or R2 groups from a provided dataframe of groups.
+    e.g. r_group_decomp.csv
 
     :param r_group: either 'R1' or 'R2' etc.
     :type r_group: string
