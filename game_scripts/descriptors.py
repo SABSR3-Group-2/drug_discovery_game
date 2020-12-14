@@ -8,15 +8,14 @@ import pandas as pd
 
 
 def get_descriptors(mol):
-    """Function to get the specified RDkit descriptors for a given molecule. Defaults to 'lipinski' set which returns
-    the calculated Lipinski parameters. Takes a SMILE string, converts to molecule and then calculates.
+    """Function to get the specified RDkit descriptors for a given molecule. Gets the Lipinski parameters.
+    Takes a SMILE string, converts to molecule and then calculates.
 
-    :param descs: the descriptors to calculate
-    :type descs: list or str
     :param mol: the molecule to calculate descriptors for
     :type mol: SMILE string
 
-    :return: dictionary with descriptor name-value pairs
+    :return: dictionary with descriptor name-value pairs for mol (smile), molecular weight, logP, TPSA,
+    Heavy Atom count, h_acceptors, h_donors, ring count.
     :rtype: dict
     """
     smile = mol
@@ -42,7 +41,3 @@ def get_descriptors(mol):
                  }
 
     return desc_dict
-
-
-# x = get_descriptors(mol='Oc1ccc(C[*:1])cc1')
-# print(x)
