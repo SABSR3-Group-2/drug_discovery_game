@@ -1,17 +1,23 @@
 """Tests for getting descriptors for molecules and ranking them"""
 
 import pytest
-import pandas as pd
 import os.path
-from game_scripts import select_mols
+from game_scripts import descriptors
 
 cwd = os.path.dirname(__file__)  # get current working directory
 
-def fun_1():
+def test_descriptors():
     """Can get all specified descriptors for single moiety and return as dict"""
 
-def fun_2():
-    """Can get specified descriptors for specified moeities and report errors"""
-
-def fun_3():
-    """Can sort specified moieties by specified descriptor"""
+    mol = 'Oc1ccc(C[*:1])cc1'
+    true_case = {'mol': 'Oc1ccc(C[*:1])cc1',
+                 'MW': '107.0497',
+                 'logP': 1.4415,
+                 'TPSA': 20.23,
+                 'Heavy Atoms': 8,
+                 'h_acceptors': 1,
+                 'h_donors': 1,
+                 'rings': 1
+                 }
+    test_case = descriptors.get_descriptors(mol=mol)
+    assert true_case == test_case

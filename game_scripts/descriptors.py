@@ -41,3 +41,7 @@ def get_descriptors(mol):
                  }
 
     return desc_dict
+
+
+x = get_descriptors(mol='Oc1ccc(C[*:1])cc1')
+print(x)
