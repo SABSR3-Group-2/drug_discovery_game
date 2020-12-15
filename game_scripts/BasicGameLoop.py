@@ -16,7 +16,7 @@ R2list = ["B14", "B11", "B21"]
 
 
 class game:
-    def __init__(self, rgroupslist=["R1", "R2"], decompFile="/home/sabsr3/Softwear Engineering Module/MainProject/drug_discovery_game/data/r_group_decomp.csv"):
+    def __init__(self, rgroupslist=["R1", "R2"], decompFile="data/r_group_decomp.csv"):
         self.democheat()
         print("--------------------\nNew Game Started\n--------------------")
         print("to exit the game at enter \"Exit\"")
