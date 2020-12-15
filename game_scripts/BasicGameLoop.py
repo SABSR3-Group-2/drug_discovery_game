@@ -14,7 +14,7 @@ _ = os.system('clear')
 
 
 class game:
-    def __init__(self, rgroupslist=["R1", "R2"], decompFile="/home/sabsr3/Softwear Engineering Module/MainProject/drug_discovery_game/data/r_group_decomp.csv"):
+    def __init__(self, rgroupslist=["R1", "R2"], decompFile="data/r_group_decomp.csv"):
         self.democheat()
         print("--------------------\nNew Game Started\n--------------------")
         print("to exit the game type \"Exit\"")
@@ -29,12 +29,16 @@ class game:
 
     def play(self, termlimit=5):
         self.__scores = []
+        self.assay_cost = 70
+        self.start_balance = 200
+        self.current_balance = self.start_balance
         self.choiceHistory = []
         self.__loopnumber = 1
         self.Exit = False
         self.UpdateCurrentImage()
         while self.Exit is False:
             print("\n\nRound "+str(self.__loopnumber)+" of "+str(termlimit))
+            print("\n Your current balance is $" + str(self.giveCurrentBalance()))
             self.currrentchoice = list([])
             choice = ["",""]
             for group in range(len(self.rgroupslist)):
@@ -55,6 +59,7 @@ class game:
                 break
             self.choiceHistory.append(self.currrentchoice)
             self.giveFeedback()
+            self.giveNewBalance()
             self.__loopnumber += 1
             if self.__loopnumber > termlimit:
                 self.Exit = True
@@ -153,6 +158,20 @@ class game:
         print("Thank you for playing")
         print(self.__scores)
         self.plotscores()
+
+    def giveCurrentBalance(self):
+        if self.__loopnumber == 1:
+            return self.start_balance
+        else:
+            return self.current_balance
+    
+    def giveNewBalance(self):
+        self.current_balance -= self.assay_cost
+        print("\n- Your new balance is $" +str(self.current_balance))
+        if self.current_balance <= 0:
+            print('You have run out of money')
+            self.Exit = True
+            self.endgame()
 
     def plotscores(self):
         import numpy as np
