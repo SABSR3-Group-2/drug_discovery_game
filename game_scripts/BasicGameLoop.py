@@ -30,7 +30,7 @@ class game:
     def play(self, termlimit=5):
         self.__scores = []
         self.assay_cost = 70
-        self.start_balance = 200
+        self.start_balance = 350
         self.current_balance = self.start_balance
         self.choiceHistory = []
         self.__loopnumber = 1
@@ -169,9 +169,12 @@ class game:
         self.current_balance -= self.assay_cost
         print("\n- Your new balance is $" +str(self.current_balance))
         if self.current_balance <= 0:
-            print('You have run out of money')
-            self.Exit = True
-            self.endgame()
+            if self.__loopnumber == 5:
+                pass
+            else:
+                print('You have run out of money')
+                self.Exit = True
+                self.endgame()
 
     def plotscores(self):
         import numpy as np
