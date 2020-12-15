@@ -27,4 +27,7 @@ jobs:
         conda env update --file environment.yml --name base
         python -c 'import pytest'
         conda install -c conda-forge rdkit
+
+    - name: Run tests
+      run: |
         pytest

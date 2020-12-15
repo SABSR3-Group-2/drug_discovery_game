@@ -1,0 +1,5 @@
+,Core,atag,R1,btag,R2,pic50
+0,O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1],A01,Oc1ccc(C[*:1])cc1,B01,c1ccc([*:2])cc1,6.5
+1,O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1],A01,Oc1ccc(C[*:1])cc1,B02,Brc1ccc([*:2])cc1,6.8
+2,O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1],A01,Oc1ccc(C[*:1])cc1,B03,O=[N+]([O-])c1cccc([*:2])c1,Assay Failed
+3,O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1],A01,Oc1ccc(C[*:1])cc1,B04,Cc1ccc([*:2])cc1,7.1
