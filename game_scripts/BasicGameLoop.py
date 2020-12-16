@@ -12,6 +12,13 @@ from rdkit.Chem import PandasTools
 # clear terminal
 _ = os.system('clear')
 
+assays = {
+    'pIC50': {'cost': 70, 'duration': 0.5},
+    'clearance_mouse': {'cost': 7000, 'duration': 3},
+    'clearance_human': {'cost': 9000, 'duration': 3.5},
+    'logd': {'cost': 1000, 'duration': 1.5},
+    'pampa': {'cost': 700, 'duration': 1}
+    }
 
 class game:
     def __init__(self, rgroupslist=["R1", "R2"], decompFile="data/r_group_decomp.csv"):
@@ -23,23 +30,24 @@ class game:
         # self.Options.append(self.getOptions("R1"))
         # self.Options.append(self.getOptions(R2list, "R2"))
         self.rgroupslist = rgroupslist
-        self.currrentchoice = ["",""]
+        self.currentchoice = ["",""]
         self.currentoptions = ["", ""]
+        self.assay = ""
         self.play()
 
-    def play(self, termlimit=5):
+    def play(self):
         self.__scores = []
-        self.assay_cost = 70
-        self.start_balance = 350
+        self.assay_cost = 0 # updated depending on the choice of assay
+        self.start_balance = 230 # arbitrary starting balance
         self.current_balance = self.start_balance
         self.choiceHistory = []
         self.__loopnumber = 1
         self.Exit = False
         self.UpdateCurrentImage()
         while self.Exit is False:
-            print("\n\nRound "+str(self.__loopnumber)+" of "+str(termlimit))
-            print("\n Your current balance is $" + str(self.giveCurrentBalance()))
-            self.currrentchoice = list([])
+            print("\n\nRound "+str(self.__loopnumber))
+            self.giveStartBalance()
+            self.currentchoice = list([])
             choice = ["",""]
             for group in range(len(self.rgroupslist)):
                 self.currentoptions[group] = self.getOptions(self.rgroupslist[group])
@@ -52,18 +60,14 @@ class game:
                         break
                 if self.Exit is True:
                     break
-                self.currrentchoice = choice
+                self.currentchoice = choice
                 self.molCheck()
-                self.chosenmolecule = MolChoose(self.currrentchoice[0], self.currrentchoice[1])
+                self.chosenmolecule = MolChoose(self.currentchoice[0], self.currentchoice[1])
             if self.Exit is True:
                 break
-            self.choiceHistory.append(self.currrentchoice)
-            self.giveFeedback()
-            self.giveNewBalance()
+            self.choiceHistory.append(self.currentchoice)
+            self.chooseAssay()
             self.__loopnumber += 1
-            if self.__loopnumber > termlimit:
-                self.Exit = True
-                self.endgame()
 
     def getOptions(self, GroupSelect="R1"):
         """
@@ -72,7 +76,7 @@ class game:
         try:
             decomp = pd.read_csv(self.decompFile)
         except FileNotFoundError:
-            print("file specified ("+str(self.decompFile)+") appers to not exist. the file must exist")
+            print("file specified ("+str(self.decompFile)+") appears to not exist. the file must exist")
             self.decompFile = input()
         decomp = pd.read_csv(self.decompFile)
 
@@ -110,10 +114,10 @@ class game:
                 self.Exit = True
                 return
             else:
-                self.currrentchoice = Rchoice
+                self.currentchoice = Rchoice
 
-            print("- you have selected: " + str(self.currrentchoice))
-            self.chosenmolecule = MolChoose(self.currrentchoice[0], self.currrentchoice[1])
+            print("- you have selected: " + str(self.currentchoice))
+            self.chosenmolecule = MolChoose(self.currentchoice[0], self.currentchoice[1])
             if str(type(self.chosenmolecule)) == "<class 'pandas.core.frame.DataFrame'>":
                 validChoice = True
             else:
@@ -127,14 +131,14 @@ class game:
 
     def molCheck(self):
         checkcombo = True
-        for groupnum in range(len(self.currrentchoice)):
+        for groupnum in range(len(self.currentchoice)):
             checkresults = []
-            if self.currrentchoice[groupnum] in list(self.currentoptions[groupnum].loc[:, "tag"]):
+            if self.currentchoice[groupnum] in list(self.currentoptions[groupnum].loc[:, "tag"]):
                 checkresults.append(True)
             else:
                 checkresults.append(False)
                 checkcombo = False
-                print("\n\n######################## Oh, that looks wrong ########################\n\""+str(self.currrentchoice[groupnum])+"\" was not found in the option set of options"+str(list(self.currentoptions[groupnum].loc[:, "tag"]))+",\n please reselect your R Groups\nto exit the game type \"Exit\"\n######################################################################\n")
+                print("\n\n######################## Oh, that looks wrong ########################\n\""+str(self.currentchoice[groupnum])+"\" was not found in the option set of options"+str(list(self.currentoptions[groupnum].loc[:, "tag"]))+",\n please reselect your R Groups\nto exit the game type \"Exit\"\n######################################################################\n")
         self.goodcombo = checkcombo
         return checkcombo
 
@@ -147,34 +151,59 @@ class game:
         d.FinishDrawing()
         d.WriteDrawingText('Images/CurrentImage.png')
 
+    def chooseAssay(self):
+        """
+        The user chooses which assay they want to run (currently only pIC50 available).
+        The game returns the cost of that assay and lets the user know
+        if they have enough money to continue.
+        """
+        assay_choice = input("\n> Choose assay: ")
+        self.assay_cost = assays[assay_choice]['cost']
+        print('- The cost of that assay is $' + str(self.assay_cost))
+        if self.assay_cost > self.current_balance:
+            print('\nYou do not have enough money for another assay')
+            self.Exit = True
+            self.endgame()
+        else:
+            self.assay = assay_choice
+            self.giveFeedback()
+
     def giveFeedback(self):
-        pIC50 = self.chosenmolecule.loc[:, "pIC50"].to_string(index=False)
-        print("\n- that molecule's pIC50 is "+str(pIC50))
-        self.__scores.append(pIC50)
-        # currentstring = self.chosenmolecule.iloc[:,1]
-        self.UpdateCurrentImage()
+        if self.assay == "pIC50":
+            pIC50 = self.chosenmolecule.loc[:, "pIC50"].to_string(index=False)
+            print("- that molecule's pIC50 is "+str(pIC50))
+            self.__scores.append(pIC50)
+            # currentstring = self.chosenmolecule.iloc[:,1]
+            self.UpdateCurrentImage()
+            self.giveNewBalance()
 
     def endgame(self):
         print("Thank you for playing")
         print(self.__scores)
         self.plotscores()
 
-    def giveCurrentBalance(self):
+    def giveStartBalance(self):
+        """
+        Function returns the starting balance for round 1.
+        """
         if self.__loopnumber == 1:
-            return self.start_balance
+            print("\n Your starting balance is $" + str(self.start_balance) + "\n")
         else:
-            return self.current_balance
+            pass
     
     def giveNewBalance(self):
+        """
+        The current balance is updated according to the cost of the assay.
+        If the balance reaches 0, the game ends.
+        """
         self.current_balance -= self.assay_cost
-        print("\n- Your new balance is $" +str(self.current_balance))
-        if self.current_balance <= 0:
-            if self.__loopnumber == 5:
-                pass
-            else:
-                print('You have run out of money')
-                self.Exit = True
-                self.endgame()
+        print("- Your new balance is $" +str(self.current_balance))
+        if self.current_balance == 0:
+            print('You have run out of money')
+            self.Exit = True
+            self.endgame()
+        else:
+            pass
 
     def plotscores(self):
         import numpy as np
