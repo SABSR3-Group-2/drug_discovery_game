@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Drug Discovery Game'
-copyright = '2020, James Bayne, Matthew Holland, Olivia Simpson, Stephanie Wills'
+copyright = '2020, James Bayne, Anna Carbery, Matthew Holland, Olivia Simpson, Stephanie Wills'
 author = 'James Bayne, Matthew Holland, Olivia Simpson, Stephanie Wills'
 
 
