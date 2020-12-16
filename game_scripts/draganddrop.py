@@ -79,8 +79,11 @@ class MyGame(arcade.Window):
                 d.FinishDrawing()
                 d.WriteDrawingText('Images/rgroup {}.png'.format(r[0][idx]))
         
+        #Create the Rgroup dictionary
+        rgroup_dict = {}
+        
         #Create the sprite lists
-        self.scaffold_list = arcade.SpriteList()
+        self.scaffold_list = arcade.SpriteList(is_static = True)
         self.rgroup_list = arcade.SpriteList(use_spatial_hash=True)
 
         #Set up the scaffold, placing it at the centre of the screen
@@ -93,13 +96,15 @@ class MyGame(arcade.Window):
             rgroup = arcade.Sprite('Images/rgroup {}.png'.format(r2[0][r]), TILE_SCALING)
             rgroup.position = (100, r*200 + 100)
             self.rgroup_list.append(rgroup)
-        
+            rgroup_dict.update({rgroup:f"{r2[0][r]}"})
+     
         #Create and display R1 groups on the right
         for r in range(len(r1[0])):
             rgroup = arcade.Sprite('Images/rgroup {}.png'.format(r1[0][r]), TILE_SCALING)
             rgroup.position = (800, r*200 + 100)
             self.rgroup_list.append(rgroup)
-
+            rgroup_dict.update({rgroup:f"{r1[0][r]}"})
+        print(rgroup_dict)
     
 
     def on_draw(self):
@@ -144,6 +149,7 @@ class MyGame(arcade.Window):
         #create a list of any rgroups that have 'collided' with the scaffold
         snap_on = arcade.check_for_collision_with_list(self.scaffold_sprite, self.rgroup_list)
         
+        #Remove r group that has been 'snapped on' from the screen
         if snap_on != 0: 
             for r in snap_on:
                 print(r)
@@ -159,11 +165,6 @@ class MyGame(arcade.Window):
         for molecule in self.held_molecule:
             molecule.center_x += dx
             molecule.center_y += dy
-
-    def on_update(self, delta_time):
-        """Keeps track of collisions and updates game play"""
-
-        
 
     def on_key_press(self, symbol: int, modifiers: int):
         """ User presses key """
