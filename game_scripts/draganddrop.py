@@ -68,7 +68,10 @@ class MyGame(arcade.Window):
         #get R2 groups
         r2 = get_selection('R2', 3, rgroupdata)
 
-        #Convert R1 group SMILES to displayable images 
+        #Create the Rgroup dictionary
+        rgroup_dict = {}
+        
+        #Convert R group SMILES to displayable images 
         for r in [r1,r2]:
             for idx, list in enumerate(r[1]):
                 rgroup = Chem.MolFromSmiles(list)
@@ -78,9 +81,6 @@ class MyGame(arcade.Window):
                 d.DrawMolecule(rgroup)
                 d.FinishDrawing()
                 d.WriteDrawingText('Images/rgroup {}.png'.format(r[0][idx]))
-        
-        #Create the Rgroup dictionary
-        rgroup_dict = {}
         
         #Create the sprite lists
         self.scaffold_list = arcade.SpriteList(is_static = True)
@@ -96,15 +96,15 @@ class MyGame(arcade.Window):
             rgroup = arcade.Sprite('Images/rgroup {}.png'.format(r2[0][r]), TILE_SCALING)
             rgroup.position = (100, r*200 + 100)
             self.rgroup_list.append(rgroup)
-            rgroup_dict.update({rgroup:f"{r2[0][r]}"})
+            rgroup_dict.update({rgroup:[f"{r2[0][r]}"]})
      
         #Create and display R1 groups on the right
         for r in range(len(r1[0])):
             rgroup = arcade.Sprite('Images/rgroup {}.png'.format(r1[0][r]), TILE_SCALING)
             rgroup.position = (800, r*200 + 100)
             self.rgroup_list.append(rgroup)
-            rgroup_dict.update({rgroup:f"{r1[0][r]}"})
-        print(rgroup_dict)
+            rgroup_dict.update({rgroup:[f"{r1[0][r]}"]})
+
     
 
     def on_draw(self):
