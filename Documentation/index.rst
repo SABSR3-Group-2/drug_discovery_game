@@ -2,7 +2,7 @@
    sphinx-quickstart on Wed Dec 16 12:49:57 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
-.. _GettingStarted:
+.. _:file:`GettingStarted.rst`:
 
 Welcome to Drug Discovery Game's documentation!
 ===============================================
@@ -10,7 +10,7 @@ Welcome to Drug Discovery Game's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   
+   Documentation/GettingStarted
    game_scripts/Get_r_groups
 
 
@@ -21,4 +21,4 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 * :ref:`GettingStarted`
-:file:`GettingStarted.rst`
+
