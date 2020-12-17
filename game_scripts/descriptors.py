@@ -5,7 +5,9 @@ from rdkit.Chem import rdMolDescriptors
 from rdkit.Chem import AllChem
 from rdkit.Chem import Crippen
 import pandas as pd
-
+"""Feedback from Roche on 16/12/2020: sort R groups by the basic features calculated in this script. When/if
+sorting the final compounds you'd want to assay them by more complex traits such as lipopilicity, 
+metabolism etc. (the ones given in the presentation they shared"""
 
 def get_descriptors(mol):
     """Function to get the specified RDkit descriptors for a given molecule. Gets the Lipinski parameters.
@@ -41,7 +43,3 @@ def get_descriptors(mol):
                  }
 
     return desc_dict
-
-
-x = get_descriptors(mol='Oc1ccc(C[*:1])cc1')
-print(x)
