@@ -5,7 +5,7 @@ Donload & Install
 
 Manual Download
 -------------------------
-- Download code as ZIP from ('https://github.com/SABSR3-Group-2/drug_discovery_game<https://github.com/SABSR3-Group-2/drug_discovery_game>')
+- Download code as ZIP from (https://github.com/SABSR3-Group-2/drug_discovery_game)
 
 Pip Install
 -------------------------
