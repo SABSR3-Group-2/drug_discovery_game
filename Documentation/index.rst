@@ -19,4 +19,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-* :ref:`GettingStarted`:file:`GettingStarted.rst`
+* :ref:`GettingStarted`
+:file:`GettingStarted.rst`
