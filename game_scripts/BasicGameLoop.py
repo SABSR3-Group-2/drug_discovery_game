@@ -1,8 +1,8 @@
 import pandas as pd
 import rdkit
-from combine import MolChoose
+from game_scripts.combine import MolChoose
 import os
-from select_mols import get_selection
+from game_scripts.select_mols import get_selection
 from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem import PandasTools
@@ -19,7 +19,7 @@ assays = {
     'logd': {'cost': 1000, 'duration': 1.5},
     'pampa': {'cost': 700, 'duration': 1}
     }
-
+# check pic50 assay duration
 class game:
     def __init__(self, rgroupslist=["R1", "R2"], decompFile="data/r_group_decomp.csv"):
         self.democheat()
@@ -163,10 +163,10 @@ class game:
         if self.assay_cost > self.current_balance:
             print('\nYou do not have enough money for another assay')
             self.Exit = True
-            self.endgame()
+            return self.endgame()
         else:
             self.assay = assay_choice
-            self.giveFeedback()
+            return self.giveFeedback()
 
     def giveFeedback(self):
         if self.assay == "pIC50":
@@ -196,14 +196,17 @@ class game:
         The current balance is updated according to the cost of the assay.
         If the balance reaches 0, the game ends.
         """
-        self.current_balance -= self.assay_cost
-        print("- Your new balance is $" +str(self.current_balance))
-        if self.current_balance == 0:
-            print('You have run out of money')
-            self.Exit = True
-            self.endgame()
+        if self.__scores[-1] == ' Not Assayed' or self.__scores[-1] == ' Not Made':
+            print("- Assay and/or synthesis was unsuccessful. Your balance is $" +str(self.current_balance))
         else:
-            pass
+            self.current_balance -= self.assay_cost
+            print("- Your new balance is $" +str(self.current_balance))
+            if self.current_balance == 0:
+                print('You have run out of money')
+                self.Exit = True
+                return self.endgame()
+            else:
+                pass
 
     def plotscores(self):
         import numpy as np
