@@ -38,6 +38,9 @@ class MyGame(arcade.Window):
         #Call the parent class and set up the window
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
+        #Initial scaffold molecule
+        self.scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1] |$;;;;;;;;;;;;R2;;;R1$|')
+
         #Lists that keep track of the 'sprites' aka molecules and r groups
         self.scaffold_list = None
         self.rgroup_list = None
@@ -50,29 +53,34 @@ class MyGame(arcade.Window):
         """
         This function sets up the game, call it to restart.
         """
-       
+        
         #scaffold = Chem.MolFromSmiles('O=S(C1=CC=CC=C1)(NCC(O)=O)=O')
+        #os.remove('Images/scaffold.png')
+        print('chicken')
         d = rdMolDraw2D.MolDraw2DCairo(250, 200)
         d.drawOptions().addStereoAnnotation = True
         d.drawOptions().clearBackground = False
-        d.DrawMolecule(scaffold)
+        d.DrawMolecule(self.scaffold)
         d.FinishDrawing()
         d.WriteDrawingText('Images/scaffold.png')
+        print('chicken')
 
         #fetch n R groups from the dataset
         #Turn decomp R group dataset into a pandas dataframe
         rgroupdata = pd.read_csv('data/r_group_decomp.csv')
+        
         #Get R1 groups
-        r1 = get_selection('R1', 3, rgroupdata)
+        self.r1 = get_selection('R1', 3, rgroupdata)
 
         #get R2 groups
-        r2 = get_selection('R2', 3, rgroupdata)
+        self.r2 = get_selection('R2', 3, rgroupdata)
 
         #Create the Rgroup dictionary
-        rgroup_dict = {}
+        self.rgroup_dict = {}
+
         
         #Convert R group SMILES to displayable images 
-        for r in [r1,r2]:
+        for r in [self.r1,self.r2]:
             for idx, list in enumerate(r[1]):
                 rgroup = Chem.MolFromSmiles(list)
                 d = rdMolDraw2D.MolDraw2DCairo(250, 200)
@@ -83,7 +91,7 @@ class MyGame(arcade.Window):
                 d.WriteDrawingText('Images/rgroup {}.png'.format(r[0][idx]))
         
         #Create the sprite lists
-        self.scaffold_list = arcade.SpriteList(is_static = True)
+        self.scaffold_list = arcade.SpriteList()
         self.rgroup_list = arcade.SpriteList(use_spatial_hash=True)
 
         #Set up the scaffold, placing it at the centre of the screen
@@ -92,19 +100,20 @@ class MyGame(arcade.Window):
         self.scaffold_list.append(self.scaffold_sprite)
 
         #Create and display R2 groups on the left
-        for r in range(len(r2[0])):
-            rgroup = arcade.Sprite('Images/rgroup {}.png'.format(r2[0][r]), TILE_SCALING)
+        for r in range(len(self.r2[0])):
+            rgroup = arcade.Sprite('Images/rgroup {}.png'.format(self.r2[0][r]), TILE_SCALING)
             rgroup.position = (100, r*200 + 100)
             self.rgroup_list.append(rgroup)
-            rgroup_dict.update({rgroup:[f"{r2[0][r]}"]})
+            self.rgroup_dict.update({rgroup:f"{self.r2[0][r]}"})
      
         #Create and display R1 groups on the right
-        for r in range(len(r1[0])):
-            rgroup = arcade.Sprite('Images/rgroup {}.png'.format(r1[0][r]), TILE_SCALING)
+        for r in range(len(self.r1[0])):
+            rgroup = arcade.Sprite('Images/rgroup {}.png'.format(self.r1[0][r]), TILE_SCALING)
             rgroup.position = (800, r*200 + 100)
             self.rgroup_list.append(rgroup)
-            rgroup_dict.update({rgroup:[f"{r1[0][r]}"]})
+            self.rgroup_dict.update({rgroup:f"{self.r1[0][r]}"})
 
+        
     
 
     def on_draw(self):
@@ -152,9 +161,26 @@ class MyGame(arcade.Window):
         #Remove r group that has been 'snapped on' from the screen
         if snap_on != 0: 
             for r in snap_on:
-                print(r)
+                tag = self.rgroup_dict[r]
+                if tag[0] == 'A':
+                    smiles = self.r1[1][self.r1[0].index(tag)]
+                    self.scaffold_list.remove(self.scaffold_sprite)
+                    print(self.scaffold_list)
+                    self.scaffold = Chem.ReplaceSubstructs(self.scaffold, 
+                                 Chem.MolFromSmiles('[*:1]'), 
+                                 Chem.MolFromSmiles(smiles),
+                                 replaceAll=True)
+                    self.scaffold = self.scaffold[0]
+                else:
+                    smiles = self.r2[1][self.r2[0].index(tag)]
+                    self.scaffold.remove_from_sprite_lists()
+                    self.scaffold = Chem.ReplaceSubstructs(self.scaffold, 
+                                 Chem.MolFromSmiles('[*:2]'), 
+                                 Chem.MolFromSmiles(smiles),
+                                 replaceAll=True)
+                    self.scaffold = self.scaffold[0]
                 r.remove_from_sprite_lists()
-
+                self.setup()
         # We are no longer holding cards
         self.held_molecule = []
 
