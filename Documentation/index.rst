@@ -9,8 +9,12 @@ Welcome to Drug Discovery Game's documentation!
 
 .. toctree::
    :maxdepth: 2
+   
+   
+   Documentation/GettingStarted.rst
+   
+   
    :caption: Contents:
-   Documentation/GettingStarted
    game_scripts/Get_r_groups
 
 
