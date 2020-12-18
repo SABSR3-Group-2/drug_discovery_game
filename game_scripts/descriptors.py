@@ -2,6 +2,8 @@ from rdkit import Chem
 from rdkit.Chem import Lipinski
 from rdkit.Chem import Descriptors
 from rdkit.Chem import rdMolDescriptors
+from rdkit.Chem import Draw
+from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem import AllChem
 from rdkit.Chem import Crippen
 import pandas as pd
@@ -43,3 +45,18 @@ def get_descriptors(mol):
                  }
 
     return desc_dict
+
+def make_r_sprites(r_group, label):
+    """Function to get all the unique smiles for a given r group tag and make the .pngs.
+
+    """
+    data = pd.read_csv('../data/r_group_decomp.csv')
+    r_smiles = data[r_group].unique()
+    for i, r in enumerate(r_smiles):
+        mol = Chem.MolFromSmiles(r)
+        d = rdMolDraw2D.MolDraw2DCairo(250, 200)
+        d.drawOptions().addStereoAnnotation = True
+        d.drawOptions().clearBackground = False
+        d.DrawMolecule(mol)
+        d.FinishDrawing()
+        d.WriteDrawingText(f'../Images/{label}{i + 1}.png')
