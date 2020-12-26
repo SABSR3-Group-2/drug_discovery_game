@@ -48,7 +48,6 @@ def get_descriptors(mol):
 
 def make_r_sprites(r_group, label):
     """Function to get all the unique smiles for a given r group tag and make the .pngs.
-
     """
     data = pd.read_csv('../data/r_group_decomp.csv')
     r_smiles = data[r_group].unique()
@@ -59,4 +58,4 @@ def make_r_sprites(r_group, label):
         d.drawOptions().clearBackground = False
         d.DrawMolecule(mol)
         d.FinishDrawing()
-        d.WriteDrawingText(f'../Images/{label}{i + 1}.png')
+        d.WriteDrawingText(f'../Images/r_group_pngs/{label}{i + 1}.png')
