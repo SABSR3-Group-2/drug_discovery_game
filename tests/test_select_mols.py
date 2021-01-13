@@ -32,7 +32,7 @@ def test_read_mols():
     """Tests that a dataframe is returned with the correct columns. Uses test data stored in `test_input.csv`"""
 
     scaffold = 'O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]'
-    path = os.path.join(cwd, 'test_input.csv')
+    path = os.path.join(cwd, 'test_input_2.csv')
     test_read = select_mols.read_mols(path, scaffold)
-    expected_cols = ['mol', 'Core', 'atag', 'R1', 'btag', 'R2', 'pic50']
+    expected_cols = ['mol', 'Core', 'atag', 'R1', 'btag', 'R2', 'pic50', 'clearance_mouse', 'clearance_human', 'logd', 'pampa']
     assert all([a == b for a, b in zip(test_read.columns, expected_cols)])
