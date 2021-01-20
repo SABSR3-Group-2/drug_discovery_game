@@ -9,7 +9,8 @@ from io import StringIO
 def test_molchoose_nofile():
     """Tests that the FileNotFoundError works as expected"""
 
-    with pytest.raises(FileNotFoundError):  #tests that an error is raised if a non-existent file is passed to it
+    #tests that an error is raised if a non-existent file is passed to it
+    with pytest.raises(FileNotFoundError):  
         combine.MolChoose('C', 'c', DataSource ='data/no_such_file.csv')
 
 def test_molchoose_correct():
