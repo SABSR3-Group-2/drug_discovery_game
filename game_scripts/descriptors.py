@@ -2,10 +2,14 @@ from rdkit import Chem
 from rdkit.Chem import Lipinski
 from rdkit.Chem import Descriptors
 from rdkit.Chem import rdMolDescriptors
+from rdkit.Chem import Draw
+from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem import AllChem
 from rdkit.Chem import Crippen
 import pandas as pd
-
+"""Feedback from Roche on 16/12/2020: sort R groups by the basic features calculated in this script. When/if
+sorting the final compounds you'd want to assay them by more complex traits such as lipopilicity, 
+metabolism etc. (the ones given in the presentation they shared"""
 
 def get_descriptors(mol):
     """Function to get the specified RDkit descriptors for a given molecule. Gets the Lipinski parameters.
@@ -34,14 +38,28 @@ def get_descriptors(mol):
                  'MW': f'{mw:.4f}',
                  'logP': log_p,
                  'TPSA': tpsa,
-                 'Heavy Atoms': ha,
-                 'h_acceptors': h_acceptors,
-                 'h_donors': h_donors,
+                 'HA': ha,
+                 'h_acc': h_acceptors,
+                 'h_don': h_donors,
                  'rings': rings
                  }
 
     return desc_dict
 
+def make_r_sprites(r_group, label):
+    """Function to get all the unique smiles for a given r group tag and make the .pngs. Assumes the smiles are sorted
+    i.e. that the tags e.g. A01 increases monotonically.
+    """
+    data = pd.read_csv('../data/r_group_decomp.csv')
+    r_smiles = data[r_group].unique()
+    for i, r in enumerate(r_smiles):
+        tag = data[label].unique()[i]
+        mol = Chem.MolFromSmiles(r)
+        d = rdMolDraw2D.MolDraw2DCairo(250, 200)
+        d.drawOptions().addStereoAnnotation = True
+        d.drawOptions().clearBackground = False
+        d.DrawMolecule(mol)
+        d.FinishDrawing()
+        d.WriteDrawingText(f'../Images/r_group_pngs/{tag}.png')
 
-x = get_descriptors(mol='Oc1ccc(C[*:1])cc1')
-print(x)
+# make_r_sprites('R2','btag')

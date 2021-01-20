@@ -14,9 +14,9 @@ def test_descriptors():
                  'MW': '107.0497',
                  'logP': 1.4415,
                  'TPSA': 20.23,
-                 'Heavy Atoms': 8,
-                 'h_acceptors': 1,
-                 'h_donors': 1,
+                 'HA': 8,
+                 'h_acc': 1,
+                 'h_don': 1,
                  'rings': 1
                  }
     test_case = descriptors.get_descriptors(mol=mol)
