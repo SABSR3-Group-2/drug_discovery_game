@@ -26,7 +26,7 @@ CHARACTER_SCALING = 1
 TILE_SCALING = 0.5
 
 #Initial scaffold molecule
-scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1] |$;;;;;;;;;;;;R2;;;R1$|')
+#scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1] |$;;;;;;;;;;;;R2;;;R1$|')
 
 class MyGame(arcade.Window):
     """ 
@@ -40,7 +40,7 @@ class MyGame(arcade.Window):
 
         #Initial scaffold molecule
         self.scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1] |$;;;;;;;;;;;;R2;;;R1$|')
-
+    
         #Lists that keep track of the 'sprites' aka molecules and r groups
         self.scaffold_list = None
         self.rgroup_list = None
@@ -91,13 +91,16 @@ class MyGame(arcade.Window):
                 d.WriteDrawingText('Images/rgroup {}.png'.format(r[0][idx]))
         
         #Create the sprite lists
+        print(self.scaffold_list)
         self.scaffold_list = arcade.SpriteList()
         self.rgroup_list = arcade.SpriteList(use_spatial_hash=True)
 
         #Set up the scaffold, placing it at the centre of the screen
-        self.scaffold_sprite = arcade.Sprite('Images/scaffold.png', CHARACTER_SCALING )
+        print(self.scaffold_list)
+        self.scaffold_sprite = arcade.Sprite('Images/scaffold.png', CHARACTER_SCALING)
         self.scaffold_sprite.position = (SCREEN_WIDTH /2,SCREEN_HEIGHT /2)
         self.scaffold_list.append(self.scaffold_sprite)
+        print(self.scaffold_list)
 
         #Create and display R2 groups on the left
         for r in range(len(self.r2[0])):
@@ -113,16 +116,13 @@ class MyGame(arcade.Window):
             self.rgroup_list.append(rgroup)
             self.rgroup_dict.update({rgroup:f"{self.r1[0][r]}"})
 
-        
-    
-
     def on_draw(self):
         #renders the screen
 
         arcade.start_render()
         
         #Draw sprites
-        self.scaffold_list.draw()
+        self.scaffold_sprite.draw()
         self.rgroup_list.draw()
 
     def on_mouse_press(self, x, y, button, key_modifiers):
@@ -164,8 +164,10 @@ class MyGame(arcade.Window):
                 tag = self.rgroup_dict[r]
                 if tag[0] == 'A':
                     smiles = self.r1[1][self.r1[0].index(tag)]
-                    self.scaffold_list.remove(self.scaffold_sprite)
+                    self.scaffold_list = None
+                    self.scaffold_sprite = None
                     print(self.scaffold_list)
+                    print(self.scaffold_sprite)
                     self.scaffold = Chem.ReplaceSubstructs(self.scaffold, 
                                  Chem.MolFromSmiles('[*:1]'), 
                                  Chem.MolFromSmiles(smiles),
@@ -173,7 +175,8 @@ class MyGame(arcade.Window):
                     self.scaffold = self.scaffold[0]
                 else:
                     smiles = self.r2[1][self.r2[0].index(tag)]
-                    self.scaffold.remove_from_sprite_lists()
+                    self.scaffold_list = None
+                    self.scaffold_sprite = None
                     self.scaffold = Chem.ReplaceSubstructs(self.scaffold, 
                                  Chem.MolFromSmiles('[*:2]'), 
                                  Chem.MolFromSmiles(smiles),
