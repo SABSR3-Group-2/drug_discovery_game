@@ -58,6 +58,7 @@ class MyGame(arcade.Window):
 
         arcade.set_background_color(arcade.color.WHITE)
 
+
     def make_coordinates(self, n_sprites):
         """Function to make the coordinates for the r sprites.
 
@@ -90,6 +91,7 @@ class MyGame(arcade.Window):
 
         return coordinate_list
 
+
     def setup_sprites(self, tag, feat='MW'):
         """
         Reads in the specified sprites in a given order e.g. by h_don. Then assigns the coordinates and returns the
@@ -104,10 +106,18 @@ class MyGame(arcade.Window):
         self.r_sprite_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Read in the sprite .pngs
-        for file in sorted(os.listdir('../Images/r_group_pngs')):
-            if tag in file:
-                r_sprite = arcade.Sprite(f'../Images/r_group_pngs/{file}', MOL_SCALING)
-                self.r_sprite_list.append(r_sprite)
+        # for file in sorted(os.listdir('../Images/r_group_pngs')):
+        #     if tag in file:
+        #         r_sprite = arcade.Sprite(f'../Images/r_group_pngs/{file}', MOL_SCALING)
+        #         r_sprite.filename = file
+        #         self.r_sprite_list.append(r_sprite)
+
+        # Sort r_sprites by specified feature
+        desc_df.sort_values(feat, inplace=True, ascending=False)  # sort r groups by specified feature
+        for file in desc_df[tag].unique():
+            r_sprite = arcade.Sprite(f'../Images/r_group_pngs/{file}.png', MOL_SCALING)
+            # r_sprite.filename = file
+            self.r_sprite_list.append(r_sprite)
 
         # Create coordinates for the r_sprites
         coordinate_list = self.make_coordinates(len(self.r_sprite_list))
@@ -115,6 +125,7 @@ class MyGame(arcade.Window):
         # Assign coordinates to r_sprites
         for i, sprite in enumerate(self.r_sprite_list):
             sprite.position = coordinate_list[i]
+
 
     def setup(self):
         """
@@ -130,19 +141,10 @@ class MyGame(arcade.Window):
         # Create a list of the sprites
         self.r_sprite_list = arcade.SpriteList(use_spatial_hash=True)
 
-        # Read in the sprite .pngs
-        tag = 'A'
-        for file in sorted(os.listdir('../Images/r_group_pngs')):
-            if tag in file:
-                r_sprite = arcade.Sprite(f'../Images/r_group_pngs/{file}', MOL_SCALING)
-                self.r_sprite_list.append(r_sprite)
+        # Read in the sprite .pngs and create sprites
+        tag = 'atag'
+        self.setup_sprites(tag=tag, feat='MW')
 
-        # Create coordinates for the r_sprites
-        coordinate_list = self.make_coordinates(len(self.r_sprite_list))
-
-        # Assign coordinates to r_sprites
-        for i, sprite in enumerate(self.r_sprite_list):
-            sprite.position = coordinate_list[i]
 
         # Set up feature filter buttons
         # Read in filter sprites
@@ -152,6 +154,7 @@ class MyGame(arcade.Window):
             filter_sprite.position = (self.vw * (0.7 * i + 1), self.view_top - 30)
             filter_sprite.filter = f
             self.filter_sprite_list.append(filter_sprite)
+
 
     def on_draw(self):
         """Render the screen"""
@@ -171,14 +174,7 @@ class MyGame(arcade.Window):
 
         # Draw the filters
         self.filter_sprite_list.draw()
-        # arcade.draw_text(f'Sort by:\n{self.feature}',
-        #                  3,
-        #                  self.view_top - 40,
-        #                  color=arcade.color.WHITE_SMOKE,
-        #                  )
-        #
-        # arcade.draw_text('MW', self.vw, self.view_top - 30, color=arcade.color.WHITE_SMOKE)
-        # arcade.draw_circle_filled(self.vw, self.view_top - 30, 5, arcade.color.WHITE_SMOKE)
+
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         """Called when user presses a mouse button. Specifically for sorting the r groups by the specified feature"""
@@ -195,11 +191,11 @@ class MyGame(arcade.Window):
             desc_df.sort_values(feature.filter, inplace=True, ascending=False)
             print(feature.filter)
             print(desc_df.head(5))
-            print(feature, str(feature))
+
             # redraw reordered sprites
-            self.setup_sprites('A', str(feature))
-            print(r_sprite_list.position)
+            self.setup_sprites('atag', str(feature.filter))
             self.r_sprite_list.draw()
+
             # reset viewport
 
 

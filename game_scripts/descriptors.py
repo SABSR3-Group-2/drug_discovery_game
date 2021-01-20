@@ -47,15 +47,19 @@ def get_descriptors(mol):
     return desc_dict
 
 def make_r_sprites(r_group, label):
-    """Function to get all the unique smiles for a given r group tag and make the .pngs.
+    """Function to get all the unique smiles for a given r group tag and make the .pngs. Assumes the smiles are sorted
+    i.e. that the tags e.g. A01 increases monotonically.
     """
     data = pd.read_csv('../data/r_group_decomp.csv')
     r_smiles = data[r_group].unique()
     for i, r in enumerate(r_smiles):
+        tag = data[label].unique()[i]
         mol = Chem.MolFromSmiles(r)
         d = rdMolDraw2D.MolDraw2DCairo(250, 200)
         d.drawOptions().addStereoAnnotation = True
         d.drawOptions().clearBackground = False
         d.DrawMolecule(mol)
         d.FinishDrawing()
-        d.WriteDrawingText(f'../Images/r_group_pngs/{label}{i + 1}.png')
+        d.WriteDrawingText(f'../Images/r_group_pngs/{tag}.png')
+
+# make_r_sprites('R2','btag')
