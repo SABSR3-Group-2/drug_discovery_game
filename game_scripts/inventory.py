@@ -25,13 +25,11 @@ BOTTOM_VIEWPORT_MARGIN = 50
 TOP_VIEWPORT_MARGIN = 100
 
 # Calculate all descriptors and store in Dataframe
-# data = pd.read_csv('../data/r_group_decomp.csv')  # read data
-# cols = [c for c in data.columns if re.match('R*\d', c)]  # get the r group cols
-# desc = [get_descriptors(x) for x in data[cols[0]].unique()]  # calculate descriptors for all moieties of a given r group
-# desc_df = pd.DataFrame(desc)  # make dataframe
-# desc_df.insert(0, 'atag', data['atag'].unique())  # insert tags
-#
-# desc_df.sort_values('rings', inplace=True, ascending=False)
+data = pd.read_csv('../data/r_group_decomp.csv')  # read data
+cols = [c for c in data.columns if re.match('R*\d', c)]  # get the r group cols
+desc = [get_descriptors(x) for x in data[cols[0]].unique()]  # calculate descriptors for all moieties of a given r group
+desc_df = pd.DataFrame(desc)  # make dataframe
+desc_df.insert(0, 'atag', data['atag'].unique())  # insert tags
 
 
 class MyGame(arcade.Window):
@@ -92,6 +90,32 @@ class MyGame(arcade.Window):
 
         return coordinate_list
 
+    def setup_sprites(self, tag, feat='MW'):
+        """
+        Reads in the specified sprites in a given order e.g. by h_don. Then assigns the coordinates and returns the
+        SpriteList object
+
+        :param feat: the feature to sort by
+        :type feat: string
+        :param tag: the tag of the r group e.g. 'A'
+        :type tag: string
+        :return: `SpriteList` object
+        """
+        self.r_sprite_list = arcade.SpriteList(use_spatial_hash=True)
+
+        # Read in the sprite .pngs
+        for file in sorted(os.listdir('../Images/r_group_pngs')):
+            if tag in file:
+                r_sprite = arcade.Sprite(f'../Images/r_group_pngs/{file}', MOL_SCALING)
+                self.r_sprite_list.append(r_sprite)
+
+        # Create coordinates for the r_sprites
+        coordinate_list = self.make_coordinates(len(self.r_sprite_list))
+
+        # Assign coordinates to r_sprites
+        for i, sprite in enumerate(self.r_sprite_list):
+            sprite.position = coordinate_list[i]
+
     def setup(self):
         """
         Set up the game here. Call this function to restart the game:
@@ -107,9 +131,11 @@ class MyGame(arcade.Window):
         self.r_sprite_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Read in the sprite .pngs
-        for i in range(0, 50):
-            r_sprite = arcade.Sprite(f'../Images/r_group_pngs/A{i + 1}.png', MOL_SCALING)
-            self.r_sprite_list.append(r_sprite)
+        tag = 'A'
+        for file in sorted(os.listdir('../Images/r_group_pngs')):
+            if tag in file:
+                r_sprite = arcade.Sprite(f'../Images/r_group_pngs/{file}', MOL_SCALING)
+                self.r_sprite_list.append(r_sprite)
 
         # Create coordinates for the r_sprites
         coordinate_list = self.make_coordinates(len(self.r_sprite_list))
@@ -155,18 +181,27 @@ class MyGame(arcade.Window):
         # arcade.draw_circle_filled(self.vw, self.view_top - 30, 5, arcade.color.WHITE_SMOKE)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        """Called when user presses a mouse button"""
+        """Called when user presses a mouse button. Specifically for sorting the r groups by the specified feature"""
 
-        # Find what the user has clicked on
-        clicked = arcade.get_sprites_at_point((x, y), self.filter_sprite_list)
-
+        # Find what the user has clicked on (y coordinate is calculated dynamically)
+        clicked = arcade.get_sprites_at_point((x, self.view_top - 30), self.filter_sprite_list)
         # Change the clicked button
         if len(clicked) > 0:
             [f._set_color(arcade.color.WHITE) for f in self.filter_sprite_list]
-            clicked[0]._set_color(arcade.color.DARK_CANDY_APPLE_RED)  # turn filter red
+            feature = clicked[0]
+            feature._set_color(arcade.color.DARK_CANDY_APPLE_RED)  # turn filter red
 
             # Sort the r_sprites
-            print(clicked[0].filter)
+            desc_df.sort_values(feature.filter, inplace=True, ascending=False)
+            print(feature.filter)
+            print(desc_df.head(5))
+            print(feature, str(feature))
+            # redraw reordered sprites
+            self.setup_sprites('A', str(feature))
+            print(r_sprite_list.position)
+            self.r_sprite_list.draw()
+            # reset viewport
+
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Scroll the screen on mouse scroll"""
@@ -184,6 +219,7 @@ class MyGame(arcade.Window):
                             self.view_top)
         for i, s in enumerate(self.filter_sprite_list):
             s.position = self.vw * (0.7 * i + 1), self.view_top - 30
+
 
 def main():
     """Main method"""

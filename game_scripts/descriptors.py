@@ -38,9 +38,9 @@ def get_descriptors(mol):
                  'MW': f'{mw:.4f}',
                  'logP': log_p,
                  'TPSA': tpsa,
-                 'Heavy Atoms': ha,
-                 'h_acceptors': h_acceptors,
-                 'h_donors': h_donors,
+                 'HA': ha,
+                 'h_acc': h_acceptors,
+                 'h_don': h_donors,
                  'rings': rings
                  }
 
