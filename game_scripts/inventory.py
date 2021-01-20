@@ -75,7 +75,7 @@ class MyGame(arcade.Window):
 
         # make full rows
         for i in range(0, full_rows):
-            vh = SCREEN_HEIGHT - (self.vh * i)  # the y coordinate for a single row with 3 columns from the top
+            vh = SCREEN_HEIGHT - (self.vh * (i + 1))  # the y coordinate for a single row with 3 columns from the top
             single_row = [[self.vw, vh],
                           [self.vw * 3, vh],
                           [self.vw * 5, vh]]
@@ -84,11 +84,10 @@ class MyGame(arcade.Window):
 
         # make last row
         if last_row == 1:
-            coordinate_list.append([self.vw, SCREEN_HEIGHT - self.vh * (full_rows)])
+            coordinate_list.append([self.vw, SCREEN_HEIGHT - self.vh * (full_rows + 1)])
         else:
-            coordinate_list.append([self.vw, SCREEN_HEIGHT - self.vh * (full_rows)])
-            coordinate_list.append([self.vw * 3, SCREEN_HEIGHT - self.vh * (full_rows)])
-
+            coordinate_list.append([self.vw, SCREEN_HEIGHT - self.vh * (full_rows + 1)])
+            coordinate_list.append([self.vw * 3, SCREEN_HEIGHT - self.vh * (full_rows + 1)])
         return coordinate_list
 
 
@@ -104,13 +103,6 @@ class MyGame(arcade.Window):
         :return: `SpriteList` object
         """
         self.r_sprite_list = arcade.SpriteList(use_spatial_hash=True)
-
-        # Read in the sprite .pngs
-        # for file in sorted(os.listdir('../Images/r_group_pngs')):
-        #     if tag in file:
-        #         r_sprite = arcade.Sprite(f'../Images/r_group_pngs/{file}', MOL_SCALING)
-        #         r_sprite.filename = file
-        #         self.r_sprite_list.append(r_sprite)
 
         # Sort r_sprites by specified feature
         desc_df.sort_values(feat, inplace=True, ascending=False)  # sort r groups by specified feature
