@@ -7,16 +7,18 @@
 Welcome to Drug Discovery Game's documentation!
 ===============================================
 
+we are making a came to explain drug discovery
+
+
+
+Contents
+========
+
+.. module:: seirmo
+
 .. toctree::
-   :maxdepth: 2
-   
-   
-   Documentation/GettingStarted.rst
-   
-   
-   :caption: Contents:
-   game_scripts/Get_r_groups
-   ...
+
+    GettingStarted
 
 
 Indices and tables
