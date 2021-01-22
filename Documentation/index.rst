@@ -14,8 +14,6 @@ we are making a came to explain drug discovery
 Contents
 ========
 
-.. module:: seirmo
-
 .. toctree::
 
     GettingStarted
