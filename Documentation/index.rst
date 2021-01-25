@@ -17,6 +17,7 @@ Contents
 .. toctree::
 
     GettingStarted
+    Get_r_groups
 
 
 Indices and tables
