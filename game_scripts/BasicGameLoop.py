@@ -21,7 +21,27 @@ assays = {
     }
 # check pic50 assay duration
 class game:
+    """[Summary]
+
+    :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+    :type [ParamName]: [ParamType](, optional)
+    ...
+    :raises [ErrorType]: [ErrorDescription]
+    ...
+    :return: [ReturnDescription]
+    :rtype: [ReturnType]
+    """
     def __init__(self, rgroupslist=["R1", "R2"], decompFile="data/r_group_decomp.csv"):
+        """[Summary]
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         self.democheat()
         print("--------------------\nNew Game Started\n--------------------")
         print("to exit the game type \"Exit\"")
@@ -36,6 +56,16 @@ class game:
         self.play()
 
     def play(self):
+         """[Summary]
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         self.__scores = []
         self.assay_cost = 0 # updated depending on the choice of assay
         self.start_balance = 230 # arbitrary starting balance
