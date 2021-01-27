@@ -166,40 +166,44 @@ class MyGame(arcade.Window):
         #create a list of any rgroups that have 'collided' with the scaffold
         snap_on = arcade.check_for_collision_with_list(self.scaffold_sprite, self.rgroup_list)
 
+        #Combines the selected fragment with the scaffold molecule to produce a new scaffold
         if snap_on != 0: 
             for r in snap_on:
                 tag = self.rgroup_dict[r]
-                print(tag[0])
-                print(type(tag[0]))
+                #identifies whether an R1 or an R2 Group has been selected
                 if tag[0] == 'A':
+                    #Get the smiles string for the R1 group
                     smiles = self.r1[1][self.r1[0].index(tag)]
+                    #Empty the scaffold lists 
                     self.scaffold_list = None
                     self.scaffold_sprite = None
+                    #Combine the initial scaffold and the selected R group into one string
                     smiles = smiles + '.'+ Chem.MolToSmiles(self.scaffold)
-                    print(smiles)
-                    new = smiles.replace('[*:1]', '9') if '([*:1])' not in smiles else smiles.replace('([*:1])', '5')
-                    print('new: ' + new)
+                    #Replace the attachment vector with an integer, if vector is attached to sp2 carbon
+                    new = smiles.replace('([*:1])', '9')
+                    #Replace the attachment vector with an integer, if vector is attached to sp2 carbon
+                    new = new.replace('[*:1]', '9')
+                    #Replace scaffold with new combined scaffold. The integers in the smiles indicate the atoms are bonded
                     self.scaffold = Chem.MolFromSmiles(new)
                 else:
                     smiles = self.r2[1][self.r2[0].index(tag)]
                     self.scaffold_list = None
                     self.scaffold_sprite = None
                     smiles = smiles + '.' + Chem.MolToSmiles(self.scaffold)
-                    new = smiles.replace('([*:2])', '0')
-                    print(new)
+                    new = smiles.replace('([*:2])', '9')
+                    new = new.replace('[*:2]', '9')
                     self.scaffold = Chem.MolFromSmiles(new)
-                    print(Chem.MolToSmiles(self.scaffold))
                 r.remove_from_sprite_lists()
                 self.setup()
 
 
-        # We are no longer holding molecules
+        # Empty list of held molecules
         self.held_molecule = []
 
     def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         """ User moves mouse """
 
-        # If we are holding cards, move them with the mouse
+        # If we are holding molecules, move them with the mouse
         for molecule in self.held_molecule:
             molecule.center_x += dx
             molecule.center_y += dy
@@ -211,7 +215,7 @@ class MyGame(arcade.Window):
             self.setup()
 
 
-
+#Run the game loop
 def main():
     """ Main game method"""
     window = MyGame()
