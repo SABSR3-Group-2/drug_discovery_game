@@ -29,51 +29,45 @@ ASSAYS = {
     'pampa': {'cost': 700, 'duration': 1}
     }
 
-COMMANDS = ['run_assays', 'clear_choices']
+ACTIONS = ['run_assays', 'clear_choices']
+
+CALCULATIONS = ['calculate_descriptors', 'run_filters']
 
 class Button(arcade.Sprite):
     """Button sprite"""
 
-    def __init__(self, assay, scale=1):
-        self.assay = assay
-        self.image_file_name = f"Images/button_pngs/{self.assay}.png"
+    def __init__(self, button, scale=1):
+        self.button = button
+        self.image_file_name = f"Images/button_pngs/{self.button}.png"
         super().__init__(self.image_file_name, scale)
     
     def get_result(self):
-        if self.assay == 'cl_human':
+        if self.button == 'cl_human':
             col = 'clearance_human'
-        elif self.assay == 'cl_mouse':
+        elif self.button == 'cl_mouse':
             col = 'clearance_mouse'
         else:
-            col = self.assay
-        
+            col = self.button
         result = test_mol.at[0,col]
         return str(result)
     
     def get_cost(self):
-        cost = ASSAYS[self.assay]['cost']
+        cost = ASSAYS[self.button]['cost']
         return cost
 
     def get_duration(self):
-        duration = ASSAYS[self.assay]['duration']
+        duration = ASSAYS[self.button]['duration']
         return duration
 
-class ActionButton(arcade.Sprite):
-    """Button sprite"""
-
-    def __init__(self, action, scale=1):
-        self.action = action
-        self.image_file_name = f"Images/button_pngs/{self.action}.png"
-        super().__init__(self.image_file_name, scale)
-    
 class MyGame(arcade.Window):
     """
     Main view. Really the only view in this example. """
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
-        self.button_list = None
+        self.assay_button_list = None
         self.action_button_list = None
+        self.calc_button_list = None
         self.assay_results = None
         self.assay_choices = None
         
@@ -86,20 +80,29 @@ class MyGame(arcade.Window):
         return x_slot, y_slot
     
     def setup(self):
-        self.button_list = arcade.SpriteList()
+        self.assay_button_list = arcade.SpriteList()
         self.action_button_list = arcade.SpriteList()
+        self.calc_button_list = arcade.SpriteList()
         self.assay_results = []
         self.assay_choices = []
 
+        # make the assay buttons
         for i, assay in enumerate(ASSAYS.keys()):
-            button = Button(assay, BUTTON_SCALE)
-            button.position = self.make_coordinates(i)
-            self.button_list.append(button)
+            assay_button = Button(assay_button, BUTTON_SCALE)
+            assay_button.position = self.make_coordinates(i)
+            self.button_list.append(asay_button)
         
+        # make the action buttons
         for i, action in enumerate(COMMANDS):
             action_button = ActionButton(action, BUTTON_SCALE)
             action_button.position = 100, (SCREEN_HEIGHT - 200 - i * 100)
             self.action_button_list.append(action_button)
+        
+        # make the calculation buttons
+        for i, calc in enumerate(CALCULATIONS):
+            calc_button = ActionButton(calc, BUTTON_SCALE)
+            calc_button.position = 300, (SCREEN_HEIGHT - 200 - i * 100)
+            self.calc_button_list.append(calc_button)
 
     def on_draw(self):
         """Render the screen"""
@@ -113,23 +116,31 @@ class MyGame(arcade.Window):
                                      170,
                                      color=arcade.color.OXFORD_BLUE)
         
-        self.button_list.draw()
+        self.assay_button_list.draw()
         self.action_button_list.draw()
+        self.calc_button_list.draw()
         arcade.draw_text('Assay result', SCREEN_WIDTH-250, SCREEN_HEIGHT-50, color=arcade.color.OXFORD_BLUE, font_size=15)
-        arcade.draw_text('Balance', SCREEN_WIDTH-250, SCREEN_HEIGHT-150, color=arcade.color.OXFORD_BLUE, font_size=15)
-        arcade.draw_text('Time left', SCREEN_WIDTH-250, SCREEN_HEIGHT-250, color=arcade.color.OXFORD_BLUE, font_size=15)
-
-        res = self.assay_results
-        #arcade.draw_text(res, SCREEN_WIDTH-250, SCREEN_HEIGHT-100, color=arcade.color.OXFORD_BLUE, font_size=15)
     
     def on_mouse_press(self, x, y, button, modifiers):
-        clicked = arcade.get_sprites_at_point((x, y), self.button_list)
-        
-        if len(clicked) > 0:
-            choice = clicked[0]
-            if choice.assay in ASSAYS.keys():
+        try:
+            clicked = arcade.get_sprites_at_point((x, y), self.assay_button_list)
+            if len(clicked) > 0:
+                choice = clicked[0]
                 choice._set_color(arcade.color.DARK_CANDY_APPLE_RED)
                 self.assay_results.append(choice.get_result())
+        
+        except:
+            clicked = arcade.get_sprites_at_point((x, y), self.action_button_list)
+            if len(clicked) > 0:
+                choice = clicked[0]
+                if choice.button == 'run_assays':
+                    
+                elif choice.button == 'clear_choices':
+                    [b._set_color(arcade.color.WHITE) for b in self.assay_button_list]
+                    self.assay_results = []
+        
+        except:
+            pass
 
 def main():
     """ Main method """
