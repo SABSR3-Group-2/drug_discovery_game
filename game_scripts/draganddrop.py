@@ -8,6 +8,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import PandasTools
 from rdkit.Chem import Draw
+from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from r_groups_selection import get_selection
 
@@ -42,7 +43,7 @@ class MyGame(arcade.Window):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
         #Initial scaffold molecule
-        self.scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1] |$;;;;;;;;;;;;R2;;;R1$|')
+        self.scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]')# |$;;;;;;;;;;;;R2;;;R1$|')
     
         #Lists that keep track of the 'sprites' aka molecules and r groups
         self.scaffold_list = None
@@ -164,8 +165,7 @@ class MyGame(arcade.Window):
 
         #create a list of any rgroups that have 'collided' with the scaffold
         snap_on = arcade.check_for_collision_with_list(self.scaffold_sprite, self.rgroup_list)
-        
-        #Remove r group that has been 'snapped on' from the screen
+
         if snap_on != 0: 
             for r in snap_on:
                 tag = self.rgroup_dict[r]
@@ -175,22 +175,24 @@ class MyGame(arcade.Window):
                     smiles = self.r1[1][self.r1[0].index(tag)]
                     self.scaffold_list = None
                     self.scaffold_sprite = None
-                    self.scaffold = Chem.ReplaceSubstructs(self.scaffold, 
-                                 Chem.MolFromSmiles('[*:1]'), 
-                                 Chem.MolFromSmiles(smiles),
-                                 replacementConnectionPoint=0)
-                    self.scaffold = self.scaffold[0]
+                    smiles = smiles + '.'+ Chem.MolToSmiles(self.scaffold)
+                    print(smiles)
+                    new = smiles.replace('[*:1]', '9') if '([*:1])' not in smiles else smiles.replace('([*:1])', '5')
+                    print('new: ' + new)
+                    self.scaffold = Chem.MolFromSmiles(new)
                 else:
                     smiles = self.r2[1][self.r2[0].index(tag)]
                     self.scaffold_list = None
                     self.scaffold_sprite = None
-                    self.scaffold = Chem.ReplaceSubstructs(self.scaffold, 
-                                 Chem.MolFromSmiles('[*:2]'), 
-                                 Chem.MolFromSmiles(smiles),
-                                 replaceAll=True)
-                    self.scaffold = self.scaffold[0]
+                    smiles = smiles + '.' + Chem.MolToSmiles(self.scaffold)
+                    new = smiles.replace('([*:2])', '0')
+                    print(new)
+                    self.scaffold = Chem.MolFromSmiles(new)
+                    print(Chem.MolToSmiles(self.scaffold))
                 r.remove_from_sprite_lists()
                 self.setup()
+
+
         # We are no longer holding molecules
         self.held_molecule = []
 
