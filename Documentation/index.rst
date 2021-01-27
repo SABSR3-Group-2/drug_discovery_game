@@ -13,7 +13,6 @@ we are making a came to explain drug discovery
 
 Contents
 ========
-.. module:: ./BasicGameLoop
 .. toctree::
 
     GettingStarted
