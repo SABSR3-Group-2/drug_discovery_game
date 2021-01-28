@@ -17,4 +17,4 @@ At the moment, this is very much a minimum viable product (MVP), however it is i
 We are always very keen to hear your comments, thoughts and suggestions. Do please open an issue with any feedback.
 
 ## License
-[MIT](https://choosealicense.com/mit/)
+[MIT](https://choosealicense.com/licenses/mit/)
