@@ -25,7 +25,7 @@ BOTTOM_VIEWPORT_MARGIN = 50
 TOP_VIEWPORT_MARGIN = 100
 
 # Calculate all descriptors and store in Dataframe
-data = pd.read_csv('../data/r_group_decomp.csv')  # read data
+data = pd.read_csv('data/r_group_decomp.csv')  # read data
 cols = [c for c in data.columns if re.match('R*\d', c)]  # get the r group cols
 desc = [get_descriptors(x) for x in data[cols[0]].unique()]  # calculate descriptors for all moieties of a given r group
 desc_df = pd.DataFrame(desc)  # make dataframe
@@ -107,7 +107,7 @@ class MyGame(arcade.Window):
         # Sort r_sprites by specified feature
         desc_df.sort_values(feat, inplace=True, ascending=False)  # sort r groups by specified feature
         for file in desc_df[tag].unique():
-            r_sprite = arcade.Sprite(f'../Images/r_group_pngs/{file}.png', MOL_SCALING)
+            r_sprite = arcade.Sprite(f'Images/r_group_pngs/{file}.png', MOL_SCALING)
             # r_sprite.filename = file
             self.r_sprite_list.append(r_sprite)
 
@@ -142,7 +142,7 @@ class MyGame(arcade.Window):
         # Read in filter sprites
         self.filter_sprite_list = arcade.SpriteList(use_spatial_hash=False)
         for i, f in enumerate(self.filters):  # create and position a button for each filter
-            filter_sprite = arcade.Sprite(f'../Images/filter_pngs/{f}.png', FILTER_SCALING)
+            filter_sprite = arcade.Sprite(f'Images/filter_pngs/{f}.png', FILTER_SCALING)
             filter_sprite.position = (self.vw * (0.7 * i + 1), self.view_top - 30)
             filter_sprite.filter = f
             self.filter_sprite_list.append(filter_sprite)
