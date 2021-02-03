@@ -13,10 +13,11 @@ from rdkit.Chem.Draw import rdMolDraw2D
 from r_groups_selection import get_selection
 
 #Cleanse the Images generated in previous rounds
-for f_name in os.listdir('Images'):
+for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
     #if f_name.startswith('rgroup'):
     #    os.remove(os.path.join('Images', f_name))
-    os.remove(os.path.join('Images', f_name))
+    if f_name[-4:] == '.png':
+        os.remove(os.path.join('Images', 'game_loop_images', f_name))
 
 # Screen title and size
 SCREEN_WIDTH = 1000
@@ -70,7 +71,7 @@ class MyGame(arcade.Window):
         d.drawOptions().clearBackground = False
         d.DrawMolecule(self.scaffold)
         d.FinishDrawing()
-        d.WriteDrawingText('Images/scaffold{}.png'.format(self.round_count))
+        d.WriteDrawingText('Images/game_loop_images/scaffold{}.png'.format(self.round_count))
 
         #fetch n R groups from the dataset
         #Turn decomp R group dataset into a pandas dataframe
@@ -95,7 +96,7 @@ class MyGame(arcade.Window):
                 d.drawOptions().clearBackground = False
                 d.DrawMolecule(rgroup)
                 d.FinishDrawing()
-                d.WriteDrawingText('Images/rgroup {}.png'.format(r[0][idx]))
+                d.WriteDrawingText('Images/game_loop_images/rgroup {}.png'.format(r[0][idx]))
         
         #Create the sprite lists
         
@@ -104,21 +105,21 @@ class MyGame(arcade.Window):
 
         #Set up the scaffold, placing it at the centre of the screen
         
-        self.scaffold_sprite = arcade.Sprite('Images/scaffold{}.png'.format(self.round_count), CHARACTER_SCALING)
+        self.scaffold_sprite = arcade.Sprite('Images/game_loop_images/scaffold{}.png'.format(self.round_count), CHARACTER_SCALING)
         self.scaffold_sprite.position = (SCREEN_WIDTH /2,SCREEN_HEIGHT /2)
         self.scaffold_list.append(self.scaffold_sprite)
         
 
         #Create and display R2 groups on the left
         for r in range(len(self.r2[0])):
-            rgroup = arcade.Sprite('Images/rgroup {}.png'.format(self.r2[0][r]), TILE_SCALING)
+            rgroup = arcade.Sprite('Images/game_loop_images/rgroup {}.png'.format(self.r2[0][r]), TILE_SCALING)
             rgroup.position = (100, r*200 + 100)
             self.rgroup_list.append(rgroup)
             self.rgroup_dict.update({rgroup:f"{self.r2[0][r]}"})
      
         #Create and display R1 groups on the right
         for r in range(len(self.r1[0])):
-            rgroup = arcade.Sprite('Images/rgroup {}.png'.format(self.r1[0][r]), TILE_SCALING)
+            rgroup = arcade.Sprite('Images/game_loop_images/rgroup {}.png'.format(self.r1[0][r]), TILE_SCALING)
             rgroup.position = (800, r*200 + 100)
             self.rgroup_list.append(rgroup)
             self.rgroup_dict.update({rgroup:f"{self.r1[0][r]}"})
