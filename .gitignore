@@ -130,3 +130,6 @@ dmypy.json
 
 # VScode settings
 .vscode/ 
+
+#ignore ipython
+/game_scripts/ignore.ipynb
