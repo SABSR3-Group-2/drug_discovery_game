@@ -18,12 +18,6 @@ MOL_SCALING = 0.5
 FILTER_SCALING = 0.3
 CURSOR_SCALING = 1
 
-# Padding for scrolling
-LEFT_VIEWPORT_MARGIN = 250
-RIGHT_VIEWPORT_MARGIN = 250
-BOTTOM_VIEWPORT_MARGIN = 50
-TOP_VIEWPORT_MARGIN = 100
-
 # Calculate all descriptors and store in Dataframe
 data = pd.read_csv('data/r_group_decomp.csv')  # read data
 cols = [c for c in data.columns if re.match('R*\d', c)]  # get the r group cols
@@ -154,24 +148,6 @@ class MyGame(arcade.Window):
             filter_sprite.filter = f
             self.filter_sprite_list.append(filter_sprite)
 
-    # def on_draw(self):
-    #     """Render the screen"""
-    #
-    #     # Clear the screen to the background colour
-    #     arcade.start_render()
-    #
-    #     # Draw r_sprites
-    #     self.r_sprite_list.draw()
-    #
-    #     # Draw the menu bar
-    #     arcade.draw_rectangle_filled(SCREEN_WIDTH / 2,
-    #                                  self.view_top,
-    #                                  SCREEN_WIDTH,
-    #                                  self.vh,
-    #                                  color=arcade.color.OXFORD_BLUE)
-    #
-    #     # Draw the filters
-    #     self.filter_sprite_list.draw()
 
     def on_draw(self):
         """Render the screen"""
@@ -192,14 +168,13 @@ class MyGame(arcade.Window):
         # Draw the filters
         self.filter_sprite_list.draw()
 
+
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         """Called when user presses a mouse button. Specifically for sorting the r groups by the specified feature"""
 
         # Updating the feature button
         # Find what the user has clicked on (y coordinate is calculated dynamically)
         clicked = arcade.get_sprites_at_point((x, y), self.filter_sprite_list)
-        # print(f'clicked {clicked[0].position}')
-        print(f'x ,y {x:.3f}, {y:.3f}')
 
         # Change the clicked button
         if len(clicked) > 0:
@@ -209,8 +184,6 @@ class MyGame(arcade.Window):
 
             # Sort the r_sprites
             desc_df.sort_values(feature.filter, inplace=True, ascending=False)
-            print(feature.filter)
-            # print(desc_df.head(5))
 
             # redraw reordered sprites
             self.setup_sprites('atag', str(feature.filter))
@@ -218,37 +191,20 @@ class MyGame(arcade.Window):
         else:
             pass
 
-        # Finding which r group has been clicked
+        # Pick 3 r groups
         picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[0]
-        if len(self.picked_r_list) < 3:
-            if picked_r not in self.picked_r_list:
-                # picked_r._set_color(arcade.make_transparent_color((0, 0, 0), 50))
+        if picked_r not in self.picked_r_list:
+            if len(self.picked_r_list) < 3:
                 picked_r._set_alpha(50)
                 self.picked_r_list.append(picked_r)
             else:
-                picked_r._set_alpha(255)  # remove colour
-                self.picked_r_list.remove(picked_r)
+                print('you already have 3 groups selected. Unselect one to choose another')
         else:
-            print('you already have 3 groups selected. Unselect one to choose another')
+            picked_r._set_alpha(255)  # remove colour
+            self.picked_r_list.remove(picked_r)
+
         print(self.picked_r_list)
-    # def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-    #     """Scroll the screen on mouse scroll"""
-    #
-    #     if self.view_top + scroll_y > SCREEN_HEIGHT:
-    #         pass
-    #     elif self.view_top + scroll_y - SCREEN_HEIGHT < self.r_sprite_list[-1].position[-1] - 100:
-    #         pass
-    #     else:
-    #         self.view_top = int(self.view_top) + scroll_y
-    #         self.scrolled += scroll_y
-    #         print(f'self scrolled {self.scrolled:.3f}')
-    #         print(f'view top {self.view_top:.3f}')
-    #     # do the scrolling
-    #     arcade.set_viewport(0, SCREEN_WIDTH,
-    #                         self.view_top - SCREEN_HEIGHT,
-    #                         self.view_top)
-    #     for i, s in enumerate(self.filter_sprite_list):
-    #         s.position = self.vw * (0.7 * i + 1), self.view_top - 30
+
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Redraw the sprites lower instead of scrollling"""
