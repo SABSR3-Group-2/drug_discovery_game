@@ -27,6 +27,9 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# temporary images
+/Images/game_loop_images/*
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
