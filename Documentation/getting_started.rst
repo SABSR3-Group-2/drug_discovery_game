@@ -27,4 +27,3 @@ The game has been designed to be simple to use and nexercery instructions should
 The game challenges the player to develop a new drug to itneract in spercific ways in the body.
 You will be presented with a scaffold core and a database of R groups.
 
-
