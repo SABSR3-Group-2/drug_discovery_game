@@ -28,6 +28,7 @@ desc_df.insert(0, 'atag', data['atag'].unique())  # insert tags
 
 _window = pyglet.window.Window
 
+
 class Inventory(arcade.Window):
     """
     Inventory window class
@@ -150,7 +151,6 @@ class Inventory(arcade.Window):
             filter_sprite.filter = f
             self.filter_sprite_list.append(filter_sprite)
 
-
     def on_draw(self):
         """Render the screen"""
 
@@ -167,9 +167,11 @@ class Inventory(arcade.Window):
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
 
+        arcade.draw_text('press c to confirm selection', 0, SCREEN_HEIGHT - int(self.vh / 2) - 20,
+                         color=arcade.color.OXFORD_BLUE)
+
         # Draw the filters
         self.filter_sprite_list.draw()
-
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         """Called when user presses a mouse button. Specifically for sorting the r groups by the specified feature"""
@@ -205,13 +207,11 @@ class Inventory(arcade.Window):
             picked_r._set_alpha(255)  # remove colour
             self.picked_r_list.remove(picked_r)
 
-
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Redraw the sprites lower instead of scrollling"""
         for i, r in enumerate(self.r_sprite_list):
             r.position = (r.position[0], r.position[1] + scroll_y)
         self.view_top += scroll_y
-
 
     def on_key_press(self, symbol: int, modifiers: int):
         """Close the window and save the selected r groups to a tmp file"""
@@ -223,17 +223,16 @@ class Inventory(arcade.Window):
             global _window
             _window.close(self)
 
-
     def return_r_groups(self):
         """Return the picked r group list for use in main script"""
         return self.picked_r_list
+
 
 def inventory_main():
     """Main inventory method"""
     inventory = Inventory()
     inventory.setup()
     arcade.run()
-
 
 
 if __name__ == "__main__":
