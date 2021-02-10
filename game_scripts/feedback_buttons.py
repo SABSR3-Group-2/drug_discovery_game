@@ -132,7 +132,7 @@ class MyGame(arcade.Window):
         # stores the path to the font file
         self.font = os.path.join('fonts', 'arial.ttf')
 
-        # sets the background colour
+        # sets the background color
         arcade.set_background_color(arcade.color.OXFORD_BLUE)
 
     def make_coordinates(self, sprite_no):
