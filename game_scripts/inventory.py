@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import re
 from descriptors import get_descriptors
+import pyglet
 
 """
 Inventory
@@ -25,10 +26,11 @@ desc = [get_descriptors(x) for x in data[cols[0]].unique()]  # calculate descrip
 desc_df = pd.DataFrame(desc)  # make dataframe
 desc_df.insert(0, 'atag', data['atag'].unique())  # insert tags
 
+_window = pyglet.window.Window
 
-class MyGame(arcade.Window):
+class Inventory(arcade.Window):
     """
-    Main application class
+    Inventory window class
     """
 
     def __init__(self):
@@ -111,7 +113,7 @@ class MyGame(arcade.Window):
         desc_df.sort_values(feat, inplace=True, ascending=False)  # sort r groups by specified feature
         for file in desc_df[tag].unique():
             r_sprite = arcade.Sprite(f'Images/r_group_pngs/{file}.png', MOL_SCALING)
-            # r_sprite.filename = file
+            r_sprite.tag = file  # assign the tag to the r sprite object for later ID
             self.r_sprite_list.append(r_sprite)
 
         # Create coordinates for the r_sprites
@@ -203,8 +205,6 @@ class MyGame(arcade.Window):
             picked_r._set_alpha(255)  # remove colour
             self.picked_r_list.remove(picked_r)
 
-        print(self.picked_r_list)
-
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Redraw the sprites lower instead of scrollling"""
@@ -213,12 +213,28 @@ class MyGame(arcade.Window):
         self.view_top += scroll_y
 
 
-def main():
-    """Main method"""
-    window = MyGame()
-    window.setup()
+    def on_key_press(self, symbol: int, modifiers: int):
+        """Close the window and save the selected r groups to a tmp file"""
+        if symbol == arcade.key.C:
+            tags = [r.tag for r in self.picked_r_list]  # get the tags of the selected sprites
+            with open('game_scripts/tmp_r_groups.txt', 'w+') as out_file:
+                for t in tags:
+                    out_file.write(f'{t}\n')
+            global _window
+            _window.close(self)
+
+
+    def return_r_groups(self):
+        """Return the picked r group list for use in main script"""
+        return self.picked_r_list
+
+def inventory_main():
+    """Main inventory method"""
+    inventory = Inventory()
+    inventory.setup()
     arcade.run()
 
 
+
 if __name__ == "__main__":
-    main()
+    inventory_main()
