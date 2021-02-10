@@ -2,7 +2,7 @@ import pandas as pd
 import os.path
 
 
-def MolChoose(R1,R2,DataSource="data/r_groups_pIC50.csv"):
+def MolChoose(R1,R2,DataSource="data/r_group_decomp.csv"):
     """a function to return the source data on the molecule specified by the provided R1 and R2 values
     
 
@@ -22,8 +22,8 @@ def MolChoose(R1,R2,DataSource="data/r_groups_pIC50.csv"):
     :rtype: Pandas row
 
     """
-    R1col = 'Atag'
-    R2col = 'Btag'
+    R1col = 'atag'
+    R2col = 'btag'
     try:
         originalset = pd.read_csv(DataSource)
     except FileNotFoundError as e:   

@@ -17,7 +17,7 @@ def test_molchoose_correct():
     """Tests that the correct data is returned from a trial csv document"""
 
     test = [[1,'A01B01','A01','B01','6.5','OC(=O)[C@H](Cc1ccc(O)cc1)NS(=O)(=O)c2ccc(cc2)c3ccccc3',7,12,'>98','Gen-5']]
-    test_frame = pd.DataFrame(test, columns=['Index','Tag','Atag','Btag','pIC50_MMP12','Smiles','A_SortMax','B_SortMax','Final QC Purity','Generation-No'])
+    test_frame = pd.DataFrame(test, columns=['Index','Tag','atag','btag','pIC50_MMP12','Smiles','A_SortMax','B_SortMax','Final QC Purity','Generation-No'])
 
     pd.testing.assert_frame_equal(combine.MolChoose('A01', 'B01', DataSource='tests/test_input.csv'), test_frame)
  
