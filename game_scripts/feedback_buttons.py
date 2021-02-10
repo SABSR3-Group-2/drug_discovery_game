@@ -113,7 +113,7 @@ class MyGame(arcade.Window):
         # list to hold the button sprites
         self.button_list = None
 
-        # list to hold the molecule sprite
+        # list to hold the mol sprite
         self.mol_sprite_list = None
 
         # tracks the assays chosen, the results and results to print
