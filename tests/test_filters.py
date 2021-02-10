@@ -28,12 +28,8 @@ def test_compound_check():
     """Tests reason for failing the filters is correctly identified"""
     from game_scripts.filters import compound_check
     pains_mol = Chem.MolFromSmiles('O=C(C1=C2C(C)OC(CC(O)=O)C1)C3=CC=CC(O)=C3C2=O')
-    warning =  """
-    Match  1
-    Warning: molecule failed filter: reason quinone_A(370)
-    PAINS filters (family A)
-    """
-    npt.assert_equal(print(warning), compound_check(pains_mol))
+    warning =  'Match 1\nWarning: molecule failed filter\nReason: quinone_A(370)'
+    npt.assert_equal([warning], compound_check(pains_mol))
 
 
 def test_compound_check_2():
@@ -41,4 +37,4 @@ def test_compound_check_2():
     from game_scripts.filters import compound_check
     message = 'Molecule passes the filter.'
     passing_mol = Chem.MolFromSmiles('CC')
-    npt.assert_equal(print(message), compound_check(passing_mol))
+    npt.assert_equal([message], compound_check(passing_mol))
