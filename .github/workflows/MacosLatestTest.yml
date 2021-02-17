@@ -23,9 +23,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |      
-        sudo chown -R 501:20 /usr/local/miniconda/pkgs/* 
+        sudo chown -R 501:20 /usr/local/miniconda/pkgs
         conda install -y pandas
-        conda install -y conda-forge rdkit
+        conda install -y -c conda-forge rdkit
 
 
     - name: Run tests
