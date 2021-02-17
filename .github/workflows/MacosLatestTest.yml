@@ -23,7 +23,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |      
-        sudo chown -R 501:20 /usr/local/miniconda/pkgs/*
+        sudo chown -C -R 501:20 /usr/local/miniconda/pkgs/*
+        chmod -rwe requirements.txt
         $CONDA/bin/conda env update --file requirements.txt --name base
 
 
