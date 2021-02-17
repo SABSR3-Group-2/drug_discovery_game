@@ -20,9 +20,9 @@ We are always very keen to hear your comments, thoughts and suggestions. Do plea
 [MIT](https://choosealicense.com/licenses/mit/)
 
 
-## Operating systerms:
-Ubuntu: ![Ubuntu-Latest tests](https://github.com/SABSR3-Group-2/drug_discovery_game/workflows/Ubuntu-Latest%20tests/badge.svg)
+## Operating systems:
+Ubuntu:   ![Ubuntu-Latest tests](https://github.com/SABSR3-Group-2/drug_discovery_game/workflows/Ubuntu-Latest%20tests/badge.svg)
 
-MacOs:  ![MacOS Latest tests](https://github.com/SABSR3-Group-2/drug_discovery_game/workflows/MacOS%20Latest%20tests/badge.svg)
+MacOs:     ![MacOS Latest tests](https://github.com/SABSR3-Group-2/drug_discovery_game/workflows/MacOS%20Latest%20tests/badge.svg)
 
 Windows:![Windows Latest tests](https://github.com/SABSR3-Group-2/drug_discovery_game/workflows/Windows%20Latest%20tests/badge.svg)
