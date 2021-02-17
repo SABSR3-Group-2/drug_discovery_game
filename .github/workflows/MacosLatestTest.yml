@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |      
         sudo chown -R 501:20 /usr/local/miniconda/pkgs/*
-        pip install requirements.txt
+        $CONDA/bin/conda env update --file requirements.txt --name base
 
 
     - name: Run tests
