@@ -26,6 +26,7 @@ jobs:
         sudo chown -R 501:20 /usr/local/miniconda
         conda install -y pandas
         conda install -y -c conda-forge rdkit
+        conda install -y -c anaconda pytest
 
 
     - name: Run tests
