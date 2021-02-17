@@ -24,8 +24,9 @@ jobs:
     - name: Install dependencies
       run: |      
         sudo chown -R 501:20 /usr/local/miniconda/pkgs/*
-        $CONDA/bin/conda env update --file requirements.txt --name base
         conda install -c conda-forge rdkit
+        $CONDA/bin/conda env update --file requirements.txt --name base
+
     - name: Run tests
       run: |
         $CONDA/bin/python -m pytest -v
