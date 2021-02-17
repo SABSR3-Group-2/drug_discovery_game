@@ -23,7 +23,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |      
-        chmod +x /usr/local/miniconda/pkgs/*
+        sudo chown 501:20 /usr/local/miniconda/pkgs/*
         sudo chown 501:20 /usr/local/miniconda/pkgs/cache/*.json
         $CONDA/bin/conda env update --file requirements.txt --name base
         conda install -c conda-forge rdkit
