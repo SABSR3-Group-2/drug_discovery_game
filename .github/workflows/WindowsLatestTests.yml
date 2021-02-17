@@ -23,7 +23,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        conda update -n base -c defaults conda        
+        conda update -n base -c defaults conda       
+        where python
         $CONDA/bin/conda env update --file requirements.txt --name base
         conda install -c conda-forge rdkit
     - name: Run tests
