@@ -64,14 +64,15 @@ def compound_check(mol):
     params.AddCatalog(FilterCatalogParams.FilterCatalogs.NIH)
     catalog = FilterCatalog(params)
     entries = catalog.GetMatches(mol)
+    results = []
     if entries:
         no = 1
         for entry in entries:
-            print('Match ', no)
-            print('Warning: molecule failed filter: reason %s' % (
-                entry.GetDescription()))
-            print(entry.GetProp('Scope'))
-            print("\n")
+            result = f'Match {no}\nWarning: molecule failed filter\nReason: {entry.GetDescription()}'
+            results.append(result)
             no += 1
+        return results
     else:
-        print('Molecule passes the filter.')
+        result = 'Molecule passes the filter.'
+        results.append(result)
+        return results
