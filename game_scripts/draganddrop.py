@@ -218,7 +218,11 @@ class MyGame(arcade.Window):
 
         if symbol == arcade.key.I:
             # Open inventory
-            inventory_main()
+            # inventory_main()
+            # os.system('game_scripts/inventory.py')
+            pass
+
+
 
 #Run the game loop
 def main():
