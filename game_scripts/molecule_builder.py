@@ -150,15 +150,15 @@ class MyGame(arcade.Window):
         lead += c for c in current_rs
         self.lead = lead
         """
-        r_index = ord(self.picked_r.tag[0].lower) - 97  # calculate the index given the rtag
+        r_index = ord(self.picked_r.tag[0].lower()) - 97  # calculate the index given the rtag
         self.current_rs[r_index] = self.picked_r  # update the current_rs with the new pick
-        current_smiles = list(map(lambda picked: self.desc_df.loc[self.desc_df[picked.tag[0]] == picked.tag,
-                                                                  'mol'].item(), self.frags))  # sprites -> smiles
+        # current_smiles = list(map(lambda picked: self.desc_df.loc[self.desc_df[picked.tag[0]] == picked.tag,
+        #                                                           'mol'].item(), self.current_rs))  # sprites -> smiles
 
         current_scaff = self.scaffold  # initialise with original  scaffold
-        for i, c in enumerate(current_smiles):
+        for i, c in enumerate(self.current_rs):
             if c != 0:
-                current_scaff = self._build_lead(current_scaff, c, i + 1)
+                current_scaff = self._build_lead(current_scaff, c.smiles, i + 1)
             else:
                 pass
         self.lead = current_scaff  # update the current lead
@@ -222,7 +222,7 @@ class MyGame(arcade.Window):
         desc_df.insert(0, tag, data[tag].unique())  # insert tags
         desc_df.sort_values(feat, inplace=True, ascending=False)  # sort r groups by specified feature
         self.desc_df = desc_df  # for use in key press()
-        print(self.desc_df)
+        print(self.desc_df.columns)
 
         for file in desc_df[tag].unique():
             r_sprite = arcade.Sprite(f'Images/r_group_pngs/{file}.png', MOL_SCALING)
@@ -247,7 +247,7 @@ class MyGame(arcade.Window):
         d = rdMolDraw2D.MolDraw2DCairo(250, 200)
         d.drawOptions().addStereoAnnotation = True
         d.drawOptions().clearBackground = False
-        d.DrawMolecule(self.scaffold)
+        d.DrawMolecule(self.lead)
         d.FinishDrawing()
         d.WriteDrawingText('Images/game_loop_images/scaffold{}.png'.format(self.round_count))
 
@@ -378,6 +378,7 @@ class MyGame(arcade.Window):
             r._set_alpha(255)  # removes the shade from any other r_sprites
 
         self.picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1]  # pick the top sprite
+        self.picked_r.smiles = self.desc_df.loc[self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
         self.picked_r._set_alpha(50)  # shade
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
@@ -397,44 +398,49 @@ class MyGame(arcade.Window):
 
         if self.picked_r is not None:
             if symbol == arcade.key.C:
-                self.scaffold_list.update()
-                smiles = desc_df.loc[desc_df[tag] == self.picked_r.tag, 'mol'].item()  # get the smile for the r
-                # Empty the scaffold lists
-                print(smiles)
-                self.scaffold_list = None
-                self.scaffold_sprite = None
-                # Combine the initial scaffold and the selected R group into one string
-                # smiles = smiles + '.' + Chem.MolToSmiles(self.scaffold)
-                smiles = Chem.MolToSmiles(self.scaffold) + '.' + smiles
-                # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
-                new = smiles.replace('([*:1])', '9')
-                # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
-                new = new.replace('[*:1]', '9')
-                print(new)
-                # Replace scaffold with new combined scaffold. The integers in the smiles indicate the atoms are bonded
-                self.scaffold = Chem.MolFromSmiles(new)
+                self.update_lead()
                 self.setup()
                 self.on_draw()
 
-            if symbol == arcade.key.D:
-                self.scaffold_list.update()
-                smiles = desc_df.loc[desc_df[tag] == self.picked_r.tag, 'mol'].item()  # get the smile for the r
-                # Empty the scaffold lists
-                print(smiles)
-                self.scaffold_list = None
-                self.scaffold_sprite = None
-                # Combine the initial scaffold and the selected R group into one string
-                # smiles = smiles + '.' + Chem.MolToSmiles(self.scaffold)
-                smiles = Chem.MolToSmiles(self.scaffold) + '.' + smiles
-                # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
-                new = smiles.replace('([*:2])', '9')
-                # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
-                new = new.replace('[*:2]', '9')
-                print(new)
-                # Replace scaffold with new combined scaffold. The integers in the smiles indicate the atoms are bonded
-                self.scaffold = Chem.MolFromSmiles(new)
-                self.setup()
-                self.on_draw()
+            # if symbol == arcade.key.C:
+            #     self.scaffold_list.update()
+            #     smiles = desc_df.loc[desc_df[tag] == self.picked_r.tag, 'mol'].item()  # get the smile for the r
+            #     # Empty the scaffold lists
+            #     print(smiles)
+            #     self.scaffold_list = None
+            #     self.scaffold_sprite = None
+            #     # Combine the initial scaffold and the selected R group into one string
+            #     # smiles = smiles + '.' + Chem.MolToSmiles(self.scaffold)
+            #     smiles = Chem.MolToSmiles(self.scaffold) + '.' + smiles
+            #     # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
+            #     new = smiles.replace('([*:1])', '9')
+            #     # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
+            #     new = new.replace('[*:1]', '9')
+            #     print(new)
+            #     # Replace scaffold with new combined scaffold. The integers in the smiles indicate the atoms are bonded
+            #     self.scaffold = Chem.MolFromSmiles(new)
+            #     self.setup()
+            #     self.on_draw()
+            #
+            # if symbol == arcade.key.D:
+            #     self.scaffold_list.update()
+            #     smiles = desc_df.loc[desc_df[tag] == self.picked_r.tag, 'mol'].item()  # get the smile for the r
+            #     # Empty the scaffold lists
+            #     print(smiles)
+            #     self.scaffold_list = None
+            #     self.scaffold_sprite = None
+            #     # Combine the initial scaffold and the selected R group into one string
+            #     # smiles = smiles + '.' + Chem.MolToSmiles(self.scaffold)
+            #     smiles = Chem.MolToSmiles(self.scaffold) + '.' + smiles
+            #     # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
+            #     new = smiles.replace('([*:2])', '9')
+            #     # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
+            #     new = new.replace('[*:2]', '9')
+            #     print(new)
+            #     # Replace scaffold with new combined scaffold. The integers in the smiles indicate the atoms are bonded
+            #     self.scaffold = Chem.MolFromSmiles(new)
+            #     self.setup()
+            #     self.on_draw()
 
         if symbol == arcade.key.A:
             self.setup_sprites(tag='atag', feat='MW')
