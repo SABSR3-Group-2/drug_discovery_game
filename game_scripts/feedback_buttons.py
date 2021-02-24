@@ -24,17 +24,13 @@ CALCULATIONS = ['calculate_descriptors', 'run_filters']
 class Button(arcade.Sprite):
     """Sprite button class"""
 
-    def __init__(self, atg, btg, button, scale=1):
+    def __init__(self, mol, button, scale=1):
         # hold the button name and image
         self.button = button
         self.image_file_name = os.path.join('Images', 'button_pngs', f'{self.button}.png')
 
-        # tags are updated according to the tags in the feedback script
-        self.a = atg
-        self.b = btg
-
         # get molecule information
-        self.chosen_mol = MolChoose(self.a, self.b, DataSource=os.path.join('data', 'r_group_decomp.csv')).reset_index(drop=True)
+        self.chosen_mol = mol
 
         # call the parent class
         super().__init__(self.image_file_name, scale)
@@ -189,13 +185,13 @@ class FeedbackView(arcade.View):
 
         # make the assay buttons (at bottom of the screen)
         for i, assay in enumerate(ASSAYS.keys()):
-            assay_button = Button(self.atag, self.btag, assay, 1)
+            assay_button = Button(self.mol, assay, 1)
             assay_button.position = self.make_coordinates(i)
             self.button_list.append(assay_button)
 
         # make the other four buttons (at top of the screen)
         for i, action in enumerate(ACTIONS + CALCULATIONS):
-            action_button = Button(self.atag, self.btag, action, 0.6)
+            action_button = Button(self.mol, action, 0.6)
             action_button.position = (i + (i+1))/12 * SCREEN_WIDTH, (SCREEN_HEIGHT - 90)
             self.button_list.append(action_button)
 
