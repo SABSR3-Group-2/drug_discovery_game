@@ -4,6 +4,7 @@ from game_scripts.combine import MolChoose
 from game_scripts.descriptors import get_descriptors
 from game_scripts.filters import compound_check
 from rdkit import Chem
+import global_vars
 
 # Constants
 SCREEN_WIDTH = 1000
@@ -229,6 +230,20 @@ class FeedbackView(arcade.View):
                          font_name=self.font,
                          color=arcade.color.BLACK)
 
+        arcade.draw_text(f"Total balance: ${global_vars.balance}",
+                         4/6*SCREEN_WIDTH+20,
+                         1/5*SCREEN_HEIGHT+40,
+                         font_size=15,
+                         font_name=self.font,
+                         color=arcade.color.BLACK)
+        
+        arcade.draw_text(f"Time remaining: {global_vars.time} weeks",
+                         4/6*SCREEN_WIDTH+20,
+                         1/5*SCREEN_HEIGHT+60,
+                         font_size=15,
+                         font_name=self.font,
+                         color=arcade.color.BLACK)
+
         self.mol_sprite_list.draw()
 
         # draw the molecule report section
@@ -386,6 +401,10 @@ class FeedbackView(arcade.View):
                         # changes buttons back to white
                         self.assay_results_print = self.assay_results
                         [b._set_color(arcade.color.WHITE) for b in self.button_list]
+                        global_vars.balance -= self.total_cost
+                        global_vars.time -= self.total_duration[0]
+                        self.assay_results = []
+
                 elif choice.button == 'clear_choices':
                     # clears the selected assays and recorded data
                     # changes buttons back to white
