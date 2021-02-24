@@ -68,7 +68,6 @@ class MyGame(arcade.Window):
         self.rgroup_list = None
         self.held_molecule = []
         self.scaffold_sprite = None
-        self.lead = self.scaffold  # Initialise with the starting scaffold
         arcade.set_background_color(arcade.color.WHITE)
 
         # Variable to keep track round number
@@ -83,7 +82,8 @@ class MyGame(arcade.Window):
         self.r_sprite_list = None  # r group sprites
         self.filter_sprite_list = None  # feature filter button sprites
         self.picked_r = None  # the currently held r sprite
-        self.frags = [0, 0]  # holds the current R1 and R2 groups
+        self.current_rs = [0, 0]  # holds the current R1 and R2 groups e.g. [<sprite.object>, <sprite.object>]
+        self.lead = self.scaffold  # Initialise with the starting scaffold
         self.tag = 'atag'
 
         # Track which feature the r groups are being sorted by
@@ -96,6 +96,26 @@ class MyGame(arcade.Window):
         # self.scrolled = 0
         self.top_bound = 0  # the maximum y value
         self.bottom_bound = 0  # the minimum y value
+
+    def _build_lead(self, cur, new, no):
+        """
+        Helper function for adding a new r group to the current lead:
+
+        :param cur: current lead
+        :type cur: `RDkit.mol`
+        :param new: the new r group to be added
+        :type new: str (SMILES)
+        :param no: the number associated with the R group e.g. 'atag' = 1, 'btag' = 2
+        :type no: int
+        :return: the updated lead
+        :rtype: `RDkit.mol`
+        """
+
+        mol = Chem.MolToSmiles(cur) + '.' + new
+        mol = mol.replace(f'[*:{no}]', '9')
+        mol = mol.replace('(9)', '9')
+        return Chem.MolFromSmiles(mol)
+
 
     def update_lead(self):
         """
@@ -121,9 +141,27 @@ class MyGame(arcade.Window):
         O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)9.Cc1ccc(S(=O)(=O)NC(=N)NCCC9)cc1 = SCR1
         Fc1ccc([*:1])cc1 = R1b
         Cc1ccc(S(=O)(=O)NC(=N)NCCCC(NS(=O)(=O)c2ccc([*:2])cc2)C(=O)O)cc1.Fc1ccc9cc1 = SCR1b
+
+        IN: self.picked_r, self.current_rs, self.scaffold
+        OUT: self.lead, self.current_rs
+        scaffold = self.scaffold
+        lead = scaffold
+        lead += picked_r
+        lead += c for c in current_rs
+        self.lead = lead
         """
-        frag_smiles = list(map(lambda picked: self.desc_df.loc[self.desc_df[picked.tag[0]] == picked.tag, 'mol'].item(),
-                               self.frags))
+        r_index = ord(self.picked_r.tag[0].lower) - 97  # calculate the index given the rtag
+        self.current_rs[r_index] = self.picked_r  # update the current_rs with the new pick
+        current_smiles = list(map(lambda picked: self.desc_df.loc[self.desc_df[picked.tag[0]] == picked.tag,
+                                                                  'mol'].item(), self.frags))  # sprites -> smiles
+
+        current_scaff = self.scaffold  # initialise with original  scaffold
+        for i, c in enumerate(current_smiles):
+            if c != 0:
+                current_scaff = self._build_lead(current_scaff, c, i + 1)
+            else:
+                pass
+        self.lead = current_scaff  # update the current lead
 
     def make_coordinates(self, n_sprites):
         """Function to make the coordinates for the r sprites.
