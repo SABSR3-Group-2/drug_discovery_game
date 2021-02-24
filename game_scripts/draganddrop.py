@@ -11,6 +11,7 @@ from rdkit.Chem import Draw
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from r_groups_selection import get_selection
+from inventory import inventory_main
 
 #Cleanse the Images generated in previous rounds
 for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
@@ -215,10 +216,18 @@ class MyGame(arcade.Window):
             # Restart
             self.setup()
 
+        if symbol == arcade.key.I:
+            # Open inventory
+            # inventory_main()
+            # os.system('game_scripts/inventory.py')
+            pass
+
+
 
 #Run the game loop
 def main():
     """ Main game method"""
+    _window = 'Main'
     window = MyGame()
     window.setup()
     arcade.run()

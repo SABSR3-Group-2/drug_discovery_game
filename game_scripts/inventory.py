@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import re
 from descriptors import get_descriptors
+import pyglet
 
 """
 Inventory
@@ -18,12 +19,6 @@ MOL_SCALING = 0.5
 FILTER_SCALING = 0.3
 CURSOR_SCALING = 1
 
-# Padding for scrolling
-LEFT_VIEWPORT_MARGIN = 250
-RIGHT_VIEWPORT_MARGIN = 250
-BOTTOM_VIEWPORT_MARGIN = 50
-TOP_VIEWPORT_MARGIN = 100
-
 # Calculate all descriptors and store in Dataframe
 data = pd.read_csv('data/r_group_decomp.csv')  # read data
 cols = [c for c in data.columns if re.match('R*\d', c)]  # get the r group cols
@@ -31,10 +26,12 @@ desc = [get_descriptors(x) for x in data[cols[0]].unique()]  # calculate descrip
 desc_df = pd.DataFrame(desc)  # make dataframe
 desc_df.insert(0, 'atag', data['atag'].unique())  # insert tags
 
+_window = pyglet.window.Window
 
-class MyGame(arcade.Window):
+
+class Inventory(arcade.Window):
     """
-    Main application class
+    Inventory window class
     """
 
     def __init__(self):
@@ -55,9 +52,15 @@ class MyGame(arcade.Window):
 
         # Used to keep track of our scrolling
         self.view_top = SCREEN_HEIGHT
+        # self.scrolled = 0
+        self.top_bound = 0  # the maximum y value
+        self.bottom_bound = 0  # the minimum y value
 
+        # Set background colour
         arcade.set_background_color(arcade.color.WHITE)
 
+        # Sprites for parsing
+        self.picked_r_list = []
 
     def make_coordinates(self, n_sprites):
         """Function to make the coordinates for the r sprites.
@@ -88,8 +91,11 @@ class MyGame(arcade.Window):
         else:
             coordinate_list.append([self.vw, SCREEN_HEIGHT - self.vh * (full_rows + 1)])
             coordinate_list.append([self.vw * 3, SCREEN_HEIGHT - self.vh * (full_rows + 1)])
-        return coordinate_list
 
+        # save the maximum and minimum y values of the coordinate list
+        self.top_bound = coordinate_list[0][1] + self.vh
+        self.bottom_bound = coordinate_list[-1][1] + full_rows
+        return coordinate_list
 
     def setup_sprites(self, tag, feat='MW'):
         """
@@ -108,7 +114,7 @@ class MyGame(arcade.Window):
         desc_df.sort_values(feat, inplace=True, ascending=False)  # sort r groups by specified feature
         for file in desc_df[tag].unique():
             r_sprite = arcade.Sprite(f'Images/r_group_pngs/{file}.png', MOL_SCALING)
-            # r_sprite.filename = file
+            r_sprite.tag = file  # assign the tag to the r sprite object for later ID
             self.r_sprite_list.append(r_sprite)
 
         # Create coordinates for the r_sprites
@@ -117,7 +123,6 @@ class MyGame(arcade.Window):
         # Assign coordinates to r_sprites
         for i, sprite in enumerate(self.r_sprite_list):
             sprite.position = coordinate_list[i]
-
 
     def setup(self):
         """
@@ -137,7 +142,6 @@ class MyGame(arcade.Window):
         tag = 'atag'
         self.setup_sprites(tag=tag, feat='MW')
 
-
         # Set up feature filter buttons
         # Read in filter sprites
         self.filter_sprite_list = arcade.SpriteList(use_spatial_hash=False)
@@ -146,7 +150,6 @@ class MyGame(arcade.Window):
             filter_sprite.position = (self.vw * (0.7 * i + 1), self.view_top - 30)
             filter_sprite.filter = f
             self.filter_sprite_list.append(filter_sprite)
-
 
     def on_draw(self):
         """Render the screen"""
@@ -159,20 +162,24 @@ class MyGame(arcade.Window):
 
         # Draw the menu bar
         arcade.draw_rectangle_filled(SCREEN_WIDTH / 2,
-                                     self.view_top,
+                                     SCREEN_HEIGHT,
                                      SCREEN_WIDTH,
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
 
+        arcade.draw_text('press c to confirm selection', 0, SCREEN_HEIGHT - int(self.vh / 2) - 20,
+                         color=arcade.color.OXFORD_BLUE)
+
         # Draw the filters
         self.filter_sprite_list.draw()
-
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         """Called when user presses a mouse button. Specifically for sorting the r groups by the specified feature"""
 
+        # Updating the feature button
         # Find what the user has clicked on (y coordinate is calculated dynamically)
-        clicked = arcade.get_sprites_at_point((x, self.view_top - 30), self.filter_sprite_list)
+        clicked = arcade.get_sprites_at_point((x, y), self.filter_sprite_list)
+
         # Change the clicked button
         if len(clicked) > 0:
             [f._set_color(arcade.color.WHITE) for f in self.filter_sprite_list]
@@ -181,40 +188,52 @@ class MyGame(arcade.Window):
 
             # Sort the r_sprites
             desc_df.sort_values(feature.filter, inplace=True, ascending=False)
-            print(feature.filter)
-            print(desc_df.head(5))
 
             # redraw reordered sprites
             self.setup_sprites('atag', str(feature.filter))
             self.r_sprite_list.draw()
+        else:
+            pass
 
-            # reset viewport
-
+        # Pick 3 r groups
+        picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[0]
+        if picked_r not in self.picked_r_list:
+            if len(self.picked_r_list) < 3:
+                picked_r._set_alpha(50)
+                self.picked_r_list.append(picked_r)
+            else:
+                print('you already have 3 groups selected. Unselect one to choose another')
+        else:
+            picked_r._set_alpha(255)  # remove colour
+            self.picked_r_list.remove(picked_r)
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
-        """Scroll the screen on mouse scroll"""
+        """Redraw the sprites lower instead of scrollling"""
+        for i, r in enumerate(self.r_sprite_list):
+            r.position = (r.position[0], r.position[1] + scroll_y)
+        self.view_top += scroll_y
 
-        if self.view_top + scroll_y * 3 > SCREEN_HEIGHT:
-            pass
-        elif self.view_top + scroll_y * 3 - SCREEN_HEIGHT < self.r_sprite_list[-1].position[-1] - 100:
-            pass
-        else:
-            self.view_top = int(self.view_top) + scroll_y * 3
+    def on_key_press(self, symbol: int, modifiers: int):
+        """Close the window and save the selected r groups to a tmp file"""
+        if symbol == arcade.key.C:
+            tags = [r.tag for r in self.picked_r_list]  # get the tags of the selected sprites
+            with open('game_scripts/tmp_r_groups.txt', 'w+') as out_file:
+                for t in tags:
+                    out_file.write(f'{t}\n')
+            global _window
+            _window.close(self)
 
-        # do the scrolling
-        arcade.set_viewport(0, SCREEN_WIDTH,
-                            self.view_top - SCREEN_HEIGHT,
-                            self.view_top)
-        for i, s in enumerate(self.filter_sprite_list):
-            s.position = self.vw * (0.7 * i + 1), self.view_top - 30
+    def return_r_groups(self):
+        """Return the picked r group list for use in main script"""
+        return self.picked_r_list
 
 
-def main():
-    """Main method"""
-    window = MyGame()
-    window.setup()
+def inventory_main():
+    """Main inventory method"""
+    inventory = Inventory()
+    inventory.setup()
     arcade.run()
 
 
 if __name__ == "__main__":
-    main()
+    inventory_main()
