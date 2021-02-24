@@ -2,8 +2,6 @@
 Make molecules from a scaffold and r groups.
 
 To do:
-need to generate self.frags
-in update_lead() use ord(self.picked.tag[0]) to join on the [*1] thing
 """
 import rdkit
 import arcade
@@ -17,8 +15,6 @@ from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from r_groups_selection import get_selection
 from descriptors import get_descriptors
-
-# from inventory import inventory_main
 
 # Cleanse the Images generated in previous rounds
 for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
@@ -38,18 +34,6 @@ MOL_SCALING = 0.5
 FILTER_SCALING = 0.3
 CURSOR_SCALING = 1
 
-
-# Calculate all descriptors and store in Dataframe
-# data = pd.read_csv('data/r_group_decomp.csv')  # read data
-# cols = [c for c in data.columns if re.match('R*\d', c)]  # get the r group cols
-# desc = [get_descriptors(x) for x in data[cols[0]].unique()]  # calculate descriptors for all moieties of a given r group
-# desc_df = pd.DataFrame(desc)  # make dataframe
-# desc_df.insert(0, 'atag', data['atag'].unique())  # insert tags
-
-# Initial scaffold molecule
-# scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1] |$;;;;;;;;;;;;R2;;;R1$|')
-
-
 class MyGame(arcade.Window):
     """
     Main game class
@@ -65,8 +49,6 @@ class MyGame(arcade.Window):
 
         # Lists that keep track of the 'sprites' aka molecules and r groups
         self.scaffold_list = None
-        self.rgroup_list = None
-        self.held_molecule = []
         self.scaffold_sprite = None
         arcade.set_background_color(arcade.color.WHITE)
 
@@ -120,27 +102,6 @@ class MyGame(arcade.Window):
     def update_lead(self):
         """
         Update the lead with the newly added r groups:
-            1. If current = scaffold:
-                -> add R group at position
-            2. Add R1 to 1*:
-                if 1* in lead:
-                    -> add R1 to 1*
-                else:
-                    -> add R1 to .
-
-        c1 = current r1
-        c2 = current r2
-        ss = starring scaff
-        cs = current scaff
-
-        cs = ss + c1 + c2
-        cs = ss + c1b + c2
-
-        O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1] = Scaff
-        Cc1ccc(S(=O)(=O)NC(=N)NCCC[*:1])cc1 = R1
-        O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)9.Cc1ccc(S(=O)(=O)NC(=N)NCCC9)cc1 = SCR1
-        Fc1ccc([*:1])cc1 = R1b
-        Cc1ccc(S(=O)(=O)NC(=N)NCCCC(NS(=O)(=O)c2ccc([*:2])cc2)C(=O)O)cc1.Fc1ccc9cc1 = SCR1b
 
         IN: self.picked_r, self.current_rs, self.scaffold
         OUT: self.lead, self.current_rs
@@ -152,8 +113,6 @@ class MyGame(arcade.Window):
         """
         r_index = ord(self.picked_r.tag[0].lower()) - 97  # calculate the index given the rtag
         self.current_rs[r_index] = self.picked_r  # update the current_rs with the new pick
-        # current_smiles = list(map(lambda picked: self.desc_df.loc[self.desc_df[picked.tag[0]] == picked.tag,
-        #                                                           'mol'].item(), self.current_rs))  # sprites -> smiles
 
         current_scaff = self.scaffold  # initialise with original  scaffold
         for i, c in enumerate(self.current_rs):
@@ -251,56 +210,15 @@ class MyGame(arcade.Window):
         d.FinishDrawing()
         d.WriteDrawingText('Images/game_loop_images/scaffold{}.png'.format(self.round_count))
 
-        # fetch n R groups from the dataset
-        # Turn decomp R group dataset into a pandas dataframe
-        rgroupdata = pd.read_csv('data/r_group_decomp.csv')
-
-        # Get R1 groups
-        self.r1 = get_selection('R1', 3, rgroupdata)
-
-        # get R2 groups
-        self.r2 = get_selection('R2', 3, rgroupdata)
-
-        # Create the Rgroup dictionary
-        self.rgroup_dict = {}
-
-        # Convert R group SMILES to displayable images
-        for r in [self.r1, self.r2]:
-            for idx, list in enumerate(r[1]):
-                rgroup = Chem.MolFromSmiles(list)
-                d = rdMolDraw2D.MolDraw2DCairo(250, 200)
-                d.drawOptions().addStereoAnnotation = True
-                d.drawOptions().clearBackground = False
-                d.DrawMolecule(rgroup)
-                d.FinishDrawing()
-                d.WriteDrawingText('Images/game_loop_images/rgroup {}.png'.format(r[0][idx]))
 
         # Create the sprite lists
-
         self.scaffold_list = arcade.SpriteList()
-        self.rgroup_list = arcade.SpriteList(use_spatial_hash=True)
 
         # Set up the scaffold, placing it at the centre of the screen
-
         self.scaffold_sprite = arcade.Sprite('Images/game_loop_images/scaffold{}.png'.format(self.round_count),
                                              CHARACTER_SCALING)
         self.scaffold_sprite.position = (int(SCREEN_WIDTH * 0.75), SCREEN_HEIGHT * 0.5)
         self.scaffold_list.append(self.scaffold_sprite)
-
-        # Create and display R2 groups on the left
-        # for r in range(len(self.r2[0])):
-        #     rgroup = arcade.Sprite('Images/game_loop_images/rgroup {}.png'.format(self.r2[0][r]), TILE_SCALING)
-        #     # rgroup.position = (SCREEN_WIDTH / 2, r * 200 + 100)
-        #     rgroup.position = (self.vw * 8 , r * 200 + 100)
-        #     self.rgroup_list.append(rgroup)
-        #     self.rgroup_dict.update({rgroup: f"{self.r2[0][r]}"})
-
-        # Create and display R1 groups on the right
-        # for r in range(len(self.r1[0])):
-        #     rgroup = arcade.Sprite('Images/game_loop_images/rgroup {}.png'.format(self.r1[0][r]), TILE_SCALING)
-        #     rgroup.position = (SCREEN_WIDTH - self.vw * 2, r * 200 + 100)
-        #     self.rgroup_list.append(rgroup)
-        #     self.rgroup_dict.update({rgroup: f"{self.r1[0][r]}"})
 
         """
         Code from inventory.py:
@@ -356,7 +274,6 @@ class MyGame(arcade.Window):
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """
 
-        """Code from inventory.py"""
         # Find what the user has clicked on (y coordinate is calculated dynamically)
         clicked = arcade.get_sprites_at_point((x, y), self.filter_sprite_list)
 
@@ -381,6 +298,7 @@ class MyGame(arcade.Window):
         self.picked_r.smiles = self.desc_df.loc[self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
         self.picked_r._set_alpha(50)  # shade
 
+
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Redraw the sprites lower instead of scrollling"""
 
@@ -390,62 +308,23 @@ class MyGame(arcade.Window):
 
     def on_key_press(self, symbol: int, modifiers: int):
         """ User presses key """
-        desc_df = self.desc_df
-        tag = self.tag
         if symbol == arcade.key.R:
             # Restart
             self.setup()
 
         if self.picked_r is not None:
+            # build the molecule
             if symbol == arcade.key.C:
                 self.update_lead()
                 self.setup()
                 self.on_draw()
 
-            # if symbol == arcade.key.C:
-            #     self.scaffold_list.update()
-            #     smiles = desc_df.loc[desc_df[tag] == self.picked_r.tag, 'mol'].item()  # get the smile for the r
-            #     # Empty the scaffold lists
-            #     print(smiles)
-            #     self.scaffold_list = None
-            #     self.scaffold_sprite = None
-            #     # Combine the initial scaffold and the selected R group into one string
-            #     # smiles = smiles + '.' + Chem.MolToSmiles(self.scaffold)
-            #     smiles = Chem.MolToSmiles(self.scaffold) + '.' + smiles
-            #     # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
-            #     new = smiles.replace('([*:1])', '9')
-            #     # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
-            #     new = new.replace('[*:1]', '9')
-            #     print(new)
-            #     # Replace scaffold with new combined scaffold. The integers in the smiles indicate the atoms are bonded
-            #     self.scaffold = Chem.MolFromSmiles(new)
-            #     self.setup()
-            #     self.on_draw()
-            #
-            # if symbol == arcade.key.D:
-            #     self.scaffold_list.update()
-            #     smiles = desc_df.loc[desc_df[tag] == self.picked_r.tag, 'mol'].item()  # get the smile for the r
-            #     # Empty the scaffold lists
-            #     print(smiles)
-            #     self.scaffold_list = None
-            #     self.scaffold_sprite = None
-            #     # Combine the initial scaffold and the selected R group into one string
-            #     # smiles = smiles + '.' + Chem.MolToSmiles(self.scaffold)
-            #     smiles = Chem.MolToSmiles(self.scaffold) + '.' + smiles
-            #     # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
-            #     new = smiles.replace('([*:2])', '9')
-            #     # Replace the attachment vector with an integer, if vector is attached to sp2 carbon
-            #     new = new.replace('[*:2]', '9')
-            #     print(new)
-            #     # Replace scaffold with new combined scaffold. The integers in the smiles indicate the atoms are bonded
-            #     self.scaffold = Chem.MolFromSmiles(new)
-            #     self.setup()
-            #     self.on_draw()
-
         if symbol == arcade.key.A:
+            # see atag inventory
             self.setup_sprites(tag='atag', feat='MW')
 
         if symbol == arcade.key.B:
+            # see btag inventory
             self.setup_sprites(tag='btag', feat='MW')
 
 
