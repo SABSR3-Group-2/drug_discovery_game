@@ -10,15 +10,6 @@ SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Feedback"
 
-# load a molecule for analysis (will be fed in from drag and drop script)
-mol = MolChoose('A01', 'B01', DataSource=os.path.join('data', 'r_group_decomp.csv'))
-mol = mol.reset_index(drop=True)
-
-# create and save image of the molecule
-chosen_mol = Chem.MolFromSmiles(mol.at[0, 'mol'])
-Chem.Draw.MolToFile(chosen_mol, os.path.join('Images', 'button_pngs', 'chosen_mol.png'),
-                    size=(300, 300), imageType=None)
-
 # button names (and costs/duration for assays)
 ASSAYS = {
     'pic50': {'cost': 70, 'duration': 0.5},
@@ -38,6 +29,9 @@ class Button(arcade.Sprite):
         self.button = button
         self.image_file_name = os.path.join('Images', 'button_pngs', f'{self.button}.png')
 
+        # load feedbackview to get molecule information
+        self.fb = FeedbackView()
+
         # call the parent class
         super().__init__(self.image_file_name, scale)
 
@@ -55,7 +49,7 @@ class Button(arcade.Sprite):
             col = 'clearance_mouse'
         else:
             col = self.button
-        result = mol.at[0, col]
+        result = self.fb.mol.at[0, col]
         return str(result)
 
     def get_cost(self):
@@ -85,7 +79,7 @@ class Button(arcade.Sprite):
         :return: calculated descriptors
         :rtype: string
         """
-        descriptors = get_descriptors(mol.at[0, 'mol'])
+        descriptors = get_descriptors(self.fb.mol.at[0, 'mol'])
         descriptors.pop('mol')
         for key, val in descriptors.items(): # round to 1 dp
             descriptors[key] = round(float(val), 1)
@@ -99,16 +93,16 @@ class Button(arcade.Sprite):
         :rtype: string
         """
         # runs the compound_check function on the molecule SMILES
-        filter_res = compound_check(Chem.MolFromSmiles(mol.at[0, 'mol']))
+        filter_res = compound_check(Chem.MolFromSmiles(self.fb.mol.at[0, 'mol']))
         return filter_res
 
-class MyGame(arcade.Window):
+class FeedbackView(arcade.View):
     """
     Main application class
     """
     def __init__(self):
         # call the parent class and set up the window
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
 
         # list to hold the button sprites
         self.button_list = None
@@ -134,6 +128,15 @@ class MyGame(arcade.Window):
 
         # sets the background color
         arcade.set_background_color(arcade.color.OXFORD_BLUE)
+
+        # store the R group tags (will be updated by the molecule builder)
+        self.atag = 'A01'
+        self.btag = 'B01'
+
+        # stores the molecule info
+        # make the molecule sprite using the saved image
+        self.mol = MolChoose(self.atag, self.btag, DataSource=os.path.join('data', 'r_group_decomp.csv'))
+        self.mol = self.mol.reset_index(drop=True)
 
     def make_coordinates(self, sprite_no):
         """Function to make the coordinates for the assay button sprites.
@@ -163,6 +166,11 @@ class MyGame(arcade.Window):
         self.descriptor_results = {}
         self.filter_results = []
         self.mol_sprite_list = arcade.SpriteList()
+
+        # create and save image of the molecule
+        chosen_mol = Chem.MolFromSmiles(self.mol.at[0, 'mol'])
+        Chem.Draw.MolToFile(chosen_mol, os.path.join('Images', 'button_pngs', 'chosen_mol.png'),
+                    size=(300, 300), imageType=None)
 
         # make the molecule sprite using the saved image
         mol_sprite = arcade.Sprite(os.path.join('Images', 'button_pngs', 'chosen_mol.png'))
@@ -208,7 +216,7 @@ class MyGame(arcade.Window):
                          font_name=self.font,
                          align='center')
 
-        arcade.draw_text(f"Chosen R groups: {mol.at[0,'atag']}, {mol.at[0,'btag']}",
+        arcade.draw_text(f"Chosen R groups: {self.mol.at[0,'atag']}, {self.mol.at[0,'btag']}",
                          4/6*SCREEN_WIDTH+20,
                          1/5*SCREEN_HEIGHT+20,
                          font_size=15,
@@ -391,11 +399,20 @@ class MyGame(arcade.Window):
                 elif choice.button == 'run_filters':
                     choice._set_color(arcade.color.YELLOW)
                     self.filter_results = choice.run_filt() # records the filter results
+                
+    def on_key_press(self, key, _modifiers):
+        if key == arcade.key.SPACE:
+            # pass self, the current view, to preserve this view's state
+            molview = MolView()
+            self.window.show_view(molview)
+            molview.setup()
 
 def main():
     """ Main method """
-    window = MyGame()
-    window.setup()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    start_view = FeedbackView()
+    window.show_view(start_view)
+    start_view.setup()
     arcade.run()
 
 if __name__ == "__main__":
