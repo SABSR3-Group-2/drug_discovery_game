@@ -414,6 +414,7 @@ class FeedbackView(arcade.View):
     def on_key_press(self, key, _modifiers):
         if key == arcade.key.LEFT:
             # navigate back to molecule builder view
+            from molecule_builder import MolView
             molview = MolView()
             self.window.show_view(molview)
             molview.setup()
