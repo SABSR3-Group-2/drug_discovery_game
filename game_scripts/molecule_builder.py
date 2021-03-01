@@ -15,6 +15,9 @@ from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from r_groups_selection import get_selection
 from descriptors import get_descriptors
+from feedback_buttons import FeedbackView
+import global_vars
+
 
 # Cleanse the Images generated in previous rounds
 for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
@@ -34,7 +37,8 @@ MOL_SCALING = 0.5
 FILTER_SCALING = 0.3
 CURSOR_SCALING = 1
 
-class MyGame(arcade.Window):
+
+class MolView(arcade.View):
     """
     Main game class
     """
@@ -42,7 +46,7 @@ class MyGame(arcade.Window):
     def __init__(self):
 
         # Call the parent class and set up the window
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
 
         # Initial scaffold molecule
         self.scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]')  # |$;;;;;;;;;;;;R2;;;R1$|')
@@ -326,14 +330,24 @@ class MyGame(arcade.Window):
         if symbol == arcade.key.B:
             # see btag inventory
             self.setup_sprites(tag='btag', feat='MW')
+            
+        if symbol == arcade.key.RIGHT:
+            # navigate back to molecule builder view
+            feedbackview = FeedbackView()
+            self.window.show_view(feedbackview)
+            # set feedbackview.tags to the list of chosen tags
+            feedbackview.setup()
+
+            
 
 
 # Run the game loop
 def main():
-    """ Main game method"""
-    _window = 'Main'
-    window = MyGame()
-    window.setup()
+    """ Main method """
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    start_view = MolView()
+    window.show_view(start_view)
+    start_view.setup()
     arcade.run()
 
 
