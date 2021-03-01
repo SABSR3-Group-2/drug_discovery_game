@@ -14,6 +14,10 @@ from rdkit.Chem.Draw import rdMolDraw2D
 from r_groups_selection import get_selection
 from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
+import global_vars
+
+from rdkit import RDLogger
+RDLogger.DisableLog('rdApp.*')
 
 # from inventory import inventory_main
 
@@ -463,6 +467,7 @@ class MolView(arcade.View):
             # navigate back to molecule builder view
             feedbackview = FeedbackView()
             self.window.show_view(feedbackview)
+            # set feedbackview.tags to the list of chosen tags
             feedbackview.setup()
 
 
