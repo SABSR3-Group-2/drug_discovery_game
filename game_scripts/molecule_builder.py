@@ -16,8 +16,6 @@ from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
 import global_vars
 
-from rdkit import RDLogger
-RDLogger.DisableLog('rdApp.*')
 
 # from inventory import inventory_main
 
