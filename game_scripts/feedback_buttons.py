@@ -410,6 +410,8 @@ class FeedbackView(arcade.View):
                         global_vars.balance -= self.total_cost
                         global_vars.time -= self.total_duration[0]
                         self.assay_results = []
+                        self.total_cost = 0
+                        self.total_duration = []
 
                 elif choice.button == 'clear_choices':
                     # clears the selected assays and recorded data
