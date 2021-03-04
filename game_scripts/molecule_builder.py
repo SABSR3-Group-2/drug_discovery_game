@@ -18,7 +18,6 @@ from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
 import global_vars
 
-
 # Cleanse the Images generated in previous rounds
 for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
     if f_name[-4:] == '.png':
@@ -43,10 +42,11 @@ class MolView(arcade.View):
     Main game class
     """
 
-    def __init__(self):
+    def __init__(self, feedback_view=None):
 
         # Call the parent class and set up the window
         super().__init__()
+        self.feedback_view = feedback_view
 
         # Initial scaffold molecule
         self.scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]')  # |$;;;;;;;;;;;;R2;;;R1$|')
@@ -101,7 +101,6 @@ class MolView(arcade.View):
         mol = mol.replace(f'[*:{no}]', '9')
         mol = mol.replace('(9)', '9')
         return Chem.MolFromSmiles(mol)
-
 
     def update_lead(self):
         """
@@ -185,7 +184,6 @@ class MolView(arcade.View):
         desc_df.insert(0, tag, data[tag].unique())  # insert tags
         desc_df.sort_values(feat, inplace=True, ascending=False)  # sort r groups by specified feature
         self.desc_df = desc_df  # for use in key press()
-        print(self.desc_df.columns)
 
         for file in desc_df[tag].unique():
             r_sprite = arcade.Sprite(f'Images/r_group_pngs/{file}.png', MOL_SCALING)
@@ -213,7 +211,6 @@ class MolView(arcade.View):
         d.DrawMolecule(self.lead)
         d.FinishDrawing()
         d.WriteDrawingText('Images/game_loop_images/scaffold{}.png'.format(self.round_count))
-
 
         # Create the sprite lists
         self.scaffold_list = arcade.SpriteList()
@@ -302,7 +299,6 @@ class MolView(arcade.View):
         self.picked_r.smiles = self.desc_df.loc[self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
         self.picked_r._set_alpha(50)  # shade
 
-
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Redraw the sprites lower instead of scrollling"""
 
@@ -322,6 +318,8 @@ class MolView(arcade.View):
                 self.update_lead()
                 self.setup()
                 self.on_draw()
+                print(f'current rs {self.current_rs}')
+                print(f'pikced r {self.picked_r}, tag = {self.picked_r.tag}')
 
         if symbol == arcade.key.A:
             # see atag inventory
@@ -330,15 +328,14 @@ class MolView(arcade.View):
         if symbol == arcade.key.B:
             # see btag inventory
             self.setup_sprites(tag='btag', feat='MW')
-            
-        if symbol == arcade.key.RIGHT:
-            # navigate back to molecule builder view
-            feedbackview = FeedbackView()
-            self.window.show_view(feedbackview)
-            # set feedbackview.tags to the list of chosen tags
-            feedbackview.setup()
 
-            
+        if symbol == arcade.key.RIGHT:
+            if 0 in self.current_rs:
+                print("You haven't selected enough r groups")
+            else:
+                # navigate to feedback buttons view
+                pause = FeedbackView(self)  # passes the current view to FeedbackView for later
+                self.window.show_view(pause)  # show the Feedback view
 
 
 # Run the game loop
