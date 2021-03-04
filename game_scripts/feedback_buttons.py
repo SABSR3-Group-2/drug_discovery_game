@@ -424,8 +424,14 @@ class FeedbackView(arcade.View):
                         # changes buttons back to white
                         self.assay_results_print = self.assay_results
                         [b._set_color(arcade.color.WHITE) for b in self.button_list]
+                        # cost is not deducted if the molecule was not made or assayed
+                        if 'Not Made' in self.assay_results_print or 'Not Assayed' in self.assay_results_print:
+                            self.total_cost -= ASSAYS['pic50']['cost']
+                            self.total_duration.remove(ASSAYS['pic50']['duration'])
+                        # costs are subtracted from global variables
                         global_vars.balance -= self.total_cost
-                        global_vars.time -= self.total_duration[0]
+                        if len(self.total_duration) >= 1:
+                            global_vars.time -= self.total_duration[0]
                         self.assay_results = []
                         self.total_cost = 0
                         self.total_duration = []
@@ -435,7 +441,7 @@ class FeedbackView(arcade.View):
                             self.mol_view.assay_df = self.mol_view.assay_df.append({'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
                         for a, r in zip(self.assay_choices, self.assay_results_print):
                             self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), a] = r
-                        print(self.mol_view.assay_df)
+                        # print(self.mol_view.assay_df)
 
                 elif choice.button == 'clear_choices':
                     # clears the selected assays and recorded data
@@ -460,7 +466,7 @@ class FeedbackView(arcade.View):
                             self.mol_view.assay_df = self.mol_view.assay_df.append({'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
                     for d, v in zip(self.mol_view.filters, self.descriptor_results.values()):
                         self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), d] = v
-                    print(self.mol_view.assay_df)
+                    # print(self.mol_view.assay_df)
 
                 elif choice.button == 'run_filters':
                     choice._set_color(arcade.color.YELLOW)
