@@ -127,6 +127,7 @@ class FeedbackView(arcade.View):
         self.assay_choices = None
         self.assay_results = None
         self.assay_results_print = None
+        self.assay_choices_print = None
 
         # track the total cost and duration of the assays selected
         self.total_cost = None
@@ -176,9 +177,10 @@ class FeedbackView(arcade.View):
         and sets their positions.
         """
         self.button_list = arcade.SpriteList()
+        self.assay_results = []
         self.assay_choices = []
         self.assay_results_print = []
-        self.assay_results = []
+        self.assay_choices_print = []
         self.total_cost = 0
         self.total_duration = []
         self.descriptor_results = {}
@@ -314,7 +316,7 @@ class FeedbackView(arcade.View):
                          font_name=self.font,
                          color=arcade.color.BLACK)
 
-        for i, (assa, res) in enumerate(zip(self.assay_choices, self.assay_results_print)):
+        for i, (assa, res) in enumerate(zip(self.assay_choices_print, self.assay_results_print)):
             arcade.draw_text(assa,
                              30,
                              SCREEN_HEIGHT - 265 - (i * 40),
@@ -423,6 +425,7 @@ class FeedbackView(arcade.View):
                         # adds the results to another list to print
                         # changes buttons back to white
                         self.assay_results_print = self.assay_results
+                        self.assay_choices_print = self.assay_choices
                         [b._set_color(arcade.color.WHITE) for b in self.button_list]
                         # cost is not deducted if the molecule was not made or assayed
                         if 'Not Made' in self.assay_results_print or 'Not Assayed' in self.assay_results_print:
@@ -433,13 +436,14 @@ class FeedbackView(arcade.View):
                         if len(self.total_duration) >= 1:
                             global_vars.time -= self.total_duration[0]
                         self.assay_results = []
+                        self.assay_choices = []
                         self.total_cost = 0
                         self.total_duration = []
                         # append assay data to assay_df
                         # checks if a row for that mol already exists (appends new row if not)
                         if len(self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])]) == 0:
                             self.mol_view.assay_df = self.mol_view.assay_df.append({'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
-                        for a, r in zip(self.assay_choices, self.assay_results_print):
+                        for a, r in zip(self.assay_choices_print, self.assay_results_print):
                             self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), a] = r
                         # print(self.mol_view.assay_df)
 
@@ -448,6 +452,7 @@ class FeedbackView(arcade.View):
                     # changes buttons back to white
                     [b._set_color(arcade.color.WHITE) for b in self.button_list]
                     self.assay_results_print = []
+                    self.assay_choices_print = []
                     self.assay_results = []
                     self.total_cost = 0
                     self.total_duration = []
