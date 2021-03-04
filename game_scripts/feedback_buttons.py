@@ -427,20 +427,16 @@ class FeedbackView(arcade.View):
                         self.assay_results = []
                         self.total_cost = 0
                         self.total_duration = []
-                        # store the assays run and for which mol in global_vars df
+                        # append assays run to df in global_vars
                         for a in self.assay_choices:
                             d = {'mol tags': [self.tags], 'assay': a}
                             mol_df = pd.DataFrame(d)
                             if global_vars.history.empty == True:
                                 global_vars.history = global_vars.history.append(mol_df)
                             else:
-                                # checks the row does not already exist in the df before appending
-                                if (global_vars.history == np.array([self.tags,a], dtype=object)).all(1).any() == False:
+                                # checks if the row already exists
+                                if (global_vars.history == np.array([self.tags, a], dtype=object)).all(1).any() == False:
                                     global_vars.history = global_vars.history.append(mol_df)
-                                # if the assay has already been run, the df is not updated
-                                else:
-                                    pass
-                        print(global_vars.history)
 
                 elif choice.button == 'clear_choices':
                     # clears the selected assays and recorded data
