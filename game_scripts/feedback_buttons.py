@@ -4,8 +4,8 @@ from game_scripts.combine import MolChoose
 from game_scripts.descriptors import get_descriptors
 from game_scripts.filters import compound_check
 from rdkit import Chem
-from rdkit.Chem.Draw import rdMolDraw2D
 import global_vars
+from analysis import AnalysisView
 
 """
 Feedback
@@ -124,6 +124,7 @@ class FeedbackView(arcade.View):
         self.assay_choices = None
         self.assay_results = None
         self.assay_results_print = None
+        self.assay_choices_print = None
 
         # track the total cost and duration of the assays selected
         self.total_cost = None
@@ -149,6 +150,7 @@ class FeedbackView(arcade.View):
 
         # stores the molecule info
         self.mol = None
+        self.final_df = None
 
         self.setup()
 
@@ -172,9 +174,10 @@ class FeedbackView(arcade.View):
         and sets their positions.
         """
         self.button_list = arcade.SpriteList()
+        self.assay_results = []
         self.assay_choices = []
         self.assay_results_print = []
-        self.assay_results = []
+        self.assay_choices_print = []
         self.total_cost = 0
         self.total_duration = []
         self.descriptor_results = {}
@@ -310,7 +313,7 @@ class FeedbackView(arcade.View):
                          font_name=self.font,
                          color=arcade.color.BLACK)
 
-        for i, (assa, res) in enumerate(zip(self.assay_choices, self.assay_results_print)):
+        for i, (assa, res) in enumerate(zip(self.assay_choices_print, self.assay_results_print)):
             arcade.draw_text(assa,
                              30,
                              SCREEN_HEIGHT - 265 - (i * 40),
@@ -419,18 +422,38 @@ class FeedbackView(arcade.View):
                         # adds the results to another list to print
                         # changes buttons back to white
                         self.assay_results_print = self.assay_results
+                        self.assay_choices_print = self.assay_choices
                         [b._set_color(arcade.color.WHITE) for b in self.button_list]
+                        # cost is not deducted if the molecule was not made or assayed
+                        if 'Not Made' in self.assay_results_print or 'Not Assayed' in self.assay_results_print:
+                            self.total_cost -= ASSAYS['pic50']['cost']
+                            self.total_duration.remove(ASSAYS['pic50']['duration'])
+                        # costs are subtracted from global variables
                         global_vars.balance -= self.total_cost
-                        global_vars.time -= self.total_duration[0]
+                        if len(self.total_duration) >= 1:
+                            global_vars.time -= self.total_duration[0]
                         self.assay_results = []
+                        self.assay_choices = []
                         self.total_cost = 0
                         self.total_duration = []
+                        # append assay data to assay_df
+                        # checks if a row for that mol already exists (appends new row if not)
+                        if len(self.mol_view.assay_df.loc[
+                                (self.mol_view.assay_df['atag'] == self.tags[0]) &
+                                (self.mol_view.assay_df['btag'] == self.tags[1])]) == 0:
+                            self.mol_view.assay_df = self.mol_view.assay_df.append(
+                                {'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
+                        for a, r in zip(self.assay_choices_print, self.assay_results_print):
+                            self.mol_view.assay_df.loc[
+                                (self.mol_view.assay_df['atag'] == self.tags[0]) &
+                                (self.mol_view.assay_df['btag'] == self.tags[1]), a] = r
 
                 elif choice.button == 'clear_choices':
                     # clears the selected assays and recorded data
                     # changes buttons back to white
                     [b._set_color(arcade.color.WHITE) for b in self.button_list]
                     self.assay_results_print = []
+                    self.assay_choices_print = []
                     self.assay_results = []
                     self.total_cost = 0
                     self.total_duration = []
@@ -443,6 +466,18 @@ class FeedbackView(arcade.View):
                 if choice.button == 'calculate_descriptors':
                     choice._set_color(arcade.color.YELLOW)
                     self.descriptor_results = choice.get_desc()  # records the descriptor results
+                    # append desc data to assay_df
+                    # checks if a row for that mol already exists (appends new row if not)
+                    if len(self.mol_view.assay_df.loc[
+                            (self.mol_view.assay_df['atag'] == self.tags[0]) &
+                            (self.mol_view.assay_df['btag'] == self.tags[1])]) == 0:
+                        self.mol_view.assay_df = self.mol_view.assay_df.append(
+                            {'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
+                    for d, v in zip(self.mol_view.filters, self.descriptor_results.values()):
+                        self.mol_view.assay_df.loc[
+                            (self.mol_view.assay_df['atag'] == self.tags[0]) &
+                            (self.mol_view.assay_df['btag'] == self.tags[1]), d] = v
+
                 elif choice.button == 'run_filters':
                     choice._set_color(arcade.color.YELLOW)
                     self.filter_results = choice.run_filt()  # records the filter results
@@ -455,9 +490,9 @@ class FeedbackView(arcade.View):
 
         if key == arcade.key.RIGHT:
             # navigate to view containing analysis (name can be changed)
-            analysisview = AnalysisView()
-            self.window.show_view(analysisview)
-            analysisview.setup()
+            pause = AnalysisView(self)  # passes the current view to Analysis for later
+            self.final_df = self.mol_view.assay_df  # create df that can be passed to AnalysisView
+            self.window.show_view(pause)
 
 
 def main():

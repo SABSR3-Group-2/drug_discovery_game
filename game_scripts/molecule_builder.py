@@ -83,6 +83,14 @@ class MolView(arcade.View):
         self.top_bound = 0  # the maximum y value
         self.bottom_bound = 0  # the minimum y value
 
+        # create df to record assay data
+        self.col_names = [
+            'atag', 'btag',
+            'pic50', 'cl_mouse', 'cl_human', 'logd', 'pampa',
+            'MW', 'logP', 'TPSA', 'HA', 'h_acc', 'h_don', 'rings'
+            ]
+        self.assay_df = pd.DataFrame(columns = self.col_names)
+
     def _build_lead(self, cur, new, no):
         """
         Helper function for adding a new r group to the current lead:
