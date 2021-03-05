@@ -4,10 +4,7 @@ from game_scripts.combine import MolChoose
 from game_scripts.descriptors import get_descriptors
 from game_scripts.filters import compound_check
 from rdkit import Chem
-from rdkit.Chem.Draw import rdMolDraw2D
 import global_vars
-import pandas as pd
-import numpy as np
 from analysis import AnalysisView
 
 """
@@ -441,11 +438,15 @@ class FeedbackView(arcade.View):
                         self.total_duration = []
                         # append assay data to assay_df
                         # checks if a row for that mol already exists (appends new row if not)
-                        if len(self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])]) == 0:
-                            self.mol_view.assay_df = self.mol_view.assay_df.append({'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
+                        if len(self.mol_view.assay_df.loc[
+                                (self.mol_view.assay_df['atag'] == self.tags[0]) &
+                                (self.mol_view.assay_df['btag'] == self.tags[1])]) == 0:
+                            self.mol_view.assay_df = self.mol_view.assay_df.append(
+                                {'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
                         for a, r in zip(self.assay_choices_print, self.assay_results_print):
-                            self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), a] = r
-                        # print(self.mol_view.assay_df)
+                            self.mol_view.assay_df.loc[
+                                (self.mol_view.assay_df['atag'] == self.tags[0]) &
+                                (self.mol_view.assay_df['btag'] == self.tags[1]), a] = r
 
                 elif choice.button == 'clear_choices':
                     # clears the selected assays and recorded data
@@ -467,11 +468,15 @@ class FeedbackView(arcade.View):
                     self.descriptor_results = choice.get_desc()  # records the descriptor results
                     # append desc data to assay_df
                     # checks if a row for that mol already exists (appends new row if not)
-                    if len(self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])]) == 0:
-                            self.mol_view.assay_df = self.mol_view.assay_df.append({'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
+                    if len(self.mol_view.assay_df.loc[
+                            (self.mol_view.assay_df['atag'] == self.tags[0]) &
+                            (self.mol_view.assay_df['btag'] == self.tags[1])]) == 0:
+                        self.mol_view.assay_df = self.mol_view.assay_df.append(
+                            {'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
                     for d, v in zip(self.mol_view.filters, self.descriptor_results.values()):
-                        self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), d] = v
-                    # print(self.mol_view.assay_df)
+                        self.mol_view.assay_df.loc[
+                            (self.mol_view.assay_df['atag'] == self.tags[0]) &
+                            (self.mol_view.assay_df['btag'] == self.tags[1]), d] = v
 
                 elif choice.button == 'run_filters':
                     choice._set_color(arcade.color.YELLOW)
