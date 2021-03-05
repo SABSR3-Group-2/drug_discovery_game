@@ -9,10 +9,8 @@ import os
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem.Draw import rdMolDraw2D
-from r_groups_selection import get_selection
 from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
-import global_vars
 
 # Cleanse the Images generated in previous rounds
 for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
