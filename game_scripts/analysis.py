@@ -3,10 +3,68 @@ Analysis view
 """
 
 import arcade
+import pandas as pd
+from matplotlib import pyplot as plt
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
 SCREEN_TITLE = "Analysis"
+
+class AnalysisGraph():
+    """
+    creates graphs for user to review their performace
+    """
+
+    def __init__(self, Datatoplot):
+        self.data = Datatoplot
+        self.fig = plt.figure(figsize=[5, 5])
+        self.ax = self.fig.add_subplot(111)
+        self.yvariable = 'pIC50'
+        self.xvariable = 'tags'
+
+    def bar(self, yVarr=None, xVar=None, yVar=None):
+
+        if type(yVar) == str:
+            print(self.yvariable)
+            print(yVar)
+            self.yvariable = yVar
+            print(self.yvariable)
+        if type(xVar) == str:
+            self.xvariable = xVar
+
+        xvalues = []
+        if self.xvariable == "tags":
+            for mol in self.data.iterrows():
+                print(mol)
+                print(mol[1][1])
+                xvalues.append(str(mol[1][0])+','+str(mol[1][1]))
+
+
+
+        yvalues = self.data[self.yvariable]
+        #canvas = agg.FigureCanvasAgg(fig)
+        # print(xvalues)
+        # print(yvalues)
+        plt.bar(xvalues,yvalues)
+        self.title=str(self.yvariable)+" against "+str(self.xvariable)
+        self.formatgraph()
+        plt.savefig("Images/analysis/maingraph.png", facecolor='white', transparent=False)
+
+    def formatgraph(self):
+
+
+        self.ax.set_ylabel(str(self.yvariable))
+        self.ax.set_xlabel(str(self.xvariable))
+        self.ax.set_title(self.title)
+
+
+
+
+
+df = pd.DataFrame({'ATag': ["a10", "a11", "a12"], 'BTag': ['b1', 'c', 'k'], 'pIC50': [100, 110, 120]})
+
+graph = AnalysisGraph(df)
+graph.bar('pIC50')
 
 class AnalysisView(arcade.View):
     """
