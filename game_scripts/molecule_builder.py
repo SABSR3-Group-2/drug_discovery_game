@@ -97,6 +97,24 @@ class MolView(arcade.View):
         vecs = re.findall('\[\*\:\d+\]', Chem.MolToSmiles(self.scaffold))
         return len(vecs)
 
+    def long_text(self, text, length=70):
+        """
+        Breaks a long paragraph into lines of a given length
+
+        :param text: long text
+        :type text: str
+        :return: list of strings making up the full text
+        :rtype: list
+        """
+        # num_lines = int(len(text) / 77) + 1
+        lines = []
+        m = length
+        for n in range(0, len(text), length):
+            lines.append(text[n:m])
+            m += length
+        lines.append(text[m:])
+        return lines
+
     def _build_lead(self, cur, new, no):
         """
         Helper function for adding a new r group to the current lead:
@@ -260,10 +278,10 @@ class MolView(arcade.View):
 
         # Set up inventory navigation button sprites
         self.buttons = arcade.SpriteList(use_spatial_hash=True)
-        button = arcade.Sprite(os.path.join('Images', 'filter_pngs', 'left_arrow.png'), FILTER_SCALING/2)
+        button = arcade.Sprite(os.path.join('Images', 'filter_pngs', 'left_arrow.png'), FILTER_SCALING / 2)
         button.position = (self.vw * 0.3, SCREEN_HEIGHT - 30)
         self.buttons.append(button)
-        button = arcade.Sprite(os.path.join('Images', 'filter_pngs', 'right_arrow.png'), FILTER_SCALING/2)
+        button = arcade.Sprite(os.path.join('Images', 'filter_pngs', 'right_arrow.png'), FILTER_SCALING / 2)
         button.position = (INVENTORY_WIDTH - self.vw * 0.3, SCREEN_HEIGHT - 30)
         self.buttons.append(button)
 
@@ -283,8 +301,23 @@ class MolView(arcade.View):
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
 
-        arcade.draw_text('press "c" to confirm selection', 0, SCREEN_HEIGHT - int(self.vh / 2) - 20,
+        arcade.draw_text('Press "c" to confirm selection', 2, SCREEN_HEIGHT - int(self.vh / 2) - 20,
                          color=arcade.color.OXFORD_BLUE)
+        instructions = ['Welcome to the drug discovery game. Below you can see the starting scaffold',
+                        'with the vectors marked by starred numbers. Select r groups from the scrol-',
+                        'lable inventory on the left by clicking on the group and pressing "C". You ',
+                        'can filter the r groups (decending) by clicking the filter buttons at the top.',
+                        'To see the different sets of r groups available for each vector, click the ',
+                        'arrows. Change views by using the right and left keys on the keyboard.']
+        # inst = 'Welcome to the drug discovery game. Below you can see the starting scaffoldwith the ' \
+        #        'vectors marked by starred numbers. Select r groups from the scrollable inventory on the left ' \
+        #        'by clicking on the group and pressing "C". You can filter the r groups (decending) by clicking ' \
+        #        'the filter buttons at the top. To see the different sets of r groups available for each vector, ' \
+        #        'click the arrows.'
+        # for i, t in enumerate(self.long_text(inst, length=75)):
+        #     arcade.draw_text(t, INVENTORY_WIDTH + 20, SCREEN_HEIGHT - 10 * (i + 1) * 2, color=arcade.color.OXFORD_BLUE)
+        for i, t in enumerate(instructions):
+            arcade.draw_text(t, INVENTORY_WIDTH + 20, SCREEN_HEIGHT - 10 * (i + 1) * 2, color=arcade.color.OXFORD_BLUE)
 
         # Delineate inventory and dragndrop
         arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT, INVENTORY_WIDTH, 0, arcade.color.OXFORD_BLUE)
@@ -323,7 +356,8 @@ class MolView(arcade.View):
 
         if arcade.get_sprites_at_point((x, y), self.r_sprite_list):
             self.picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1]  # pick the top sprite
-            self.picked_r.smiles = self.desc_df.loc[self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
+            self.picked_r.smiles = self.desc_df.loc[
+                self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
             self.picked_r._set_alpha(50)  # shade
 
         # Change inventory
@@ -340,7 +374,6 @@ class MolView(arcade.View):
                 self.setup_sprites(tag=f'{chr(ord(self.tag[0]) - 1)}tag')
         else:
             pass
-
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Redraw the sprites lower instead of scrollling"""
