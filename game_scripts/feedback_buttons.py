@@ -490,7 +490,7 @@ class FeedbackView(arcade.View):
 
         if key == arcade.key.RIGHT:
             # navigate to view containing analysis (name can be changed)
-            pause = AnalysisView(self)  # passes the current view to FeedbackView for later
+            pause = AnalysisView(self)  # passes the current view to Analysis for later
             self.final_df = self.mol_view.assay_df  # create df that can be passed to AnalysisView
             self.window.show_view(pause)
 
