@@ -3,15 +3,11 @@ Make molecules from a scaffold and r groups.
 
 To do:
 """
-import rdkit
 import arcade
 import re
 import os
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import PandasTools
-from rdkit.Chem import Draw
-from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from r_groups_selection import get_selection
 from descriptors import get_descriptors
@@ -96,24 +92,6 @@ class MolView(arcade.View):
         """Deduces the number of vectors on the scaffold molecule from the scaffold smile"""
         vecs = re.findall('\[\*\:\d+\]', Chem.MolToSmiles(self.scaffold))
         return len(vecs)
-
-    def long_text(self, text, length=70):
-        """
-        Breaks a long paragraph into lines of a given length
-
-        :param text: long text
-        :type text: str
-        :return: list of strings making up the full text
-        :rtype: list
-        """
-        # num_lines = int(len(text) / 77) + 1
-        lines = []
-        m = length
-        for n in range(0, len(text), length):
-            lines.append(text[n:m])
-            m += length
-        lines.append(text[m:])
-        return lines
 
     def _build_lead(self, cur, new, no):
         """
@@ -301,26 +279,19 @@ class MolView(arcade.View):
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
 
-        arcade.draw_text('Press "c" to confirm selection', 2, SCREEN_HEIGHT - int(self.vh / 2) - 20,
-                         color=arcade.color.OXFORD_BLUE)
-        instructions = ['Welcome to the drug discovery game. Below you can see the starting scaffold',
+        instructions = ['Welcome to the drug discovery game. Above you can see the starting scaffold',
                         'with the vectors marked by starred numbers. Select r groups from the scrol-',
-                        'lable inventory on the left by clicking on the group and pressing "C". You ',
-                        'can filter the r groups (decending) by clicking the filter buttons at the top.',
-                        'To see the different sets of r groups available for each vector, click the ',
-                        'arrows. Change views by using the right and left keys on the keyboard.']
-        # inst = 'Welcome to the drug discovery game. Below you can see the starting scaffoldwith the ' \
-        #        'vectors marked by starred numbers. Select r groups from the scrollable inventory on the left ' \
-        #        'by clicking on the group and pressing "C". You can filter the r groups (decending) by clicking ' \
-        #        'the filter buttons at the top. To see the different sets of r groups available for each vector, ' \
-        #        'click the arrows.'
-        # for i, t in enumerate(self.long_text(inst, length=75)):
-        #     arcade.draw_text(t, INVENTORY_WIDTH + 20, SCREEN_HEIGHT - 10 * (i + 1) * 2, color=arcade.color.OXFORD_BLUE)
-        for i, t in enumerate(instructions):
-            arcade.draw_text(t, INVENTORY_WIDTH + 20, SCREEN_HEIGHT - 10 * (i + 1) * 2, color=arcade.color.OXFORD_BLUE)
+                        'lable inventory on the left by double click to add to the scaffold. You can ',
+                        'filter the r groups (decending) by clicking the filter buttons at the top. To see',
+                        'the different sets of r groups available for each vector, click the arrows. ',
+                        'Change views by using the right and left keys on the keyboard.']
 
-        # Delineate inventory and dragndrop
+        for i, t in enumerate(instructions):
+            arcade.draw_text(t, INVENTORY_WIDTH + 20, SCREEN_HEIGHT / 5 - (i + 1) * 20, color=arcade.color.OXFORD_BLUE)
+
+        # Delineate boundaries
         arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT, INVENTORY_WIDTH, 0, arcade.color.OXFORD_BLUE)
+        arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT / 5, SCREEN_WIDTH, SCREEN_HEIGHT / 5, arcade.color.OXFORD_BLUE)
 
         # Draw the filters
         self.filter_sprite_list.draw()
@@ -348,13 +319,15 @@ class MolView(arcade.View):
             self.r_sprite_list.draw()
 
         # Pick the r sprite and shade it
-        # if arcade.get_sprites_at_point((x, y), self.r_sprite_list):
-        #     clicked = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1]
-
         for r in self.r_sprite_list:
             r._set_alpha(255)  # removes the shade from any other r_sprites
 
         if arcade.get_sprites_at_point((x, y), self.r_sprite_list):
+            # If already selected, then add to scaffold
+            if arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1] == self.picked_r:
+                self.update_lead()
+                self.setup()
+                self.on_draw()
             self.picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1]  # pick the top sprite
             self.picked_r.smiles = self.desc_df.loc[
                 self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
@@ -379,7 +352,7 @@ class MolView(arcade.View):
         """Redraw the sprites lower instead of scrollling"""
 
         for i, r in enumerate(self.r_sprite_list):
-            r.position = (r.position[0], r.position[1] + scroll_y)
+            r.position = (r.position[0], r.position[1] + int(scroll_y * 3))
         self.view_top += scroll_y
 
     def on_key_press(self, symbol: int, modifiers: int):
@@ -387,15 +360,6 @@ class MolView(arcade.View):
         if symbol == arcade.key.R:
             # Restart
             self.setup()
-
-        if self.picked_r is not None:
-            # build the molecule
-            if symbol == arcade.key.C:
-                self.update_lead()
-                self.setup()
-                self.on_draw()
-                print(f'current rs {self.current_rs}')
-                print(f'pikced r {self.picked_r}, tag = {self.picked_r.tag}')
 
         if symbol == arcade.key.RIGHT:
             if 0 in self.current_rs:
