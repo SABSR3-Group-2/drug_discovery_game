@@ -19,11 +19,12 @@ class AnalysisGraph():
         self.data = Datatoplot
         self.fig = plt.figure(figsize=[5, 5])
         self.ax = self.fig.add_subplot(111)
-        self.yvariable = 'pIC50'
+        self.yvariable = 'pic50'
         self.xvariable = 'tags'
+        self.title = "Analysis graph"
 
     def bar(self, yVarr=None, xVar=None, yVar=None):
-
+        print(self.data)
         if type(yVar) == str:
             print(self.yvariable)
             print(yVar)
@@ -38,7 +39,6 @@ class AnalysisGraph():
                 print(mol)
                 print(mol[1][1])
                 xvalues.append(str(mol[1][0])+','+str(mol[1][1]))
-
 
 
         yvalues = self.data[self.yvariable]
@@ -61,10 +61,10 @@ class AnalysisGraph():
 
 
 
-df = pd.DataFrame({'ATag': ["a10", "a11", "a12"], 'BTag': ['b1', 'c', 'k'], 'pIC50': [100, 110, 120]})
+#df = pd.DataFrame({'ATag': ["a10", "a11", "a12"], 'BTag': ['b1', 'c', 'k'], 'pIC50': [100, 110, 120]})
 
-graph = AnalysisGraph(df)
-graph.bar('pIC50')
+#graph = AnalysisGraph(df)
+#graph.bar('pIC50')
 
 class AnalysisView(arcade.View):
     """
@@ -75,9 +75,9 @@ class AnalysisView(arcade.View):
         super().__init__()
         self.feedback_view = feedback_view
         self.end_button_list = None
+        self.graph_list = None
 
         arcade.set_background_color(arcade.color.WHITE)
-
         self.setup()
 
     def setup(self):
@@ -91,12 +91,32 @@ class AnalysisView(arcade.View):
         end_button.name = 'end'
         self.end_button_list.append(end_button)
 
+
+        #create graph
+        self.graph_list = arcade.SpriteList()
+        main_graph = arcade.Sprite('Images/analysis/maingraph.png')
+        main_graph.position = SCREEN_WIDTH/2, SCREEN_HEIGHT/2 
+        main_graph.name = 'main graph'
+        self.graph_list.append(main_graph)
+
+
+
     def on_draw(self):
         """Renders the screen"""
         arcade.start_render()
-
+        
         # draw the end button
         self.end_button_list.draw()
+
+        # draw graph
+        ## streamline this next block
+        self.graph_list = arcade.SpriteList()
+        main_graph = arcade.Sprite('Images/analysis/maingraph.png')
+        main_graph.position = SCREEN_WIDTH/2, SCREEN_HEIGHT/2 
+        main_graph.name = 'main graph'
+        self.graph_list.append(main_graph)
+
+        self.graph_list.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
@@ -117,6 +137,9 @@ class AnalysisView(arcade.View):
         # df containing results printed when user presses SPACE
         if symbol == arcade.key.SPACE:
             print(self.feedback_view.final_df)
+            self.working_graph = AnalysisGraph(self.feedback_view.final_df)
+
+            self.working_graph.bar()
 
         if symbol == arcade.key.LEFT:
             self.window.show_view(self.feedback_view)
