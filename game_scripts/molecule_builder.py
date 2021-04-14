@@ -3,20 +3,14 @@ Make molecules from a scaffold and r groups.
 
 To do:
 """
-import rdkit
 import arcade
 import re
 import os
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import PandasTools
-from rdkit.Chem import Draw
-from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
-from r_groups_selection import get_selection
 from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
-import global_vars
 
 # Cleanse the Images generated in previous rounds
 for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
@@ -50,6 +44,7 @@ class MolView(arcade.View):
 
         # Initial scaffold molecule
         self.scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]')  # |$;;;;;;;;;;;;R2;;;R1$|')
+        self.num_vecs = self.get_num_vectors()  # get an integer value for how many vectors there are
 
         # Lists that keep track of the 'sprites' aka molecules and r groups
         self.scaffold_list = None
@@ -59,7 +54,6 @@ class MolView(arcade.View):
         # Variable to keep track round number
         self.round_count = 0
 
-        """code from inventory.py"""
         # Make relative units for responsive design
         self.vw = int(INVENTORY_WIDTH / 6)  # relative width
         self.vh = int(SCREEN_HEIGHT / 6)  # relative height
@@ -71,6 +65,7 @@ class MolView(arcade.View):
         self.current_rs = [0, 0]  # holds the current R1 and R2 groups e.g. [<sprite.object>, <sprite.object>]
         self.lead = self.scaffold  # Initialise with the starting scaffold
         self.tag = 'atag'
+        self.buttons = None  # holds the button sprites for changing between different inventories
 
         # Track which feature the r groups are being sorted by
         self.feature = None
@@ -88,8 +83,13 @@ class MolView(arcade.View):
             'atag', 'btag',
             'pic50', 'cl_mouse', 'cl_human', 'logd', 'pampa',
             'MW', 'logP', 'TPSA', 'HA', 'h_acc', 'h_don', 'rings'
-            ]
-        self.assay_df = pd.DataFrame(columns = self.col_names)
+        ]
+        self.assay_df = pd.DataFrame(columns=self.col_names)
+
+    def get_num_vectors(self):
+        """Deduces the number of vectors on the scaffold molecule from the scaffold smile"""
+        vecs = re.findall('\[\*\:\d+\]', Chem.MolToSmiles(self.scaffold))
+        return len(vecs)
 
     def _build_lead(self, cur, new, no):
         """
@@ -252,6 +252,15 @@ class MolView(arcade.View):
             filter_sprite.filter = f
             self.filter_sprite_list.append(filter_sprite)
 
+        # Set up inventory navigation button sprites
+        self.buttons = arcade.SpriteList(use_spatial_hash=True)
+        button = arcade.Sprite(os.path.join('Images', 'filter_pngs', 'left_arrow.png'), FILTER_SCALING / 2)
+        button.position = (self.vw * 0.3, SCREEN_HEIGHT - 30)
+        self.buttons.append(button)
+        button = arcade.Sprite(os.path.join('Images', 'filter_pngs', 'right_arrow.png'), FILTER_SCALING / 2)
+        button.position = (INVENTORY_WIDTH - self.vw * 0.3, SCREEN_HEIGHT - 30)
+        self.buttons.append(button)
+
     def on_draw(self):
         """renders the screen"""
 
@@ -259,9 +268,6 @@ class MolView(arcade.View):
 
         # Draw sprites
         self.scaffold_list.draw()
-
-        """Code from inventory.py"""
-        # Draw r_sprites
         self.r_sprite_list.draw()
 
         # Draw the menu bar
@@ -271,14 +277,25 @@ class MolView(arcade.View):
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
 
-        arcade.draw_text('press "c" to confirm selection', 0, SCREEN_HEIGHT - int(self.vh / 2) - 20,
-                         color=arcade.color.OXFORD_BLUE)
+        instructions = ['Welcome to the drug discovery game. Above you can see the starting scaffold',
+                        'with the vectors marked by starred numbers. Select r groups from the scrol-',
+                        'lable inventory on the left by double click to add to the scaffold. You can ',
+                        'filter the r groups (decending) by clicking the filter buttons at the top. To see',
+                        'the different sets of r groups available for each vector, click the arrows. ',
+                        'Change views by using the right and left keys on the keyboard.']
 
-        # Delineate inventory and dragndrop
+        for i, t in enumerate(instructions):
+            arcade.draw_text(t, INVENTORY_WIDTH + 20, SCREEN_HEIGHT / 5 - (i + 1) * 20, color=arcade.color.OXFORD_BLUE)
+
+        # Delineate boundaries
         arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT, INVENTORY_WIDTH, 0, arcade.color.OXFORD_BLUE)
+        arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT / 5, SCREEN_WIDTH, SCREEN_HEIGHT / 5, arcade.color.OXFORD_BLUE)
 
         # Draw the filters
         self.filter_sprite_list.draw()
+
+        # Draw the navigation buttons
+        self.buttons.draw()
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """ Called when the user presses a mouse button. """
@@ -303,15 +320,37 @@ class MolView(arcade.View):
         for r in self.r_sprite_list:
             r._set_alpha(255)  # removes the shade from any other r_sprites
 
-        self.picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1]  # pick the top sprite
-        self.picked_r.smiles = self.desc_df.loc[self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
-        self.picked_r._set_alpha(50)  # shade
+        if arcade.get_sprites_at_point((x, y), self.r_sprite_list):
+            # If already selected, then add to scaffold
+            if arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1] == self.picked_r:
+                self.update_lead()
+                self.setup()
+                self.on_draw()
+            self.picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1]  # pick the top sprite
+            self.picked_r.smiles = self.desc_df.loc[
+                self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
+            self.picked_r._set_alpha(50)  # shade
+
+        # Change inventory
+        clicked = arcade.get_sprites_at_point((x, y), self.buttons)
+        if clicked[-1] == self.buttons[1]:  # if right arrow
+            if ord(self.tag[0]) - 96 < self.num_vecs:  # not out of range
+                self.setup_sprites(tag=f'{chr(ord(self.tag[0]) + 1)}tag')
+            else:
+                pass
+        elif clicked[-1] == self.buttons[0]:  # if left arrow
+            if self.tag[0] == 'a':
+                pass
+            else:
+                self.setup_sprites(tag=f'{chr(ord(self.tag[0]) - 1)}tag')
+        else:
+            pass
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Redraw the sprites lower instead of scrollling"""
 
         for i, r in enumerate(self.r_sprite_list):
-            r.position = (r.position[0], r.position[1] + scroll_y)
+            r.position = (r.position[0], r.position[1] + int(scroll_y * 3))
         self.view_top += scroll_y
 
     def on_key_press(self, symbol: int, modifiers: int):
@@ -319,23 +358,6 @@ class MolView(arcade.View):
         if symbol == arcade.key.R:
             # Restart
             self.setup()
-
-        if self.picked_r is not None:
-            # build the molecule
-            if symbol == arcade.key.C:
-                self.update_lead()
-                self.setup()
-                self.on_draw()
-                print(f'current rs {self.current_rs}')
-                print(f'pikced r {self.picked_r}, tag = {self.picked_r.tag}')
-
-        if symbol == arcade.key.A:
-            # see atag inventory
-            self.setup_sprites(tag='atag', feat='MW')
-
-        if symbol == arcade.key.B:
-            # see btag inventory
-            self.setup_sprites(tag='btag', feat='MW')
 
         if symbol == arcade.key.RIGHT:
             if 0 in self.current_rs:
