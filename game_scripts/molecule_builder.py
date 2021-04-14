@@ -12,7 +12,7 @@ from rdkit.Chem.Draw import rdMolDraw2D
 from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
 
-# Cleanse the Images generated in previous rounds
+# Cleanse the images generated in previous rounds
 for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
     if f_name[-4:] == '.png':
         os.remove(os.path.join('Images', 'game_loop_images', f_name))
@@ -68,7 +68,7 @@ class MolView(arcade.View):
         self.buttons = None  # holds the button sprites for changing between different inventories
 
         # Track which feature the r groups are being sorted by
-        self.feature = None
+        self.feature = 'MW'
         self.filters = ['MW', 'logP', 'TPSA', 'HA', 'h_acc', 'h_don', 'rings']
 
         # Used to keep track of our scrolling
@@ -205,6 +205,21 @@ class MolView(arcade.View):
         for i, sprite in enumerate(self.r_sprite_list):
             sprite.position = coordinate_list[i]
 
+        # self.setup_values()
+
+    def draw_values(self):
+        """
+        For the r sprite inventory, this function draws the value that the list is being sorted by under each sprite.
+        E.g. if sorting by rings and the R group has 3 rings it will print "3" under the associated sprite.
+        """
+
+        for i, r in enumerate(self.desc_df[self.feature]):
+            coord = self.r_sprite_list[i].position
+            value_coord = [f'{float(r):.0f}', coord[0], coord[1] - 55]
+            arcade.draw_text(value_coord[0], value_coord[1], value_coord[2],
+                             color=arcade.color.BLACK, align="center", font_size=11)
+
+
     def setup(self):
         """
         This function sets up the game, call it to restart.
@@ -229,13 +244,6 @@ class MolView(arcade.View):
         self.scaffold_sprite.position = (int(SCREEN_WIDTH * 0.75), SCREEN_HEIGHT * 0.5)
         self.scaffold_list.append(self.scaffold_sprite)
 
-        """
-        Code from inventory.py:
-            Process to setting up the r_sprites
-                1. Create SpriteList of Sprites
-                2. Create list of coordinates
-                3. Assigning coordinates to each sprite
-        """
         # Set up r group sprites
         # Create a list of the sprites
         self.r_sprite_list = arcade.SpriteList(use_spatial_hash=True)
@@ -261,6 +269,7 @@ class MolView(arcade.View):
         button.position = (INVENTORY_WIDTH - self.vw * 0.3, SCREEN_HEIGHT - 30)
         self.buttons.append(button)
 
+
     def on_draw(self):
         """renders the screen"""
 
@@ -269,6 +278,7 @@ class MolView(arcade.View):
         # Draw sprites
         self.scaffold_list.draw()
         self.r_sprite_list.draw()
+        self.draw_values()
 
         # Draw the menu bar
         arcade.draw_rectangle_filled(INVENTORY_WIDTH / 2,
@@ -279,7 +289,7 @@ class MolView(arcade.View):
 
         instructions = ['Welcome to the drug discovery game. Above you can see the starting scaffold',
                         'with the vectors marked by starred numbers. Select r groups from the scrol-',
-                        'lable inventory on the left by double click to add to the scaffold. You can ',
+                        'lable inventory on the left by double clicking to add to the scaffold. You can ',
                         'filter the r groups (decending) by clicking the filter buttons at the top. To see',
                         'the different sets of r groups available for each vector, click the arrows. ',
                         'Change views by using the right and left keys on the keyboard.']
@@ -302,12 +312,12 @@ class MolView(arcade.View):
 
         # Find what the user has clicked on (y coordinate is calculated dynamically)
         clicked = arcade.get_sprites_at_point((x, y), self.filter_sprite_list)
-
         if len(clicked) > 0:
-            # Change the clicked button
+            # Change the clicked filter button
             [f._set_color(arcade.color.WHITE) for f in self.filter_sprite_list]
             feature = clicked[0]
             feature._set_color(arcade.color.DARK_CANDY_APPLE_RED)  # turn filter red
+            self.feature = feature.filter
 
             # Sort the r_sprites
             self.desc_df.sort_values(feature.filter, inplace=True, ascending=False)
@@ -333,18 +343,19 @@ class MolView(arcade.View):
 
         # Change inventory
         clicked = arcade.get_sprites_at_point((x, y), self.buttons)
-        if clicked[-1] == self.buttons[1]:  # if right arrow
-            if ord(self.tag[0]) - 96 < self.num_vecs:  # not out of range
-                self.setup_sprites(tag=f'{chr(ord(self.tag[0]) + 1)}tag')
+        if len(clicked) > 0:
+            if clicked[-1] == self.buttons[1]:  # if right arrow
+                if ord(self.tag[0]) - 96 < self.num_vecs:  # not out of range
+                    self.setup_sprites(tag=f'{chr(ord(self.tag[0]) + 1)}tag')
+                else:
+                    pass
+            elif clicked[-1] == self.buttons[0]:  # if left arrow
+                if self.tag[0] == 'a':
+                    pass
+                else:
+                    self.setup_sprites(tag=f'{chr(ord(self.tag[0]) - 1)}tag')
             else:
                 pass
-        elif clicked[-1] == self.buttons[0]:  # if left arrow
-            if self.tag[0] == 'a':
-                pass
-            else:
-                self.setup_sprites(tag=f'{chr(ord(self.tag[0]) - 1)}tag')
-        else:
-            pass
 
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Redraw the sprites lower instead of scrollling"""
