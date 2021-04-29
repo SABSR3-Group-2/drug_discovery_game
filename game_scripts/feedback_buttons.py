@@ -1,8 +1,8 @@
 import os
 import arcade
-from game_scripts.combine import MolChoose
-from game_scripts.descriptors import get_descriptors
-from game_scripts.filters import compound_check
+from combine import MolChoose
+from descriptors import get_descriptors
+from filters import compound_check
 from rdkit import Chem
 import global_vars
 from analysis import AnalysisView
