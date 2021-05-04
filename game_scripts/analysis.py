@@ -49,7 +49,7 @@ class Card():
         self.logd = logd
         self.x_logd = card_coordinates[0] - 70
         self.y_logd = card_coordinates[1] - 120
-        self.logd_text = f"Logd: {self.logd}"
+        self.logd_text = f"LogD: {self.logd}"
 
         self.pampa = pampa
         self.x_pampa = card_coordinates[0] - 70
@@ -64,7 +64,7 @@ class AnalysisView(arcade.View):
     def __init__(self, feedback_view=None):
         super().__init__()
         self.feedback_view = feedback_view
-        self.end_button_list = None
+        self.button_list = None
         self.card_list = None
         self.mat_list = None
         self.text_list = []
@@ -85,6 +85,8 @@ class AnalysisView(arcade.View):
         # get font from font file
         self.font = os.path.join('fonts', 'arial.ttf')
 
+        self.mol_choice = None
+
         self.setup()
 
     def setup(self):
@@ -92,11 +94,16 @@ class AnalysisView(arcade.View):
         This function sets up the view, call it to restart.
         """
         # create end button
-        self.end_button_list = arcade.SpriteList()
+        self.button_list = arcade.SpriteList()
         end_button = arcade.Sprite(f'Images/button_pngs/end_game_blue.png', 0.5)
         end_button.position = SCREEN_WIDTH - 70, 50
         end_button.name = 'end'
-        self.end_button_list.append(end_button)
+        self.button_list.append(end_button)
+
+        builder_button = arcade.Sprite(f'Images/button_pngs/mol_builder.png', 0.5)
+        builder_button.position = MENU_WIDTH / 2, SCREEN_HEIGHT - 70
+        builder_button.name = 'builder'
+        self.button_list.append(builder_button)
 
         # create cards with molecules on them
         self.card_list = arcade.SpriteList()
@@ -111,8 +118,11 @@ class AnalysisView(arcade.View):
 
         # create blank mats for molecules to sit on
         self.mat_list = arcade.SpriteList()
-        for i in range(len(self.card_list)):
+        for (index, row), i in zip(self.feedback_view.final_df.iterrows(), range(len(self.card_list))):
             mat_sprite = arcade.SpriteSolidColor(width = MAT_WIDTH, height = MAT_HEIGHT, color=arcade.color.LIGHT_BLUE)
+            mat_sprite.atag = row['atag']
+            mat_sprite.btag = row['btag']
+
             self.mat_list.append(mat_sprite)
         
         # create coordinates for the cards
@@ -135,6 +145,7 @@ class AnalysisView(arcade.View):
         for (index, row), coord in zip(self.feedback_view.final_df.iterrows(), card_coordinate_list):
             cardtext = Card(coord, row['atag'], row['btag'], row['pic50'], row['cl_mouse'], row['cl_human'], row['logd'], row['pampa'])
             self.text_list.append(cardtext)
+        
 
     def make_coordinates(self, n_sprites):
         """
@@ -173,8 +184,6 @@ class AnalysisView(arcade.View):
         """
         arcade.start_render()
 
-        # draw the sprites
-        self.end_button_list.draw()
         self.mat_list.draw()
         self.card_list.draw()
 
@@ -222,6 +231,16 @@ class AnalysisView(arcade.View):
                         font_size=10,
                         font_name=self.font,
                         align='center')
+        
+        # draw the menu bar
+        arcade.draw_rectangle_filled(MENU_WIDTH / 2,
+                                     SCREEN_HEIGHT,
+                                     MENU_WIDTH,
+                                     self.vh,
+                                     color=arcade.color.OXFORD_BLUE)
+
+        # draw the sprites
+        self.button_list.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
@@ -229,12 +248,24 @@ class AnalysisView(arcade.View):
         when the user clicks on a button.
         """
         # identifies what button the user clicks on
-        clicked = arcade.get_sprites_at_point((x, y), self.end_button_list)
+        clicked = arcade.get_sprites_at_point((x, y), self.button_list)
         if len(clicked) > 0:  # checks a button has been clicked
             if clicked[0].name == 'end':
                 # if end button clicked, csv file created and window closed
                 self.feedback_view.final_df.to_csv('data/results.csv', index=False)
                 self.window.close()
+            
+            elif clicked[0].name == 'builder':
+                self.window.show_view(self.feedback_view.mol_view)
+        
+        # identifies what button the user clicks on
+        clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
+        if len(clicked) > 0:  # checks a button has been clicked
+            [b._set_color(arcade.color.WHITE) for b in self.mat_list]
+            self.mol_choice = None
+            choice = clicked[0]
+            choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
+            self.mol_choice = [choice.atag, choice.btag]  # record mol chosen using tag attributes
 
     def on_key_press(self, symbol: int, modifiers: int):
         """ User presses key """
