@@ -101,9 +101,14 @@ class AnalysisView(arcade.View):
         self.button_list.append(end_button)
 
         builder_button = arcade.Sprite(f'Images/button_pngs/mol_builder.png', 0.5)
-        builder_button.position = MENU_WIDTH / 2, SCREEN_HEIGHT - 70
+        builder_button.position = 50, SCREEN_HEIGHT - 70
         builder_button.name = 'builder'
         self.button_list.append(builder_button)
+
+        assays_button = arcade.Sprite(f'Images/button_pngs/run_assays.png', 0.5)
+        assays_button.position = 150, SCREEN_HEIGHT - 70
+        assays_button.name = 'assays'
+        self.button_list.append(assays_button)
 
         # create cards with molecules on them
         self.card_list = arcade.SpriteList()
@@ -238,6 +243,14 @@ class AnalysisView(arcade.View):
                                      MENU_WIDTH,
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
+        
+        arcade.draw_text('Select a molecule to investigate further',
+                        15,
+                        SCREEN_HEIGHT - 25,
+                        color=arcade.color.WHITE,
+                        font_size=10,
+                        font_name=self.font,
+                        align='center')
 
         # draw the sprites
         self.button_list.draw()
@@ -272,6 +285,30 @@ class AnalysisView(arcade.View):
                         self.feedback_view.mol_view.on_draw()
 
                     self.window.show_view(self.feedback_view.mol_view)
+            
+            elif clicked[0].name == 'assays':
+                if self.mol_choice is not None:
+                    sprites = []
+                    for sprite in self.feedback_view.mol_view.r_sprite_list:
+                        if sprite.tag == self.mol_choice[0]:
+                            sprites.append(sprite)
+                        if sprite.tag == self.mol_choice[1]:
+                            sprites.append(sprite)
+                    for sprite in sprites:
+                        self.feedback_view.mol_view.picked_r = sprite  # pick the top sprite
+                        self.feedback_view.mol_view.picked_r.smiles = self.feedback_view.mol_view.desc_df.loc[self.feedback_view.mol_view.desc_df[self.feedback_view.mol_view.tag] == self.feedback_view.mol_view.picked_r.tag, 'mol'].item()  # give smile
+                        self.feedback_view.mol_view.picked_r._set_alpha(50)  # shade
+                        self.feedback_view.mol_view.update_lead()
+                        self.feedback_view.mol_view.setup()
+                        self.feedback_view.mol_view.on_draw()
+                        
+                    for i, t in enumerate(self.mol_choice):
+                        self.feedback_view.tags[i] = t
+                    self.feedback_view.setup()
+
+                    self.window.show_view(self.feedback_view)
+                    arcade.set_background_color(arcade.color.OXFORD_BLUE)
+
         
         # identifies what button the user clicks on
         clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
