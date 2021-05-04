@@ -39,12 +39,12 @@ class Card():
         self.cl_mouse = cl_mouse
         self.x_cl_mouse = card_coordinates[0] - 70
         self.y_cl_mouse = card_coordinates[1] - 80
-        self.cl_mouse_text = f"Clearance (m): {self.cl_mouse}"
+        self.cl_mouse_text = f"Cl (mouse): {self.cl_mouse}"
 
         self.cl_human = cl_human
         self.x_cl_human = card_coordinates[0] - 70
         self.y_cl_human = card_coordinates[1] - 100
-        self.cl_human_text = f"Clearance (h): {self.cl_human}"
+        self.cl_human_text = f"Cl (human): {self.cl_human}"
 
         self.logd = logd
         self.x_logd = card_coordinates[0] - 70
@@ -200,35 +200,35 @@ class AnalysisView(arcade.View):
                         c.x_pic50,
                         c.y_pic50,
                         color=arcade.color.BLACK,
-                        font_size=10,
+                        font_size=8,
                         font_name=self.font,
                         align='center')
             arcade.draw_text(c.cl_mouse_text,
                         c.x_cl_mouse,
                         c.y_cl_mouse,
                         color=arcade.color.BLACK,
-                        font_size=10,
+                        font_size=8,
                         font_name=self.font,
                         align='center')
             arcade.draw_text(c.cl_human_text,
                         c.x_cl_human,
                         c.y_cl_human,
                         color=arcade.color.BLACK,
-                        font_size=10,
+                        font_size=8,
                         font_name=self.font,
                         align='center')
             arcade.draw_text(c.logd_text,
                         c.x_logd,
                         c.y_logd,
                         color=arcade.color.BLACK,
-                        font_size=10,
+                        font_size=8,
                         font_name=self.font,
                         align='center')
             arcade.draw_text(c.pampa_text,
                         c.x_pampa,
                         c.y_pampa,
                         color=arcade.color.BLACK,
-                        font_size=10,
+                        font_size=8,
                         font_name=self.font,
                         align='center')
         
@@ -256,7 +256,22 @@ class AnalysisView(arcade.View):
                 self.window.close()
             
             elif clicked[0].name == 'builder':
-                self.window.show_view(self.feedback_view.mol_view)
+                if self.mol_choice is not None:
+                    sprites = []
+                    for sprite in self.feedback_view.mol_view.r_sprite_list:
+                        if sprite.tag == self.mol_choice[0]:
+                            sprites.append(sprite)
+                        if sprite.tag == self.mol_choice[1]:
+                            sprites.append(sprite)
+                    for sprite in sprites:
+                        self.feedback_view.mol_view.picked_r = sprite  # pick the top sprite
+                        self.feedback_view.mol_view.picked_r.smiles = self.feedback_view.mol_view.desc_df.loc[self.feedback_view.mol_view.desc_df[self.feedback_view.mol_view.tag] == self.feedback_view.mol_view.picked_r.tag, 'mol'].item()  # give smile
+                        self.feedback_view.mol_view.picked_r._set_alpha(50)  # shade
+                        self.feedback_view.mol_view.update_lead()
+                        self.feedback_view.mol_view.setup()
+                        self.feedback_view.mol_view.on_draw()
+
+                    self.window.show_view(self.feedback_view.mol_view)
         
         # identifies what button the user clicks on
         clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
@@ -270,14 +285,15 @@ class AnalysisView(arcade.View):
     def on_key_press(self, symbol: int, modifiers: int):
         """ User presses key """
         # df containing results printed when user presses SPACE
-        if symbol == arcade.key.SPACE:
+        if symbol == arcade.key.SPACE:  # debugging code
             print(self.feedback_view.final_df)
-            for i in self.text_list:
-                print(i.y)
 
         if symbol == arcade.key.LEFT:
             self.window.show_view(self.feedback_view)
             arcade.set_background_color(arcade.color.OXFORD_BLUE)
+        
+        if symbol == arcade.key.RIGHT:  # debugging code
+            print(self.mol_choice[0], self.mol_choice[1])
     
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Redraw the sprites lower instead of scrollling"""
