@@ -261,6 +261,15 @@ class AnalysisView(arcade.View):
         when the user clicks on a button.
         """
         # identifies what button the user clicks on
+        clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
+        if len(clicked) > 0:  # checks a button has been clicked
+            [b._set_color(arcade.color.WHITE) for b in self.mat_list]
+            #self.mol_choice = None
+            choice = clicked[0]
+            choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
+            self.mol_choice = [choice.atag, choice.btag]  # record mol chosen using tag attributes
+
+        # identifies what button the user clicks on
         clicked = arcade.get_sprites_at_point((x, y), self.button_list)
         if len(clicked) > 0:  # checks a button has been clicked
             if clicked[0].name == 'end':
@@ -283,6 +292,11 @@ class AnalysisView(arcade.View):
                         self.feedback_view.mol_view.update_lead()
                         self.feedback_view.mol_view.setup()
                         self.feedback_view.mol_view.on_draw()
+                    
+                    for i, t in enumerate(self.mol_choice):
+                        self.feedback_view.tags[i] = t
+                    self.feedback_view.setup()
+                    self.feedback_view.on_draw()
 
                     self.window.show_view(self.feedback_view.mol_view)
             
@@ -305,19 +319,9 @@ class AnalysisView(arcade.View):
                     for i, t in enumerate(self.mol_choice):
                         self.feedback_view.tags[i] = t
                     self.feedback_view.setup()
-
+                    self.feedback_view.on_draw()
                     self.window.show_view(self.feedback_view)
                     arcade.set_background_color(arcade.color.OXFORD_BLUE)
-
-        
-        # identifies what button the user clicks on
-        clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
-        if len(clicked) > 0:  # checks a button has been clicked
-            [b._set_color(arcade.color.WHITE) for b in self.mat_list]
-            self.mol_choice = None
-            choice = clicked[0]
-            choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
-            self.mol_choice = [choice.atag, choice.btag]  # record mol chosen using tag attributes
 
     def on_key_press(self, symbol: int, modifiers: int):
         """ User presses key """
