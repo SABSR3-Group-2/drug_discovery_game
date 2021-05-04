@@ -3,15 +3,12 @@ Analysis view
 """
 
 import arcade
-<<<<<<< HEAD
-from end_game_screen import EndView
-=======
 import pandas as pd
 from game_scripts.combine import MolChoose
 from rdkit import Chem
 from rdkit.Chem import Draw
 import os
->>>>>>> 5d330437e7dbb3a936a42644300667b62586b474
+from end_game import EndGame
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -277,13 +274,11 @@ class AnalysisView(arcade.View):
         clicked = arcade.get_sprites_at_point((x, y), self.button_list)
         if len(clicked) > 0:  # checks a button has been clicked
             if clicked[0].name == 'end':
+                pause = EndGame(self)
+                self.window.show_view(pause)
                 # if end button clicked, csv file created and window closed
-                self.feedback_view.final_df.to_csv('data/results.csv', index=False)
-<<<<<<< HEAD
-                end_view = EndView(self.feedback_view.mol_view)  # create end view and pass mol builder view
-                self.window.show_view(end_view)
-=======
-                self.window.close()
+                #self.feedback_view.final_df.to_csv('data/results.csv', index=False)
+                #self.window.close()
             
             elif clicked[0].name == 'builder':
                 if self.mol_choice is not None:
@@ -330,7 +325,6 @@ class AnalysisView(arcade.View):
                     self.feedback_view.on_draw()
                     self.window.show_view(self.feedback_view)
                     arcade.set_background_color(arcade.color.OXFORD_BLUE)
->>>>>>> 5d330437e7dbb3a936a42644300667b62586b474
 
     def on_key_press(self, symbol: int, modifiers: int):
         """ User presses key """

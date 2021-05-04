@@ -277,7 +277,7 @@ class MolView(arcade.View):
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
 
-        instructions = ['Welcome to the drug discovery game. Above you can see the starting scaffold',
+        instructions = ['Welcome to the Drug Discovery Game. Above you can see the starting scaffold',
                         'with the vectors marked by starred numbers. Select r groups from the scrol-',
                         'lable inventory on the left by double click to add to the scaffold. You can ',
                         'filter the r groups (decending) by clicking the filter buttons at the top. To see',
