@@ -62,4 +62,20 @@ def make_r_sprites(r_group, label):
         d.FinishDrawing()
         d.WriteDrawingText(f'../Images/r_group_pngs/{tag}.png')
 
+def lipinski(desc_dict):
+    """Calculate Lipinski from the descriptor dictionary.
+    Return the number of rules broken and whether the molecule passes.
+    """
+    violations = 0
+    if desc_dict['MW'] >= 500: violations += 1
+    if desc_dict['h_acc'] >= 10: violations += 1
+    if desc_dict['h_don'] >= 5: violations += 1
+    if desc_dict['logP'] >= 5: violations += 1
+    if violations > 1:
+        result = 'fails'
+    else:
+        result = 'passes'
+    
+    return violations, result
+
 # make_r_sprites('R2','btag')
