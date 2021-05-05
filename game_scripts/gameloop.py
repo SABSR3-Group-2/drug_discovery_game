@@ -2,7 +2,6 @@
 import arcade
 from molecule_builder import MolView
 
-
 # Screen title and size
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -18,11 +17,13 @@ CURSOR_SCALING = 1
 
 
 def main():
-    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    start_view = MolView()
-    window.show_view(start_view)
-    start_view.setup()
-    arcade.run()
+    while 1:
+        window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        start_view = MolView()
+        window.show_view(start_view)
+        start_view.setup()
+        arcade.run()
+
 
 
 if __name__ == '__main__':
