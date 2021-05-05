@@ -153,7 +153,7 @@ class AnalysisView(arcade.View):
             sprite.position = mat_coordinate_list[i]
 
         # use the Card class to create objects that store the molecule info and coordinates
-        for (index, row), coord in zip(self.feedback_view.final_df.iterrows(), card_coordinate_list):
+        for (index, row), coord in zip(self.feedback_view.final_df.iterrows(), mol_coordinate_list):
             cardtext = Card(coord, row['atag'], row['btag'], row['pic50'], row['cl_mouse'], row['cl_human'], row['logd'], row['pampa'])
             self.text_list.append(cardtext)
 
