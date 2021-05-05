@@ -340,6 +340,9 @@ class MolView(arcade.View):
         arcade.draw_text('Molecule Builder', int(SCREEN_WIDTH*0.59), SCREEN_HEIGHT - 50, color=arcade.color.WHITE,
                          font_size=30)
 
+        arcade.draw_text(f'Displaying: R{ord(self.tag[0].lower()) - 96}', 10, SCREEN_HEIGHT - self.vh * 0.5 - 20,
+                         color=arcade.color.OXFORD_BLUE, font_size=11)
+
         instructions = ['Welcome to the Drug Discovery Game. Above you can see the starting scaffold',
                         'with the vectors marked by starred numbers. Select r groups from the scrol-',
                         'lable inventory on the left by double clicking to add to the scaffold. You can ',
