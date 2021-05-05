@@ -1,11 +1,11 @@
 import os
 import arcade
-from game_scripts.combine import MolChoose
-from game_scripts.descriptors import get_descriptors
-from game_scripts.filters import compound_check
+from combine import MolChoose
+from descriptors import get_descriptors
+from filters import compound_check
 from rdkit import Chem
 import global_vars
-from analysis import AnalysisView
+from review import ReviewView
 
 """
 Feedback
@@ -489,9 +489,9 @@ class FeedbackView(arcade.View):
             arcade.set_background_color(arcade.color.WHITE)
 
         if key == arcade.key.RIGHT:
-            # navigate to view containing analysis (name can be changed)
-            pause = AnalysisView(self)  # passes the current view to Analysis for later
-            self.final_df = self.mol_view.assay_df  # create df that can be passed to AnalysisView
+            # navigate to view containing review (name can be changed)
+            pause = ReviewView(self)  # passes the current view to Review for later
+            self.final_df = self.mol_view.assay_df  # create df that can be passed to ReviewView
             self.window.show_view(pause)
 
 
