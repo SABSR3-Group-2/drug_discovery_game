@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import time
 from rdkit import Chem
+from rdkit import RDLogger
 from rdkit.Chem.Draw import rdMolDraw2D
 from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
@@ -42,7 +43,7 @@ class MolView(arcade.View):
         # Call the parent class and set up the window
         super().__init__()
         self.feedback_view = feedback_view
-
+        RDLogger.DisableLog('rdApp.*')  # don't print warning message for hydrogen removal
         # Initial scaffold molecule
         self.scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]')  # |$;;;;;;;;;;;;R2;;;R1$|')
         self.num_vecs = self.get_num_vectors()  # get an integer value for how many vectors there are
