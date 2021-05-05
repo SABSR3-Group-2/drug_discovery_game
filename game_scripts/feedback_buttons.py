@@ -195,11 +195,6 @@ class FeedbackView(arcade.View):
         self.mol = MolChoose(atag, btag, DataSource=os.path.join('data', 'r_group_decomp.csv'))
         self.mol = self.mol.reset_index(drop=True)
 
-        # create and save image of the molecule
-        chosen_mol = Chem.MolFromSmiles(self.mol.at[0, 'mol'])
-        Chem.Draw.MolToFile(chosen_mol, os.path.join('Images', 'button_pngs', 'chosen_mol.png'),
-                            size=(300, 300), imageType=None)
-
         # make the molecule sprite using the saved image
         mol_sprite = arcade.Sprite(os.path.join('Images', 'game_loop_images',
                                                 f'scaffold{self.mol_view.round_count}.png'))
