@@ -29,7 +29,11 @@ MANIFEST
 
 # temporary images
 /Images/game_loop_images/*
-
+/Images/button_pngs/chosen_mol.png
+# temporary files
+/game_scripts/tmp_r_groups.txt
+/data/results.csv
+.idea/
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.

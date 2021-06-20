@@ -2,7 +2,7 @@ import os
 import arcade
 from combine import MolChoose
 from descriptors import get_descriptors, lipinski
-from filters import compound_check, run_filters
+from filters import run_filters
 from rdkit import Chem
 import global_vars
 from analysis import AnalysisView
@@ -257,6 +257,14 @@ class FeedbackView(arcade.View):
                          font_name=self.font,
                          color=arcade.color.BLACK)
 
+        if global_vars.balance <= 0:
+            arcade.draw_text(f"Total balance: ${global_vars.balance}",
+                             4 / 6 * SCREEN_WIDTH + 20,
+                             1 / 5 * SCREEN_HEIGHT + 40,
+                             font_size=15,
+                             font_name=self.font,
+                             color=arcade.color.DARK_CANDY_APPLE_RED)
+
         arcade.draw_text(f"Time remaining: {global_vars.time} weeks",
                          4 / 6 * SCREEN_WIDTH + 20,
                          1 / 5 * SCREEN_HEIGHT + 60,
@@ -489,9 +497,12 @@ class FeedbackView(arcade.View):
 
     def on_key_press(self, key, _modifiers):
         if key == arcade.key.LEFT:
-            # navigate back to molecule builder view
-            self.window.show_view(self.mol_view)
-            arcade.set_background_color(arcade.color.WHITE)
+            if global_vars.balance > 0:
+                # navigate back to molecule builder view
+                self.window.show_view(self.mol_view)
+                arcade.set_background_color(arcade.color.WHITE)
+            else:
+                print('no more attempts left')
 
         if key == arcade.key.RIGHT:
             # navigate to view containing analysis (name can be changed)
