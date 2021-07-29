@@ -18,15 +18,21 @@ SCREEN_TITLE = "Feedback"
 
 # button names (and costs/duration for assays)
 ASSAYS = {
-    'pic50': {'cost': 70, 'duration': 0.5},
-    'cl_mouse': {'cost': 7000, 'duration': 3},
-    'cl_human': {'cost': 9000, 'duration': 3.5},
-    'logd': {'cost': 1000, 'duration': 1.5},
-    'pampa': {'cost': 700, 'duration': 1}
+    'pic50': {'cost': 70, 'duration': 0.5, 'name': 'pIC50'},
+    'cl_mouse': {'cost': 7000, 'duration': 3, 'name': 'Clearance (mouse)'},
+    'cl_human': {'cost': 9000, 'duration': 3.5, 'name': 'Clearance (humans)'},
+    'logd': {'cost': 1000, 'duration': 1.5, 'name': 'LogD'},
+    'pampa': {'cost': 700, 'duration': 1, 'name': 'PAMPA'}
 }
 ACTIONS = ['run_assays', 'clear_choices']
 CALCULATIONS = ['calculate_descriptors', 'run_filters']
-
+DESC_NAMES = {'MW': 'Molecular weight',
+              'logP': 'LogP',
+              'TPSA': 'TPSA',
+              'HA': 'Heavy atom count',
+              'h_acc': 'Number of HBAs',
+              'h_don': 'Number of HBDs',
+              'rings': 'Number of rings'}
 
 class Button(arcade.Sprite):
     """Sprite button class"""
@@ -149,6 +155,12 @@ class FeedbackView(arcade.View):
             else:
                 self.tags[i] = t.tag
 
+        # Track which sprite we're near for displaying help
+        self.hovered = None
+        self.hover_time = 0
+        self.location = (0, 0)
+        self.display_hover = False
+
         # stores the molecule info
         self.mol = None
         self.final_df = None
@@ -198,7 +210,7 @@ class FeedbackView(arcade.View):
         # make the molecule sprite using the saved image
         mol_sprite = arcade.Sprite(os.path.join('Images', 'game_loop_images',
                                                 f'scaffold{self.mol_view.round_count}.png'))
-        mol_sprite.position = (SCREEN_WIDTH - (SCREEN_WIDTH / 6)), (SCREEN_HEIGHT - (4 / 5 * SCREEN_HEIGHT) / 2)
+        mol_sprite.position = (SCREEN_WIDTH - (SCREEN_WIDTH / 6)), (SCREEN_HEIGHT - 150)
         self.mol_sprite_list.append(mol_sprite)
 
         # make the assay buttons (at bottom of the screen)
@@ -210,8 +222,54 @@ class FeedbackView(arcade.View):
         # make the other four buttons (at top of the screen)
         for i, action in enumerate(ACTIONS + CALCULATIONS):
             action_button = Button(self.mol, action, 0.6)
-            action_button.position = (i + (i + 1)) / 12 * SCREEN_WIDTH, (SCREEN_HEIGHT - 90)
+            action_button.position = (i + (i + 1)) / 18 * SCREEN_WIDTH, (SCREEN_HEIGHT - 90)
             self.button_list.append(action_button)
+
+    def split_text(self, n_words, text):
+        """
+        Split the hover text into multiple lines so it fits on the screen.
+        """
+        words = text.split()
+        split = [words[i:i + n_words] for i in range(0, len(words), n_words)]
+        split = [" ".join(lst) for lst in split]
+        return split
+
+    def draw_hover(self):
+
+        # Specify the help texts
+        text_dict = {'pic50': '-log * IC50 (half-maximal inhibitory concentration), a measure of potency',
+                     'cl_mouse': 'This assay measures the metabolic clearance of the drug in mice',
+                     'cl_human': 'This assay measures the metabolic clearance of the drug in humans',
+                     'logd': 'LogD is a measure of lipophilicity',
+                     'pampa': 'Tests the permeability of the compound',
+                     'calculate_descriptors': 'Calculate molecular properties of the molecule',
+                     'run_filters': 'Run substructure filters on the molecule to identify promiscuous binders or toxic groups',
+                     'run_assays': 'Run selected assays. This will deduct time and money from your overall balance',
+                     'clear_choices': 'Clear selected assays'}
+
+        full_text = text_dict[self.hovered.button]  # what text to write out
+        lines = self.split_text(5, full_text)
+
+        #centre_loc = (self.hovered.position[0] + 30, self.hovered.position[1])  # where to draw it
+        if self.hovered.button != 'pampa':
+            line_locs = [(self.hovered.position[0] + 40, self.hovered.position[1] - 20 * i) for i in range(len(lines))]
+        else:
+            line_locs = [(self.hovered.position[0] - 150, self.hovered.position[1] - 20 * i) for i in range(len(lines))]
+
+        # Create the text sprite
+        for i, line in enumerate(lines):
+
+            text_sprite = arcade.draw_text(line, line_locs[i][0], line_locs[i][1], color=arcade.color.BLACK, font_size=10, font_name=self.font)
+
+            # Draw the background
+            width = text_sprite.width
+            height = text_sprite.height
+            arcade.draw_rectangle_filled(line_locs[i][0] + width * 0.5, line_locs[i][1] + height * 0.5,
+                                        width + 10, height + 10,
+                                        color=arcade.color.YELLOW)
+
+            # Draw the text
+            text_sprite.draw()
 
     def on_draw(self):
         """Render the screen"""
@@ -234,15 +292,15 @@ class FeedbackView(arcade.View):
 
         arcade.draw_text('Chosen molecule',
                          SCREEN_WIDTH - 260,
-                         0.9 * SCREEN_HEIGHT,
+                         0.93 * SCREEN_HEIGHT,
                          color=arcade.color.BLACK,
-                         font_size=20,
+                         font_size=15,
                          font_name=self.font,
                          align='center')
 
         arcade.draw_text(f"Chosen R groups: {self.mol.at[0, 'atag']}, {self.mol.at[0, 'btag']}",
                          4 / 6 * SCREEN_WIDTH + 20,
-                         1 / 5 * SCREEN_HEIGHT + 20,
+                         350,
                          font_size=15,
                          font_name=self.font,
                          color=arcade.color.BLACK)
@@ -252,7 +310,7 @@ class FeedbackView(arcade.View):
         # draw text showing remaining balance
         arcade.draw_text(f"Total balance: ${global_vars.balance}",
                          4 / 6 * SCREEN_WIDTH + 20,
-                         1 / 5 * SCREEN_HEIGHT + 40,
+                         370,
                          font_size=15,
                          font_name=self.font,
                          color=arcade.color.BLACK)
@@ -260,14 +318,14 @@ class FeedbackView(arcade.View):
         if global_vars.balance <= 0:
             arcade.draw_text(f"Total balance: ${global_vars.balance}",
                              4 / 6 * SCREEN_WIDTH + 20,
-                             1 / 5 * SCREEN_HEIGHT + 40,
+                             370,
                              font_size=15,
                              font_name=self.font,
                              color=arcade.color.DARK_CANDY_APPLE_RED)
 
         arcade.draw_text(f"Time remaining: {global_vars.time} weeks",
                          4 / 6 * SCREEN_WIDTH + 20,
-                         1 / 5 * SCREEN_HEIGHT + 60,
+                         390,
                          font_size=15,
                          font_name=self.font,
                          color=arcade.color.BLACK)
@@ -286,26 +344,39 @@ class FeedbackView(arcade.View):
                                      color=arcade.color.WHITE)
 
         arcade.draw_text('Molecule report',
-                         30,
-                         SCREEN_HEIGHT * 7 / 10 + 10,
-                         font_size=20,
+                         SCREEN_WIDTH / 3 - 100,
+                         SCREEN_HEIGHT * 3 / 4 - 10,
+                         font_size=18,
                          font_name=self.font,
                          color=arcade.color.BLACK)
 
         # draw the top command buttons
         arcade.draw_text('Commands',
-                         30,
+                         10,
                          SCREEN_HEIGHT - 50,
-                         font_size=20,
+                         font_size=15,
                          font_name=self.font,
                          color=arcade.color.WHITE)
 
         arcade.draw_text('Free calculations',
-                         1 / 3 * SCREEN_WIDTH + 30,
+                         2 / 9 * SCREEN_WIDTH + 10,
                          SCREEN_HEIGHT - 50,
-                         font_size=20,
+                         font_size=15,
                          font_name=self.font,
                          color=arcade.color.WHITE)
+
+
+        arcade.draw_rectangle_filled((5 / 9 * SCREEN_WIDTH),
+                                     (9 / 10 * SCREEN_HEIGHT),
+                                     (2 / 9 * SCREEN_WIDTH),
+                                     (1 / 5 * SCREEN_HEIGHT),
+                                     color=arcade.color.WHITE)
+
+        arcade.draw_rectangle_outline((5 / 9 * SCREEN_WIDTH),
+                                     (9 / 10 * SCREEN_HEIGHT),
+                                     (2 / 9 * SCREEN_WIDTH),
+                                     (1 / 5 * SCREEN_HEIGHT),
+                                     color=arcade.color.BLACK, border_width=5)
 
         self.button_list.draw()
 
@@ -313,31 +384,39 @@ class FeedbackView(arcade.View):
         arcade.draw_text('Assay results:',
                          30,
                          SCREEN_HEIGHT * 7 / 10 - 25,
-                         font_size=18,
+                         font_size=15,
                          font_name=self.font,
                          color=arcade.color.BLACK)
 
         for i, (assa, res) in enumerate(zip(self.assay_choices_print, self.assay_results_print)):
-            arcade.draw_text(assa,
+            arcade.draw_text(ASSAYS[assa]['name'],
                              30,
-                             SCREEN_HEIGHT - 265 - (i * 40),
+                             SCREEN_HEIGHT - 240 - (i * 20),
                              color=arcade.color.BLACK,
-                             font_size=12,
+                             font_size=10,
                              font_name=self.font)
             arcade.draw_text(res,
-                             130,
-                             SCREEN_HEIGHT - 265 - (i * 40),
+                             160,
+                             SCREEN_HEIGHT - 240 - (i * 20),
                              color=arcade.color.BLACK,
-                             font_size=12,
+                             font_size=10,
                              font_name=self.font)
+
+        # draw the top command buttons
+        arcade.draw_text('Total cost to run assays',
+                         4 / 9 * SCREEN_WIDTH + 10,
+                         SCREEN_HEIGHT - 50,
+                         font_size=15,
+                         font_name=self.font,
+                         color=arcade.color.BLACK)
 
         # draw text to record the total cost and duration
         cost_text = f"Total cost: ${self.total_cost}"
         arcade.draw_text(cost_text,
-                         30,
-                         1 / 5 * SCREEN_HEIGHT + 40,
+                         4 / 9 * SCREEN_WIDTH + 10,
+                         SCREEN_HEIGHT - 75,
                          color=arcade.color.BLACK,
-                         font_size=15,
+                         font_size=10,
                          font_name=self.font)
 
         if self.total_duration == []:
@@ -345,66 +424,101 @@ class FeedbackView(arcade.View):
         else:  # assumes assays are run in parallel (records the longest assay in the selection)
             duration_text = f"Total duration: {max(self.total_duration)} weeks"
         arcade.draw_text(duration_text,
-                         30,
-                         1 / 5 * SCREEN_HEIGHT + 20,
+                         4 / 9 * SCREEN_WIDTH + 10,
+                         SCREEN_HEIGHT - 100,
                          color=arcade.color.BLACK,
-                         font_size=15,
+                         font_size=10,
                          font_name=self.font)
 
         # draw descriptor calculations
         arcade.draw_text('Descriptors:',
                          SCREEN_WIDTH * 1 / 3 + 10,
-                         SCREEN_HEIGHT * 7 / 10 + 10,
+                         SCREEN_HEIGHT * 7 / 10 - 25,
                          color=arcade.color.BLACK,
-                         font_size=18,
+                         font_size=15,
                          font_name=self.font)
 
         for i, (desc, val) in enumerate(self.descriptor_results.items()):
-            arcade.draw_text(desc,
+            arcade.draw_text(DESC_NAMES[desc],
                              SCREEN_WIDTH * 1 / 3 + 10,
-                             SCREEN_HEIGHT - 205 - (i * 20),
+                             SCREEN_HEIGHT - 240 - (i * 20),
                              color=arcade.color.BLACK,
                              font_size=10,
                              font_name=self.font)
             arcade.draw_text(str(val),
-                             SCREEN_WIDTH * 1 / 3 + 110,
-                             SCREEN_HEIGHT - 205 - (i * 20),
-                             color=arcade.color.BLACK,
-                             font_size=10,
-                             font_name=self.font)
-        
-        # give result of Lipinski's ro5
-        if self.descriptor_results != {}:
-            ro5_v, ro5_res = lipinski(self.descriptor_results)
-            lipinski_text = f"Molecule {ro5_res} Lipinski filter ({ro5_v} rules broken)"
-            arcade.draw_text(lipinski_text,
-                             SCREEN_WIDTH * 1 / 3 + 10,
-                             SCREEN_HEIGHT - 205 - (7 * 20),
+                             SCREEN_WIDTH * 1 / 3 + 130,
+                             SCREEN_HEIGHT - 240 - (i * 20),
                              color=arcade.color.BLACK,
                              font_size=10,
                              font_name=self.font)
 
         # draw filter results
         arcade.draw_text('Filters:',
-                         SCREEN_WIDTH * 1 / 3 + 10,
-                         SCREEN_HEIGHT * 3 / 7 - 10,
+                         30,
+                         SCREEN_HEIGHT * 3 / 7 - 30,
                          color=arcade.color.BLACK,
-                         font_size=18,
+                         font_size=15,
                          font_name=self.font)
 
         for i, (filt, val) in enumerate(self.filter_results.items()):
+            if isinstance(val, list):
+                val = ', '.join(val)
+                val = val.replace('_', ' ').replace('[', '').replace(']', '')
             arcade.draw_text(filt,
-                             SCREEN_WIDTH * 1 / 3 + 10,
-                             SCREEN_HEIGHT / 2 - 80 - i * 20,
+                             30,
+                             SCREEN_HEIGHT / 2 - 100 - i * 20,
                              color=arcade.color.BLACK,
                              font_size=10,
                              font_name=self.font)
             arcade.draw_text(str(val),
-                             SCREEN_WIDTH * 1 / 3 + 110,
-                             SCREEN_HEIGHT / 2 - 80 - i * 20,
+                             160,
+                             SCREEN_HEIGHT / 2 - 100 - i * 20,
                              color=arcade.color.BLACK,
                              font_size=10,
                              font_name=self.font)
+
+        # give result of Lipinski's ro5
+        if self.descriptor_results != {}:
+            ro5_v, ro5_res = lipinski(self.descriptor_results)
+            lipinski_text = f"Molecule {ro5_res} Lipinski filter ({ro5_v} rules broken)"
+            arcade.draw_text(lipinski_text,
+                             30,
+                             SCREEN_HEIGHT / 2 - 100 - 4 * 20,
+                             color=arcade.color.BLACK,
+                             font_size=10,
+                             font_name=self.font)
+
+        instructions = ['Welcome to the feedback screen. Here you',
+                        'can run assays on your chosen molecule,',
+                        'calculate descriptors and run substructure',
+                        'filters. Press the R key to see a summary of',
+                        'all molecules made so far.']
+
+        for i, t in enumerate(instructions):
+            arcade.draw_text(t, 4 / 6 * SCREEN_WIDTH + 20, SCREEN_HEIGHT * 2 / 5 - (i + 1) * 20, color=arcade.color.BLACK, font_name=self.font)
+
+        # Draw hover text
+        if self.display_hover:
+            self.draw_hover()
+
+    def on_update(self, delta_time: float):
+        """Checks to see if the user is hovering over a sprite looking for help"""
+        # Specify which sprites have help text
+
+        hovered = arcade.get_sprites_at_point(self.location, self.button_list)
+        self.display_hover = False
+        if len(hovered) == 1:
+            if self.hovered != hovered[-1]:  # if hovering over something new
+                self.hovered = hovered[-1]  # store the sprite that's being hovered over
+                self.hover_time = 0
+            else:
+                self.hover_time += delta_time
+            if self.hover_time > 1:
+                self.display_hover = True  # feeds back into on_draw()
+
+    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
+        """Update mouse location"""
+        self.location = (x, y)
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
