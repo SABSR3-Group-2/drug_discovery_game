@@ -1,5 +1,6 @@
 from select_mols import *
 import os
+import pandas as pd
 
 
 def preprocess(raw_data, scaffold):
@@ -9,3 +10,5 @@ def preprocess(raw_data, scaffold):
     processed_data_df = read_mols(raw_data, scaffold)
     print('Finished preprocessing')
     print(processed_data_df.shape)
+    print(f'Saving processed data to file: {raw_data}_processed')
+    processed_data_df.to_csv(f'{raw_data}_processed', encoding='utf-8', index=False)
