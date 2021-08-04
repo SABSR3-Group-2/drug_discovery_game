@@ -7,9 +7,13 @@ import pandas as pd
 from combine import MolChoose
 from rdkit import Chem
 from rdkit.Chem import Draw
-import os
-from end_game_screen import EndView
 from math import isnan
+from matplotlib import pyplot as plt
+import os
+from os import listdir
+from os.path import isfile, join
+from end_game_screen import EndView
+
 
 
 SCREEN_WIDTH = 1000
@@ -164,6 +168,9 @@ class AnalysisView(arcade.View):
         self.mat_list = None  # stores the 'mats' (rectangle representing outside of the card)
         self.text_list = []  # stores the text information for each card (generated with the Card class)
 
+        arcade.set_background_color(arcade.color.WHITE)
+
+        ### GRAPH Init ###
         # stores graphs
         self.graph_list = None
         # store graph related buttons
@@ -171,13 +178,14 @@ class AnalysisView(arcade.View):
         self.axisToggleButton_list = None
 
         # basic graph properties
+        self.buttonscale = 0.4
         self.currentx = "pic50"
         self.currenty = "logP"
         self.axisselectmode = "x"
+        self.properties = ["logP", "pic50", "cl_mouse", "cl_human", "logd", "pampa", "MW", "logP", "TPSA", "HA", "h_acc", "h_don", "rings"]
 
         
-
-        arcade.set_background_color(arcade.color.WHITE)
+        ### Cards Init ##
 
         # Make relative units for responsive design
         self.vw = int(MENU_WIDTH / 4)  # relative width
@@ -199,9 +207,14 @@ class AnalysisView(arcade.View):
         self.setup()
 
     def setup(self):
+        self.setupCards()
+        self.setupGraph()
+
+    def setupCards(self):
         """
         This function sets up the view, call it to restart.
         """
+        ### Card Setup ###
         # create the end button
         self.button_list = arcade.SpriteList()
         end_button = arcade.Sprite(f'Images/button_pngs/end_game_blue.png', 0.5)
@@ -263,6 +276,172 @@ class AnalysisView(arcade.View):
         for (index, row), coord in zip(self.feedback_view.final_df.iterrows(), mol_coordinate_list):
             cardtext = Card(coord, row['atag'], row['btag'], row['pic50'], row['cl_mouse'], row['cl_human'], row['logd'], row['pampa'])
             self.text_list.append(cardtext)
+
+    def setupGraph(self):
+        ### Graph Setup ###
+        """
+        This function sets up the view, call it to restart.
+        """
+        # # create end button
+        # self.end_button_list = arcade.SpriteList()
+        # end_button = arcade.Sprite(os.path.join("Images","button_pngs","end_game_blue.png"), 0.5)
+        # end_button.position = SCREEN_WIDTH - 50, 30
+        # end_button.name = 'end'
+        # self.end_button_list.append(end_button)
+
+
+        #create graph
+        self.cleartempgraphs()
+        print("debug a: "+str(self.feedback_view.final_df))
+        print("debug a: "+str(self.final_df))
+        self.working_graph = ReviewGraph(self.feedback_view.final_df)
+
+        self.graph_list = arcade.SpriteList()
+        main_graph = arcade.Sprite(os.path.join('Images','review','maingraph.png'))
+        main_graph.position = (SCREEN_WIDTH-(SCREEN_WIDTH/3))/2+(SCREEN_WIDTH/3)-(SCREEN_WIDTH/20), (SCREEN_HEIGHT*0.4)
+        main_graph.name = 'maingraph'
+        self.graph_list.append(main_graph)
+
+        
+        
+        buttonson = True
+                
+
+
+        if buttonson == True:
+            #create axis buttons
+            self.axisbutton_list = arcade.SpriteList()
+            buttonheight = 115*self.buttonscale
+            buttonwidth = 85*self.buttonscale
+            self.mat_list = arcade.SpriteList()
+
+            # setup button collumns
+            numcolls = 7
+            colproperties = []
+            for col in range(numcolls):
+                colproperties.append([])
+
+            for j in range(len(self.properties)):
+                colproperties[j%numcolls].append(self.properties[j])
+            
+            maxlen = []
+            for col in colproperties:
+                maxlen.append(len(col))
+            maxlen = max(maxlen)
+
+            for col in range(numcolls):
+                i = 0
+
+                if numcolls == 2:
+                    if col == 0:
+                        colmodifer = -2.25*buttonwidth
+                    else:
+                        colmodifer = 2.25*buttonwidth
+                
+                if numcolls == 3:
+                    if col == 0:
+                        colmodifer = -2*buttonwidth
+                    elif col == 1:
+                        colmodifer = 0
+                    else:
+                        colmodifer = 2*buttonwidth
+
+                
+                if numcolls == 5:
+                    if col == 0:
+                        colmodifer = -5*buttonwidth
+                    elif col == 1:
+                        colmodifer = -2.5*buttonwidth
+                    elif col == 2:
+                        colmodifer = 0
+                    elif col == 3:
+                        colmodifer = 2.5*buttonwidth
+                    else:
+                        colmodifer = 5*buttonwidth
+
+                if numcolls == 6:
+                    if col == 0:
+                        colmodifer = -5*buttonwidth
+                    elif col == 1:
+                        colmodifer = -2.5*buttonwidth
+                    elif col == 2:
+                        colmodifer = 0
+                    elif col == 3:
+                        colmodifer = 2.5*buttonwidth
+                    elif col == 4:
+                        colmodifer = 2.5*buttonwidth
+                    else:
+                        colmodifer = 5*buttonwidth
+
+                if numcolls == 7:
+                    if col == 0:
+                        colmodifer = -6*buttonwidth
+                    elif col == 1:
+                        colmodifer = -4*buttonwidth
+                    elif col == 2:
+                        colmodifer = -2*buttonwidth
+                    elif col == 3:
+                        colmodifer = 0
+                    elif col == 4:
+                        colmodifer = 2*buttonwidth
+                    elif col == 5:
+                        colmodifer = 4*buttonwidth
+                    else:
+                        colmodifer = 6*buttonwidth
+
+
+                for pair in colproperties[col]:
+                    hcenter = SCREEN_HEIGHT - ((maxlen* buttonheight) - (i*buttonheight) - 0.5*buttonheight)
+                    for side in ["x", "y"]:
+                        wcenter = (SCREEN_WIDTH-(SCREEN_WIDTH/3)-1.5*buttonwidth) - buttonwidth + colmodifer
+                        property_button = axisButton(pair, self.working_graph, self.buttonscale)
+                        property_button.position = wcenter, hcenter
+                        self.axisbutton_list.append(property_button)
+                        mat_sprite = arcade.SpriteSolidColor(width = int(buttonwidth), height = int(buttonheight), color=arcade.color.LIGHT_BLUE)
+                        mat_sprite.position = wcenter,hcenter
+                        mat_sprite.value = pair
+                        mat_sprite.side = side
+                        mat_sprite.equivalant = property_button
+                        self.mat_list.append(mat_sprite)
+                    i += 1
+
+        if buttonson == True:
+
+            if numcolls == 2:
+                colmodifer = -2.25*buttonwidthh
+            if numcolls == 3:
+                colmodifer = -5*buttonwidth
+            if numcolls == 7:
+                colmodifer == 9*buttonwidth
+
+            self.axisToggleButton_list = arcade.SpriteList()
+            self.xymat_list = arcade.SpriteList()
+            hcenter = SCREEN_HEIGHT - (1.5*buttonheight) #(maxlen* buttonheight) + (1* buttonheight) - (0.5*buttonheight)
+            for side in ['x','y']:
+                self.toggle_button = None
+                if side == "x":
+                    wcenter = (SCREEN_WIDTH-(SCREEN_WIDTH/3))/2+(SCREEN_WIDTH*0.32) - buttonwidth + colmodifer + 2.25*buttonwidth
+                    state = "on"
+                elif side == "y":
+                    wcenter = (SCREEN_WIDTH-(SCREEN_WIDTH/3))/2+(SCREEN_WIDTH*0.32) + buttonwidth + colmodifer + 2.25*buttonwidth
+                    state = "off"
+                self.toggle_button = xyToggleButton(side, state, self.buttonscale)
+                self.toggle_button.position = wcenter, hcenter
+                self.axisToggleButton_list.append(self.toggle_button)
+                togmat_sprite = arcade.SpriteSolidColor(width = int(buttonwidth), height = int(buttonheight), color=arcade.color.LIGHT_BLUE)
+                togmat_sprite.position = wcenter,hcenter
+                togmat_sprite.side = side
+                togmat_sprite.equivalant = self.toggle_button
+                self.xymat_list.append(togmat_sprite)
+
+    def cleartempgraphs(self):
+        tempdir = os.path.join('Images', 'temp')
+        filestorm = [join(tempdir, f) for f in listdir(tempdir) if (isfile(join(tempdir, f)) and f.startswith("TempGraph") and f.endswith(".png"))]
+        for filetorm in filestorm:
+            if os.path.exists(filetorm):
+                os.remove(filetorm)
+
+
 
     def make_coordinates(self, n_sprites):
         """
@@ -379,18 +558,32 @@ class AnalysisView(arcade.View):
         # draw the button sprites
         self.button_list.draw()
 
+
+        # draw graph
+        #         
+        #draw axis buttons
+        self.axisbutton_list.draw()
+        #draw axis toggle buttons
+        self.axisToggleButton_list.draw()
+
+        #draw main graph
+    
+        self.graph_list[-1].draw()
+
+
     def on_mouse_press(self, x, y, button, modifiers):
         """
         Called when the user presses a mouse button. Used for determining what happens
         when the user clicks on a button.
         """
         # check if the user has clicked on a card
-        clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
-        if len(clicked) > 0:  # checks a button has been clicked
-            [b._set_color(arcade.color.WHITE) for b in self.mat_list]
-            choice = clicked[0]
-            choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
-            self.mol_choice = [choice.atag, choice.btag]  # record the tags of the chosen molecule
+        if x < SCREEN_WIDTH/3:
+            clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
+            if len(clicked) > 0:  # checks a button has been clicked
+                [b._set_color(arcade.color.WHITE) for b in self.mat_list]
+                choice = clicked[0]
+                choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
+                self.mol_choice = [choice.atag, choice.btag]  # record the tags of the chosen molecule
 
         # check if the user has clicked on a button
         clicked = arcade.get_sprites_at_point((x, y), self.button_list)
@@ -457,9 +650,49 @@ class AnalysisView(arcade.View):
                     # show the feedback view
                     self.window.show_view(self.feedback_view)
                     arcade.set_background_color(arcade.color.OXFORD_BLUE)
+   
+        #check axis buttons
+        clickedxytoggle = arcade.get_sprites_at_point((x, y), self.xymat_list)
+        if len(clickedxytoggle) > 0:  # checks a button has been clicked
+            #[b._set_color(arcade.color.WHITE) for b in self.xymat_list]
+            xychoice = clickedxytoggle[0]
+            for option in self.axisToggleButton_list:
+                option.toggle()
+            xychoice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
+            xyside = xychoice.equivalant.side
+            xystate = xychoice.equivalant.state
+            if xyside == "x":
+                if xystate == "on":
+                    self.axisselectmode = "x"
+                if xystate == "off":
+                    self.axisselectmode = "y"
+            elif xyside == "y":
+                if xystate == "on":
+                    self.axisselectmode = "y"
+                if xystate == "off":
+                    self.axisselectmode = "x"
+            
+
+        #check axis buttons
+        clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
+        if len(clicked) > 0:  # checks a button has been clicked
+            [b._set_color(arcade.color.WHITE) for b in self.mat_list]
+            choice = clicked[0]
+            choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
+            choiceresult = choice.equivalant.chooseproperty()
+            if self.axisselectmode == "x":
+                self.currentx = choiceresult[1]
+            elif self.axisselectmode == "y":
+                self.currenty = choiceresult[1]
+
+            self.plot("scatter")
+
 
     def on_key_press(self, symbol: int, modifiers: int):
         """ User presses key """
+        if symbol == arcade.key.SPACE:
+            self.plot("scatter")
+
         if symbol == arcade.key.LEFT:
             self.window.show_view(self.feedback_view)
             arcade.set_background_color(arcade.color.OXFORD_BLUE)
@@ -483,6 +716,98 @@ class AnalysisView(arcade.View):
             c.y_pampa += scroll_y
 
         self.view_top += scroll_y
+    
+
+    def plot(self, plottype):
+
+        self.working_graph = ReviewGraph(self.feedback_view.final_df)
+        print(f">>>>>>>>>>>>>>>>> {self.feedback_view.final_df}")
+        self.graph_list = arcade.SpriteList()
+        if plottype == "scatter":
+            returnpath = self.working_graph.scatter([self.currentx,self.currenty,"tags"])
+            main_graph = arcade.Sprite(returnpath)
+            main_graph.position = (SCREEN_WIDTH-(SCREEN_WIDTH/3))/2+(SCREEN_WIDTH/3)-(SCREEN_WIDTH/20), (SCREEN_HEIGHT*0.4)
+            main_graph.name = 'main graph'
+            self.graph_list.append(main_graph)
+            self.graph_list
+
+class axisButton(arcade.Sprite):
+    """Sprite axis button class"""
+
+    def __init__(self, option, graph, scale=0.5):
+        # hold the button name and image
+        self.button = option
+        self.side = "x" #remove this line
+        self.image_file_name = os.path.join('Images', 'axisbuttons', f'{self.button}.png')
+        self.linkedgraph = graph
+
+        # call the parent class
+        super().__init__(self.image_file_name, scale)
+
+    def chooseproperty(self):
+        """
+        :Returns the assay result when an assay button is clicked.
+        :return: assay result for the chosen molecule
+        :rtype: string
+        """
+        print("activating "+str(self.button)+" for "+str(self.side)+" axis")
+        # retrieves the appropriate column name
+        if self.side == "x":
+            return(['x',self.button])
+        elif self.side == "y":
+            return(['y',self.button])
+        else:
+            return str(['',self.button])
+
+class xyToggleButton(arcade.Sprite):
+    def __init__(self, side, state='off', scale=0.5):
+        
+        # Set up parent class
+        super().__init__(scale=scale)
+        
+        
+        self.side = side
+        self.usrscale = scale
+        self.state = state
+
+
+
+        # Load Textures        
+        self.image_file_folder = os.path.join('Images', 'axisbuttons', f'{self.side}')
+
+        #Load textures
+        self.texture_off = arcade.load_texture(os.path.join(self.image_file_folder, f'{self.side}_off.png') )
+        self.texture_on =  arcade.load_texture( os.path.join(self.image_file_folder, f'{self.side}_on.png') )
+
+
+        if state == "on":
+            self.texture = self.texture_on
+        elif state == "off":
+            self.texture = self.texture_off
+
+    def toggle(self):
+        """
+        :Returns the assay result when an assay button is clicked.
+        :return: assay result for the chosen molecule
+        :rtype: string
+        """
+        if self.state == 'on':
+            self.state = 'off'
+        elif self.state == 'off':
+            self.state = 'on'
+        #self.image_file_name = os.path.join('Images', 'axisbuttons', f'{self.side}_{self.state}.png') 
+        self.update(self.state)
+        #return([self.side, self.state, self.image_file_name])
+    
+    def update(self, state=None):
+        if state == None:
+            state = self.state
+
+        if state == "on":
+            self.texture = self.texture_on
+        elif state == "off":
+            self.texture = self.texture_off
+
 
 def main():
     """ Main method """
