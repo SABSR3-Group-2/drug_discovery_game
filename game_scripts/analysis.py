@@ -71,6 +71,7 @@ class AnalysisView(arcade.View):
         self.mol_list = None  # stores the mol sprites (the molecule images on the cards)
         self.mat_list = None  # stores the 'mats' (rectangle representing outside of the card)
         self.text_list = []  # stores the text information for each card (generated with the Card class)
+        self.graphs_list = None
 
         arcade.set_background_color(arcade.color.WHITE)
 
@@ -97,24 +98,29 @@ class AnalysisView(arcade.View):
         """
         This function sets up the view, call it to restart.
         """
-        # create the end button
         self.button_list = arcade.SpriteList()
-        end_button = arcade.Sprite(f'Images/button_pngs/end_game_blue.png', 0.5)
-        end_button.position = SCREEN_WIDTH - 70, 50
-        end_button.name = 'end'
-        self.button_list.append(end_button)
-
         # create a button to allow user to explore a chosen molecule in the molecule_buidler
         builder_button = arcade.Sprite(f'Images/button_pngs/mol_builder.png', 0.5)
-        builder_button.position = 50, SCREEN_HEIGHT - 70
+        builder_button.position = (MENU_WIDTH * 1/6), SCREEN_HEIGHT - 70
         builder_button.name = 'builder'
         self.button_list.append(builder_button)
 
         # create a button to allow the user to run more assays on a chosen molecule in feedback_buttons
         assays_button = arcade.Sprite(f'Images/button_pngs/run_assays.png', 0.5)
-        assays_button.position = 150, SCREEN_HEIGHT - 70
+        assays_button.position = (MENU_WIDTH * 3/6), SCREEN_HEIGHT - 70
         assays_button.name = 'assays'
         self.button_list.append(assays_button)
+
+        # create the final mol button
+        final_button = arcade.Sprite(f'Images/button_pngs/final_choice.png', 0.226)
+        final_button.position = (MENU_WIDTH * 5/6), SCREEN_HEIGHT - 70
+        final_button.name = 'final'
+        self.button_list.append(final_button)
+
+        self.graphs_list = arcade.SpriteList()
+        graph = arcade.Sprite((f'Images/graphs.png'))
+        graph.position = 2/3 * SCREEN_WIDTH, SCREEN_HEIGHT / 2
+        self.graphs_list.append(graph)
 
         # create the molecule sprites for the cards
         self.mol_list = arcade.SpriteList()
@@ -196,9 +202,16 @@ class AnalysisView(arcade.View):
         """
         arcade.start_render()
 
+        arcade.draw_rectangle_filled(SCREEN_WIDTH * 2/3,
+                                SCREEN_HEIGHT / 2,
+                                SCREEN_WIDTH * 2/3,
+                                SCREEN_HEIGHT,
+                                color=arcade.color.OXFORD_BLUE)
+
         # draw the sprites needed for the cards
         self.mat_list.draw()
         self.mol_list.draw()
+        self.graphs_list.draw()
 
         # draw the text that goes on the cards
         for c in self.text_list:
@@ -252,13 +265,16 @@ class AnalysisView(arcade.View):
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
 
-        arcade.draw_text('Select a molecule to investigate further',
-                        15,
-                        SCREEN_HEIGHT - 25,
-                        color=arcade.color.WHITE,
-                        font_size=10,
-                        font_name=self.font,
-                        align='center')
+        help_text = ["Select a molecule to investigate further or choose",
+                     "your favourite molecule and end the game."]
+        for i, line in enumerate(help_text):
+            arcade.draw_text(line,
+                            15,
+                            SCREEN_HEIGHT - 25 - i * 15,
+                            color=arcade.color.WHITE,
+                            font_size=10,
+                            font_name=self.font,
+                            align='center')
 
         # draw the button sprites
         self.button_list.draw()
@@ -279,11 +295,11 @@ class AnalysisView(arcade.View):
         # check if the user has clicked on a button
         clicked = arcade.get_sprites_at_point((x, y), self.button_list)
         if len(clicked) > 0:  # checks a button has been clicked
-            # if end button clicked, csv file created and window closed
-            if clicked[0].name == 'end':
+            # if final choice button clicked, csv file created and end page shown
+            if clicked[0].name == 'final':
                 self.feedback_view.final_df.to_csv('data/results.csv', index=False)
-                end_view = EndView(self.feedback_view.mol_view)  # create end view and pass mol builder view
-                self.window.show_view(end_view)
+                pause = EndView(self)  # passes the current view to Analysis for later
+                self.window.show_view(pause)
 
             # if the molecule builder button is clicked, the chosen molecule tags are passed to self.feedback_view.mol_view
             elif clicked[0].name == 'builder':

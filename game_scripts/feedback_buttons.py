@@ -237,13 +237,13 @@ class FeedbackView(arcade.View):
     def draw_hover(self):
 
         # Specify the help texts
-        text_dict = {'pic50': '-log * IC50 (half-maximal inhibitory concentration), a measure of potency',
+        text_dict = {'pic50': 'pIC50 represents the negative log of the IC50 (half-maximal inhibitory concentration), a measure of potency',
                      'cl_mouse': 'This assay measures the metabolic clearance of the drug in mice',
                      'cl_human': 'This assay measures the metabolic clearance of the drug in humans',
-                     'logd': 'LogD is a measure of lipophilicity',
-                     'pampa': 'Tests the permeability of the compound',
+                     'logd': 'LogD represents the distribution coefficient used to measure lipophilicity',
+                     'pampa': 'This assay measures the permeability of the compounds (parallel artificial membrane permeability assay)',
                      'calculate_descriptors': 'Calculate molecular properties of the molecule',
-                     'run_filters': 'Run substructure filters on the molecule to identify promiscuous binders or toxic groups',
+                     'run_filters': 'Run substructure filters (PAINS, NIH, BRENK, ZINC) on the molecule to identify compounds that may result in false positives',
                      'run_assays': 'Run selected assays. This will deduct time and money from your overall balance',
                      'clear_choices': 'Clear selected assays'}
 
@@ -300,7 +300,7 @@ class FeedbackView(arcade.View):
 
         arcade.draw_text(f"Chosen R groups: {self.mol.at[0, 'atag']}, {self.mol.at[0, 'btag']}",
                          4 / 6 * SCREEN_WIDTH + 20,
-                         350,
+                         390,
                          font_size=15,
                          font_name=self.font,
                          color=arcade.color.BLACK)
@@ -310,7 +310,7 @@ class FeedbackView(arcade.View):
         # draw text showing remaining balance
         arcade.draw_text(f"Total balance: ${global_vars.balance}",
                          4 / 6 * SCREEN_WIDTH + 20,
-                         370,
+                         360,
                          font_size=15,
                          font_name=self.font,
                          color=arcade.color.BLACK)
@@ -318,14 +318,14 @@ class FeedbackView(arcade.View):
         if global_vars.balance <= 0:
             arcade.draw_text(f"Total balance: ${global_vars.balance}",
                              4 / 6 * SCREEN_WIDTH + 20,
-                             370,
+                             360,
                              font_size=15,
                              font_name=self.font,
                              color=arcade.color.DARK_CANDY_APPLE_RED)
 
         arcade.draw_text(f"Time remaining: {global_vars.time} weeks",
                          4 / 6 * SCREEN_WIDTH + 20,
-                         390,
+                         330,
                          font_size=15,
                          font_name=self.font,
                          color=arcade.color.BLACK)
@@ -366,17 +366,17 @@ class FeedbackView(arcade.View):
                          color=arcade.color.WHITE)
 
 
-        arcade.draw_rectangle_filled((5 / 9 * SCREEN_WIDTH),
-                                     (9 / 10 * SCREEN_HEIGHT),
-                                     (2 / 9 * SCREEN_WIDTH),
-                                     (1 / 5 * SCREEN_HEIGHT),
-                                     color=arcade.color.WHITE)
+        # arcade.draw_rectangle_filled((5 / 9 * SCREEN_WIDTH),
+        #                              (9 / 10 * SCREEN_HEIGHT),
+        #                              (2 / 9 * SCREEN_WIDTH),
+        #                              (1 / 5 * SCREEN_HEIGHT),
+        #                              color=arcade.color.WHITE)
 
-        arcade.draw_rectangle_outline((5 / 9 * SCREEN_WIDTH),
-                                     (9 / 10 * SCREEN_HEIGHT),
-                                     (2 / 9 * SCREEN_WIDTH),
-                                     (1 / 5 * SCREEN_HEIGHT),
-                                     color=arcade.color.BLACK, border_width=5)
+        # arcade.draw_rectangle_outline((5 / 9 * SCREEN_WIDTH),
+        #                              (9 / 10 * SCREEN_HEIGHT),
+        #                              (2 / 9 * SCREEN_WIDTH),
+        #                              (1 / 5 * SCREEN_HEIGHT),
+        #                              color=arcade.color.BLACK, border_width=5)
 
         self.button_list.draw()
 
@@ -408,14 +408,14 @@ class FeedbackView(arcade.View):
                          SCREEN_HEIGHT - 50,
                          font_size=15,
                          font_name=self.font,
-                         color=arcade.color.BLACK)
+                         color=arcade.color.WHITE)
 
         # draw text to record the total cost and duration
         cost_text = f"Total cost: ${self.total_cost}"
         arcade.draw_text(cost_text,
                          4 / 9 * SCREEN_WIDTH + 10,
                          SCREEN_HEIGHT - 75,
-                         color=arcade.color.BLACK,
+                         color=arcade.color.WHITE,
                          font_size=10,
                          font_name=self.font)
 
@@ -426,7 +426,7 @@ class FeedbackView(arcade.View):
         arcade.draw_text(duration_text,
                          4 / 9 * SCREEN_WIDTH + 10,
                          SCREEN_HEIGHT - 100,
-                         color=arcade.color.BLACK,
+                         color=arcade.color.WHITE,
                          font_size=10,
                          font_name=self.font)
 
@@ -491,11 +491,14 @@ class FeedbackView(arcade.View):
         instructions = ['Welcome to the feedback screen. Here you',
                         'can run assays on your chosen molecule,',
                         'calculate descriptors and run substructure',
-                        'filters. Press the R key to see a summary of',
-                        'all molecules made so far.']
+                        'filters. Running assays costs time and money,',
+                        'which will be deducted from your total bal-',
+                        'ance above. Press the R key to see a summ-',
+                        'mary of all molecules made so far, or press',
+                        'the L key to return to the molecule builder.']
 
         for i, t in enumerate(instructions):
-            arcade.draw_text(t, 4 / 6 * SCREEN_WIDTH + 20, SCREEN_HEIGHT * 2 / 5 - (i + 1) * 20, color=arcade.color.BLACK, font_name=self.font)
+            arcade.draw_text(t, 4 / 6 * SCREEN_WIDTH + 20, 320 - (i + 1) * 20, color=arcade.color.BLACK, font_name=self.font)
 
         # Draw hover text
         if self.display_hover:
