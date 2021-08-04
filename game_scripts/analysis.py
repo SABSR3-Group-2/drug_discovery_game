@@ -29,9 +29,8 @@ class Card():
     def __init__(self, card_coordinates, atag, btag, pic50=None, cl_mouse=None, cl_human=None, logd=None, pampa=None):
         cleaned_input = []
         for assay_value in [pic50, cl_mouse, cl_human, logd, pampa]:
-            print(f"{assay_value} is {type(assay_value)}")
-            if assay_value == None:
-                cleaned_input.append("No Data")
+            if type(assay_value) == str:
+                cleaned_input.append(assay_value)
             elif isnan(float(assay_value)):
                 cleaned_input.append("Not Tested")
             else:
@@ -45,27 +44,22 @@ class Card():
         self.y_tag = card_coordinates[1] + 35
         self.tag_text = f"{self.atag}, {self.btag}"
 
-        #self.pic50 = pic50
         self.x_pic50 = card_coordinates[0] - 70
         self.y_pic50 = card_coordinates[1] - 60
         self.pic50_text = f"pIC50: {self.pic50}"
 
-        #self.cl_mouse = cl_mouse
         self.x_cl_mouse = card_coordinates[0] - 70
         self.y_cl_mouse = card_coordinates[1] - 80
         self.cl_mouse_text = f"Cl (mouse): {self.cl_mouse}"
 
-        #self.cl_human = cl_human
         self.x_cl_human = card_coordinates[0] - 70
         self.y_cl_human = card_coordinates[1] - 100
         self.cl_human_text = f"Cl (human): {self.cl_human}"
 
-        #self.logd = logd
         self.x_logd = card_coordinates[0] - 70
         self.y_logd = card_coordinates[1] - 120
         self.logd_text = f"LogD: {self.logd}"
 
-        #self.pampa = pampa
         self.x_pampa = card_coordinates[0] - 70
         self.y_pampa = card_coordinates[1] - 140
         self.pampa_text = f"PAMPA: {self.pampa}"
@@ -156,18 +150,32 @@ class ReviewGraph():
 
 class AnalysisView(arcade.View):
     """
-    Main view class
+    Analysis view class
     """
 
     def __init__(self, feedback_view=None):
         super().__init__()
         self.feedback_view = feedback_view
+        self.final_df = feedback_view.final_df
         self.button_list = None
 
         # stores the components of the 'cards'
         self.mol_list = None  # stores the mol sprites (the molecule images on the cards)
         self.mat_list = None  # stores the 'mats' (rectangle representing outside of the card)
         self.text_list = []  # stores the text information for each card (generated with the Card class)
+
+        # stores graphs
+        self.graph_list = None
+        # store graph related buttons
+        self.axisbutton_list = None
+        self.axisToggleButton_list = None
+
+        # basic graph properties
+        self.currentx = "pic50"
+        self.currenty = "logP"
+        self.axisselectmode = "x"
+
+        
 
         arcade.set_background_color(arcade.color.WHITE)
 
@@ -343,11 +351,22 @@ class AnalysisView(arcade.View):
                         align='center')
 
         # draw the menu bar
-        arcade.draw_rectangle_filled(MENU_WIDTH / 2,
+        arcade.draw_rectangle_filled(SCREEN_WIDTH/2,
                                      SCREEN_HEIGHT,
-                                     MENU_WIDTH,
+                                     SCREEN_WIDTH,
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
+        
+        arcade.draw_line(SCREEN_WIDTH/3,
+                         SCREEN_HEIGHT,
+                         SCREEN_WIDTH/3,
+                         SCREEN_HEIGHT - (self.vh/2),
+                         color=arcade.color.WHITE)
+        arcade.draw_line(SCREEN_WIDTH/3,
+                         SCREEN_HEIGHT - (self.vh/2),
+                         SCREEN_WIDTH/3,
+                         0,
+                         color=arcade.color.OXFORD_BLUE)
 
         arcade.draw_text('Select a molecule to investigate further',
                         15,
