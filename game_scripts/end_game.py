@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import arcade
 from game_scripts.combine import MolChoose
 from game_scripts.descriptors import get_descriptors
@@ -18,11 +19,14 @@ SCREEN_HEIGHT = 650
 SCREEN_TITLE = "The Final Selection"
 
 CARD_WIDTH = 250
-CARD_HEIGHT = 400
+CARD_HEIGHT = 200
 MAT_WIDTH = 250
 MAT_HEIGHT = 650
 
-
+#Constants for spider plot
+labels=['pIC50', 'logP', 'logD', 'H_acceptors', 'H_donors']
+markers = [0, 1, 2, 3, 4, 5]
+str_markers = ["0", "1", "2", "3", "4", "5"]
 
 class EndGame(arcade.View):
     """
@@ -40,6 +44,7 @@ class EndGame(arcade.View):
         self.numberline = None
         self.target_sprite = None
         self.text_list = []
+        self.radarplot = None
 
         # stores the path to the font file
         self.font = os.path.join('fonts', 'arial.ttf')
@@ -48,6 +53,28 @@ class EndGame(arcade.View):
         arcade.set_background_color(arcade.color.WHITE)
 
         self.setup()
+
+    def make_radar_chart(self, stats, attribute_labels = labels, plot_markers = markers, plot_str_markers = str_markers):
+
+        labels = np.array(attribute_labels)
+
+        angles = np.linspace(0, 2*np.pi, len(labels), endpoint=False)
+        #The below concatenations are needed to ensure that the input lists have the same lengths, in the final product the last entry in the list must be the same as the first
+        stats = np.concatenate((stats,[stats[0]]))
+        angles = np.concatenate((angles,[angles[0]]))
+
+        fig= plt.figure(figsize=(3,3))
+        ax = fig.add_subplot(111, polar=True)
+        ax.plot(angles, stats, 'o-', linewidth=2)
+        ax.fill(angles, stats, alpha=0.25)
+        ax.set_thetagrids(angles[:-1] * 180/np.pi, labels)
+        plt.yticks(markers)
+        ax.grid(True)
+
+        fig.savefig('Images/game_loop_images/spider_plot.png', transparent=True)
+
+        return
+
 
     def make_numberline(self, mol_info):
         #Generate number-line of pIC50's for comparison with final plot
@@ -100,11 +127,11 @@ class EndGame(arcade.View):
         self.mat_list = arcade.SpriteList()
 
         left_mat = arcade.SpriteSolidColor(CARD_WIDTH, CARD_HEIGHT, arcade.color.LIGHT_BLUE)
-        left_mat.position = 350, 400
+        left_mat.position = 350, 500
         self.mat_list.append(left_mat)
 
         right_mat = arcade.SpriteSolidColor(CARD_WIDTH, CARD_HEIGHT, arcade.color.LIGHT_BLUE)
-        right_mat.position = 650, 400
+        right_mat.position = 650, 500
         self.mat_list.append(right_mat)
 
         #Generate sprite for the molecule actually chosen
@@ -136,13 +163,20 @@ class EndGame(arcade.View):
         
 
         #Generate numberline for pIC50
-        self.make_numberline(mol_info)
-        self.numberline = arcade.Sprite('Images/game_loop_images/pic50_line.png')
-        self.numberline.position = (550, 140)
-        self.card_list.append(self.numberline)
-        pic50 = mol_info.at[0, 'pic50']
+        #self.make_numberline(mol_info)
+        #self.numberline = arcade.Sprite('Images/game_loop_images/pic50_line.png')
+        #self.numberline.position = (550, 140)
+        #self.card_list.append(self.numberline)
+        
+
+        #Generate spider plot
+        self.make_radar_chart(stats=[2,3,4,4,5])
+        self.radarplot = arcade.Sprite('Images/game_loop_images/spider_plot.png')
+        self.radarplot.position = (480, 250)
+        self.card_list.append(self.radarplot)
 
         #generate text list
+        pic50 = mol_info.at[0, 'pic50']
         self.text_list = ['pIC50: {}'.format(pic50), 'pIC50: 7.7']
 
     def on_draw(self):
