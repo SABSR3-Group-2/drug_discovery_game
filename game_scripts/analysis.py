@@ -577,19 +577,22 @@ class AnalysisView(arcade.View):
         when the user clicks on a button.
         """
         # check if the user has clicked on a card
-        if x < SCREEN_WIDTH/3:
+        if x < SCREEN_WIDTH/3 and y < SCREEN_HEIGHT-(self.vh/2):
+            print(f">>>>>>DEBUG>>>>>>> card area clicked")
             clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
             if len(clicked) > 0:  # checks a button has been clicked
                 [b._set_color(arcade.color.WHITE) for b in self.mat_list]
                 choice = clicked[0]
                 choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
                 self.mol_choice = [choice.atag, choice.btag]  # record the tags of the chosen molecule
+                print(f"\t>>>>>>DEBUG>>>>>>> card {choice.atag},{choice.btag} clicked")
 
         # check if the user has clicked on a button
         clicked = arcade.get_sprites_at_point((x, y), self.button_list)
         if len(clicked) > 0:  # checks a button has been clicked
             # if end button clicked, csv file created and window closed
             if clicked[0].name == 'end':
+                print(f">>>>>>DEBUG>>>>>>> End clicked")
                 self.feedback_view.final_df.to_csv('data/results.csv', index=False)
                 end_view = EndView(self.feedback_view.mol_view)  # create end view and pass mol builder view
                 self.window.show_view(end_view)
@@ -624,6 +627,7 @@ class AnalysisView(arcade.View):
 
             # if the run assays button is clicked, the chosen molecule tags are again passed to both views
             elif clicked[0].name == 'assays':
+                print(f">>>>>>DEBUG>>>>>>> assays clicked")
                 if self.mol_choice is not None:
                     sprites = []
                     # get the sprites in the mol builder script that match the tags
