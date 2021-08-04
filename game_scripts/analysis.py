@@ -57,6 +57,90 @@ class Card():
         self.y_pampa = card_coordinates[1] - 140
         self.pampa_text = f"PAMPA: {self.pampa}"
 
+class ReviewGraph():
+    """
+    creates graphs for user to review their performace
+    """
+
+    def __init__(self, Datatoplot):
+        self.data = Datatoplot
+        self.fig = plt.figure(figsize=[5, 5])
+        self.ax = self.fig.add_subplot(111)
+        #self.yvariable = 'pic50'
+        #self.xvariable = 'logP'
+        self.axisnames = ['','','tags'] 
+        self.title = "Review graph"
+
+
+    def bar(self, yVarr=None, xVar=None, yVar=None):
+        pass
+
+
+    def scatter(self, axisnames, yVarr=None, xVar=None, yVar=None):
+        self.axisnames = axisnames
+        datavalues = [[],[],[],[]] # [[x],[y],[lables],[colours]] 
+        for axisno in [0,1,2]:
+            currentaxis =  self.axisnames[axisno]
+            if currentaxis in ["logP", "pic50", "cl_mouse", "cl_human", "logd", "pampa", "MW", "logP", "TPSA", "HA", "h_acc", "h_don", "rings"]:
+                indexno = 0
+                for element in self.data[currentaxis]:
+                    if axisno == 0:
+                        datavalues[3].append("blue")
+                    isfloat = True
+                    try:
+                        float(element)
+                    except ValueError:
+                        isfloat = False
+                    if isfloat is True:
+                        datavalues[axisno].append(float(element))
+                    else:
+                        datavalues[axisno].append(0.0)
+                        if element == "Inactive":
+                            datavalues[3][indexno] = ("#909496")
+                        elif element == "Not Made":
+                            datavalues[3][indexno] = ("#909496")
+                        elif element == "Not Assayed":
+                            datavalues[3][indexno] = ("#909496")
+                        elif element == "NaN":
+                            datavalues[3][indexno] = ("#909496")
+                        else:
+                            datavalues[3][indexno] = ("#909496")
+                    indexno += 1
+            elif currentaxis in ["tags"]:
+                for mol in self.data.iterrows():
+                    datavalues[axisno].append(str(mol[1][0])+','+str(mol[1][1]))
+        plt.scatter(datavalues[0], datavalues[1], c=datavalues[3])
+        for i, datavalues[2] in enumerate(datavalues[2]):
+            plt.annotate(datavalues[2], (datavalues[0][i], datavalues[1][i]))
+        self.title=str(self.axisnames[1])+" against "+str(self.axisnames[0])
+        self.formatgraph()
+        plt.savefig(os.path.join("Images","review","maingraph.png"), facecolor='white', transparent=False)
+        
+        tempdir = os.path.join('Images', 'temp')
+        CurFiles = [f for f in listdir(tempdir) if (isfile(join(tempdir, f)) and f.startswith("TempGraph") and f.endswith(".png"))]
+        print(f"all: {CurFiles}")
+        CurFiles = [s.strip("TempGraph") for s in CurFiles]
+        CurFiles = [s.strip(".png") for s in CurFiles]
+        print(f"striped: {CurFiles}")
+        CurFiles = [int(s) for s in CurFiles if s.isnumeric()]
+        print(f"numeric: {CurFiles}")
+        if CurFiles != []:
+            curMax = max(CurFiles)
+        else:
+            curMax = 0
+        plt.savefig(os.path.join("Images","temp",f"TempGraph{curMax+1}.png"), facecolor='white', transparent=False)
+        #return(os.path.join("Images","review",f"maingraph.png"))
+        return(os.path.join("Images","temp",f"TempGraph{curMax+1}.png"))
+
+
+    def formatgraph(self):
+
+        self.ax.set_xlabel(str(self.axisnames[0]))
+        self.ax.set_ylabel(str(self.axisnames[1]))
+        self.ax.set_title(self.title)
+
+
+
 class AnalysisView(arcade.View):
     """
     Main view class
