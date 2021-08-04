@@ -9,6 +9,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 import os
 from end_game_screen import EndView
+from math import isnan
 
 
 SCREEN_WIDTH = 1000
@@ -26,33 +27,45 @@ class Card():
     Card class to store molecule info and text coordinates
     """
     def __init__(self, card_coordinates, atag, btag, pic50=None, cl_mouse=None, cl_human=None, logd=None, pampa=None):
+        cleaned_input = []
+        for assay_value in [pic50, cl_mouse, cl_human, logd, pampa]:
+            print(f"{assay_value} is {type(assay_value)}")
+            if assay_value == None:
+                cleaned_input.append("No Data")
+            elif isnan(float(assay_value)):
+                cleaned_input.append("Not Tested")
+            else:
+                cleaned_input.append(assay_value)
+        self.pic50, self.cl_mouse, self.cl_human, self.logd, self.pampa = cleaned_input
+
+
         self.atag = atag
         self.btag = btag
         self.x_tag = card_coordinates[0] - 30
         self.y_tag = card_coordinates[1] + 35
         self.tag_text = f"{self.atag}, {self.btag}"
 
-        self.pic50 = pic50
+        #self.pic50 = pic50
         self.x_pic50 = card_coordinates[0] - 70
         self.y_pic50 = card_coordinates[1] - 60
         self.pic50_text = f"pIC50: {self.pic50}"
 
-        self.cl_mouse = cl_mouse
+        #self.cl_mouse = cl_mouse
         self.x_cl_mouse = card_coordinates[0] - 70
         self.y_cl_mouse = card_coordinates[1] - 80
         self.cl_mouse_text = f"Cl (mouse): {self.cl_mouse}"
 
-        self.cl_human = cl_human
+        #self.cl_human = cl_human
         self.x_cl_human = card_coordinates[0] - 70
         self.y_cl_human = card_coordinates[1] - 100
         self.cl_human_text = f"Cl (human): {self.cl_human}"
 
-        self.logd = logd
+        #self.logd = logd
         self.x_logd = card_coordinates[0] - 70
         self.y_logd = card_coordinates[1] - 120
         self.logd_text = f"LogD: {self.logd}"
 
-        self.pampa = pampa
+        #self.pampa = pampa
         self.x_pampa = card_coordinates[0] - 70
         self.y_pampa = card_coordinates[1] - 140
         self.pampa_text = f"PAMPA: {self.pampa}"
