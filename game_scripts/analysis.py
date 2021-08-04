@@ -8,12 +8,8 @@ from combine import MolChoose
 from rdkit import Chem
 from rdkit.Chem import Draw
 import os
-<<<<<<< HEAD
 from end_game import EndGame
-=======
-from end_game_screen import EndView
 
->>>>>>> 86bd030cf2c7e97eaae094d334067e67a6a5e215
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -285,20 +281,11 @@ class AnalysisView(arcade.View):
         if len(clicked) > 0:  # checks a button has been clicked
             # if end button clicked, csv file created and window closed
             if clicked[0].name == 'end':
-<<<<<<< HEAD
                 pause = EndGame(self)
                 self.window.show_view(pause)
-                # if end button clicked, csv file created and window closed
-                #self.feedback_view.final_df.to_csv('data/results.csv', index=False)
-                #self.window.close()
-            
-=======
-                self.feedback_view.final_df.to_csv('data/results.csv', index=False)
-                end_view = EndView(self.feedback_view.mol_view)  # create end view and pass mol builder view
-                self.window.show_view(end_view)
+                    
 
             # if the molecule builder button is clicked, the chosen molecule tags are passed to self.feedback_view.mol_view
->>>>>>> 86bd030cf2c7e97eaae094d334067e67a6a5e215
             elif clicked[0].name == 'builder':
                 if self.mol_choice is not None:
                     sprites = []

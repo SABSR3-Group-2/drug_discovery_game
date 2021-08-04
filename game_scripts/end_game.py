@@ -140,7 +140,6 @@ class EndGame(arcade.View):
         self.numberline = arcade.Sprite('Images/game_loop_images/pic50_line.png')
         self.numberline.position = (550, 140)
         self.card_list.append(self.numberline)
-        print(mol_info.at[0, 'pic50'])
         pic50 = mol_info.at[0, 'pic50']
 
         #generate text list
