@@ -1,8 +1,8 @@
 import os
 import arcade
-from game_scripts.combine import MolChoose
-from game_scripts.descriptors import get_descriptors
-from game_scripts.filters import compound_check
+from combine import MolChoose
+from descriptors import get_descriptors, lipinski
+from filters import run_filters
 from rdkit import Chem
 import global_vars
 from analysis import AnalysisView
@@ -89,7 +89,8 @@ class Button(arcade.Sprite):
         descriptors = get_descriptors(self.chosen_mol.at[0, 'mol'])
         descriptors.pop('mol')
         for key, val in descriptors.items():  # round to 1 dp
-            descriptors[key] = round(float(val), 1)
+            if key not in ['HA', 'h_acc', 'h_don', 'rings']:
+                descriptors[key] = round(float(val), 1)
         return descriptors
 
     def run_filt(self):
@@ -100,7 +101,7 @@ class Button(arcade.Sprite):
         :rtype: string
         """
         # runs the compound_check function on the molecule SMILES
-        filter_res = compound_check(Chem.MolFromSmiles(self.chosen_mol.at[0, 'mol']))
+        filter_res = run_filters(Chem.MolFromSmiles(self.chosen_mol.at[0, 'mol']))
         return filter_res
 
 
@@ -181,7 +182,7 @@ class FeedbackView(arcade.View):
         self.total_cost = 0
         self.total_duration = []
         self.descriptor_results = {}
-        self.filter_results = []
+        self.filter_results = {}
         self.mol_sprite_list = arcade.SpriteList()
 
         # stores the molecule info
@@ -193,11 +194,6 @@ class FeedbackView(arcade.View):
                 btag = tag
         self.mol = MolChoose(atag, btag, DataSource=os.path.join('data', 'r_group_decomp.csv'))
         self.mol = self.mol.reset_index(drop=True)
-
-        # create and save image of the molecule
-        chosen_mol = Chem.MolFromSmiles(self.mol.at[0, 'mol'])
-        Chem.Draw.MolToFile(chosen_mol, os.path.join('Images', 'button_pngs', 'chosen_mol.png'),
-                            size=(300, 300), imageType=None)
 
         # make the molecule sprite using the saved image
         mol_sprite = arcade.Sprite(os.path.join('Images', 'game_loop_images',
@@ -366,40 +362,49 @@ class FeedbackView(arcade.View):
         for i, (desc, val) in enumerate(self.descriptor_results.items()):
             arcade.draw_text(desc,
                              SCREEN_WIDTH * 1 / 3 + 10,
-                             SCREEN_HEIGHT - 210 - (i * 20),
+                             SCREEN_HEIGHT - 205 - (i * 20),
                              color=arcade.color.BLACK,
-                             font_size=12,
+                             font_size=10,
                              font_name=self.font)
             arcade.draw_text(str(val),
                              SCREEN_WIDTH * 1 / 3 + 110,
-                             SCREEN_HEIGHT - 210 - (i * 20),
+                             SCREEN_HEIGHT - 205 - (i * 20),
                              color=arcade.color.BLACK,
-                             font_size=12,
+                             font_size=10,
+                             font_name=self.font)
+        
+        # give result of Lipinski's ro5
+        if self.descriptor_results != {}:
+            ro5_v, ro5_res = lipinski(self.descriptor_results)
+            lipinski_text = f"Molecule {ro5_res} Lipinski filter ({ro5_v} rules broken)"
+            arcade.draw_text(lipinski_text,
+                             SCREEN_WIDTH * 1 / 3 + 10,
+                             SCREEN_HEIGHT - 205 - (7 * 20),
+                             color=arcade.color.BLACK,
+                             font_size=10,
                              font_name=self.font)
 
         # draw filter results
-        arcade.draw_text('Filters',
+        arcade.draw_text('Filters:',
                          SCREEN_WIDTH * 1 / 3 + 10,
-                         SCREEN_HEIGHT * 3 / 7,
+                         SCREEN_HEIGHT * 3 / 7 - 10,
                          color=arcade.color.BLACK,
                          font_size=18,
                          font_name=self.font)
 
-        for i, filt in enumerate(self.filter_results):
-            if filt == 'Molecule passes the filter.':
-                arcade.draw_text(filt,
-                                 SCREEN_WIDTH * 1 / 3 + 10,
-                                 SCREEN_HEIGHT / 2 - 70 - i * 20,
-                                 color=arcade.color.BLACK,
-                                 font_size=12,
-                                 font_name=self.font)
-            else:  # adjusts the location of the text
-                arcade.draw_text(filt,
-                                 SCREEN_WIDTH * 1 / 3 + 10,
-                                 SCREEN_HEIGHT / 3 - 10 - i * 50,
-                                 color=arcade.color.BLACK,
-                                 font_size=12,
-                                 font_name=self.font)
+        for i, (filt, val) in enumerate(self.filter_results.items()):
+            arcade.draw_text(filt,
+                             SCREEN_WIDTH * 1 / 3 + 10,
+                             SCREEN_HEIGHT / 2 - 80 - i * 20,
+                             color=arcade.color.BLACK,
+                             font_size=10,
+                             font_name=self.font)
+            arcade.draw_text(str(val),
+                             SCREEN_WIDTH * 1 / 3 + 110,
+                             SCREEN_HEIGHT / 2 - 80 - i * 20,
+                             color=arcade.color.BLACK,
+                             font_size=10,
+                             font_name=self.font)
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
@@ -466,7 +471,7 @@ class FeedbackView(arcade.View):
                     self.total_cost = 0
                     self.total_duration = []
                     self.descriptor_results = {}
-                    self.filter_results = []
+                    self.filter_results = {}
                     self.assay_choices = []
 
             # checks if the button is an action button

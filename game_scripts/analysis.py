@@ -4,11 +4,16 @@ Analysis view
 
 import arcade
 import pandas as pd
-from game_scripts.combine import MolChoose
+from combine import MolChoose
 from rdkit import Chem
 from rdkit.Chem import Draw
 import os
+<<<<<<< HEAD
 from end_game import EndGame
+=======
+from end_game_screen import EndView
+
+>>>>>>> 86bd030cf2c7e97eaae094d334067e67a6a5e215
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -24,7 +29,6 @@ class Card():
     """
     Card class to store molecule info and text coordinates
     """
-
     def __init__(self, card_coordinates, atag, btag, pic50=None, cl_mouse=None, cl_human=None, logd=None, pampa=None):
         self.atag = atag
         self.btag = btag
@@ -36,7 +40,7 @@ class Card():
         self.x_pic50 = card_coordinates[0] - 70
         self.y_pic50 = card_coordinates[1] - 60
         self.pic50_text = f"pIC50: {self.pic50}"
-        
+
         self.cl_mouse = cl_mouse
         self.x_cl_mouse = card_coordinates[0] - 70
         self.y_cl_mouse = card_coordinates[1] - 80
@@ -59,16 +63,18 @@ class Card():
 
 class AnalysisView(arcade.View):
     """
-    Analysis class
+    Main view class
     """
 
     def __init__(self, feedback_view=None):
         super().__init__()
         self.feedback_view = feedback_view
         self.button_list = None
-        self.card_list = None
-        self.mat_list = None
-        self.text_list = []
+
+        # stores the components of the 'cards'
+        self.mol_list = None  # stores the mol sprites (the molecule images on the cards)
+        self.mat_list = None  # stores the 'mats' (rectangle representing outside of the card)
+        self.text_list = []  # stores the text information for each card (generated with the Card class)
 
         arcade.set_background_color(arcade.color.WHITE)
 
@@ -86,6 +92,7 @@ class AnalysisView(arcade.View):
         # get font from font file
         self.font = os.path.join('fonts', 'arial.ttf')
 
+        # stores which molecule card has been chosen
         self.mol_choice = None
 
         self.setup()
@@ -94,64 +101,67 @@ class AnalysisView(arcade.View):
         """
         This function sets up the view, call it to restart.
         """
-        # create end button
+        # create the end button
         self.button_list = arcade.SpriteList()
         end_button = arcade.Sprite(f'Images/button_pngs/end_game_blue.png', 0.5)
         end_button.position = SCREEN_WIDTH - 70, 50
         end_button.name = 'end'
         self.button_list.append(end_button)
 
+        # create a button to allow user to explore a chosen molecule in the molecule_buidler
         builder_button = arcade.Sprite(f'Images/button_pngs/mol_builder.png', 0.5)
         builder_button.position = 50, SCREEN_HEIGHT - 70
         builder_button.name = 'builder'
         self.button_list.append(builder_button)
 
+        # create a button to allow the user to run more assays on a chosen molecule in feedback_buttons
         assays_button = arcade.Sprite(f'Images/button_pngs/run_assays.png', 0.5)
         assays_button.position = 150, SCREEN_HEIGHT - 70
         assays_button.name = 'assays'
         self.button_list.append(assays_button)
 
-        # create cards with molecules on them
-        self.card_list = arcade.SpriteList()
+        # create the molecule sprites for the cards
+        self.mol_list = arcade.SpriteList()
         for index, row in self.feedback_view.final_df.iterrows():
-            # get the molecules that have been selected from the df
+            # get the molecules that have been built/assayed from the final_df
             mol_info = MolChoose(row['atag'], row['btag'], DataSource=os.path.join('data', 'r_group_decomp.csv')).reset_index(drop=True)
             mol = Chem.MolFromSmiles(mol_info.at[0, 'mol'])
             Chem.Draw.MolToFile(mol, 'Images/game_loop_images/selected_mol{}.png'.format(index),
                             size=(CARD_WIDTH, CARD_HEIGHT), imageType=None)  # save image of the molecule to file
             card_sprite = arcade.Sprite('Images/game_loop_images/selected_mol{}.png'.format(index), scale=1)  # create sprites of the molecules
-            self.card_list.append(card_sprite)
+            self.mol_list.append(card_sprite)
 
-        # create blank mats for molecules to sit on
+        # create blank 'mats' to represent the outline of the cards
+        # the mats will be the clickable item for each card to allow the user to select molecules
         self.mat_list = arcade.SpriteList()
-        for (index, row), i in zip(self.feedback_view.final_df.iterrows(), range(len(self.card_list))):
+        for (index, row), i in zip(self.feedback_view.final_df.iterrows(), range(len(self.mol_list))):
             mat_sprite = arcade.SpriteSolidColor(width = MAT_WIDTH, height = MAT_HEIGHT, color=arcade.color.LIGHT_BLUE)
+            # add tag attributes
             mat_sprite.atag = row['atag']
             mat_sprite.btag = row['btag']
-
             self.mat_list.append(mat_sprite)
-        
-        # create coordinates for the cards
-        coordinate_list = self.make_coordinates(len(self.card_list))
-        card_coordinate_list = []
-        for coords in coordinate_list:
-            new_coords = []
-            new_coords.append(coords[0])
-            new_coords.append(coords[1] + 50)
-            card_coordinate_list.append(new_coords)
 
-        # set the coordinates of the molecule and mat sprites
-        for i, sprite in enumerate(self.card_list):
-            sprite.position = card_coordinate_list[i]
-        
+        # create coordinates for the mat sprites
+        mat_coordinate_list = self.make_coordinates(len(self.mat_list))
+        # use the same coordinates but with a higher y value for the mol sprites
+        mol_coordinate_list = []
+        for coords in mat_coordinate_list:
+            mol_coords = []
+            mol_coords.append(coords[0])
+            mol_coords.append(coords[1] + 50)
+            mol_coordinate_list.append(mol_coords)
+
+        # set the coordinates of the molecule sprites
+        for i, sprite in enumerate(self.mol_list):
+            sprite.position = mol_coordinate_list[i]
+
         for i, sprite in enumerate(self.mat_list):
-            sprite.position = coordinate_list[i]
-        
+            sprite.position = mat_coordinate_list[i]
+
         # use the Card class to create objects that store the molecule info and coordinates
-        for (index, row), coord in zip(self.feedback_view.final_df.iterrows(), card_coordinate_list):
+        for (index, row), coord in zip(self.feedback_view.final_df.iterrows(), mol_coordinate_list):
             cardtext = Card(coord, row['atag'], row['btag'], row['pic50'], row['cl_mouse'], row['cl_human'], row['logd'], row['pampa'])
             self.text_list.append(cardtext)
-        
 
     def make_coordinates(self, n_sprites):
         """
@@ -190,8 +200,9 @@ class AnalysisView(arcade.View):
         """
         arcade.start_render()
 
+        # draw the sprites needed for the cards
         self.mat_list.draw()
-        self.card_list.draw()
+        self.mol_list.draw()
 
         # draw the text that goes on the cards
         for c in self.text_list:
@@ -237,14 +248,14 @@ class AnalysisView(arcade.View):
                         font_size=8,
                         font_name=self.font,
                         align='center')
-        
+
         # draw the menu bar
         arcade.draw_rectangle_filled(MENU_WIDTH / 2,
                                      SCREEN_HEIGHT,
                                      MENU_WIDTH,
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
-        
+
         arcade.draw_text('Select a molecule to investigate further',
                         15,
                         SCREEN_HEIGHT - 25,
@@ -253,7 +264,7 @@ class AnalysisView(arcade.View):
                         font_name=self.font,
                         align='center')
 
-        # draw the sprites
+        # draw the button sprites
         self.button_list.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
@@ -261,33 +272,71 @@ class AnalysisView(arcade.View):
         Called when the user presses a mouse button. Used for determining what happens
         when the user clicks on a button.
         """
-        # identifies what button the user clicks on
+        # check if the user has clicked on a card
         clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
         if len(clicked) > 0:  # checks a button has been clicked
             [b._set_color(arcade.color.WHITE) for b in self.mat_list]
-            #self.mol_choice = None
             choice = clicked[0]
             choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
-            self.mol_choice = [choice.atag, choice.btag]  # record mol chosen using tag attributes
+            self.mol_choice = [choice.atag, choice.btag]  # record the tags of the chosen molecule
 
-        # identifies what button the user clicks on
+        # check if the user has clicked on a button
         clicked = arcade.get_sprites_at_point((x, y), self.button_list)
         if len(clicked) > 0:  # checks a button has been clicked
+            # if end button clicked, csv file created and window closed
             if clicked[0].name == 'end':
+<<<<<<< HEAD
                 pause = EndGame(self)
                 self.window.show_view(pause)
                 # if end button clicked, csv file created and window closed
                 #self.feedback_view.final_df.to_csv('data/results.csv', index=False)
                 #self.window.close()
             
+=======
+                self.feedback_view.final_df.to_csv('data/results.csv', index=False)
+                end_view = EndView(self.feedback_view.mol_view)  # create end view and pass mol builder view
+                self.window.show_view(end_view)
+
+            # if the molecule builder button is clicked, the chosen molecule tags are passed to self.feedback_view.mol_view
+>>>>>>> 86bd030cf2c7e97eaae094d334067e67a6a5e215
             elif clicked[0].name == 'builder':
                 if self.mol_choice is not None:
                     sprites = []
+                    # get the sprites in the mol builder script that match the tags
                     for sprite in self.feedback_view.mol_view.r_sprite_list:
                         if sprite.tag == self.mol_choice[0]:
                             sprites.append(sprite)
                         if sprite.tag == self.mol_choice[1]:
                             sprites.append(sprite)
+                    # update the lead molecule in mol builder with the correct r groups
+                    for sprite in sprites:
+                        self.feedback_view.mol_view.picked_r = sprite
+                        self.feedback_view.mol_view.picked_r.smiles = self.feedback_view.mol_view.desc_df.loc[self.feedback_view.mol_view.desc_df[self.feedback_view.mol_view.tag] == self.feedback_view.mol_view.picked_r.tag, 'mol'].item()  # give smile
+                        self.feedback_view.mol_view.picked_r._set_alpha(50)  # shade
+                        self.feedback_view.mol_view.update_lead()
+                        self.feedback_view.mol_view.setup()
+                        self.feedback_view.mol_view.on_draw()
+
+                    # also update the molecule shown in the feedback view
+                    for i, t in enumerate(self.mol_choice):
+                        self.feedback_view.tags[i] = t
+                    self.feedback_view.setup()
+                    self.feedback_view.on_draw()
+
+                    # show the mol builder view
+                    self.window.show_view(self.feedback_view.mol_view)
+
+            # if the run assays button is clicked, the chosen molecule tags are again passed to both views
+            elif clicked[0].name == 'assays':
+                if self.mol_choice is not None:
+                    sprites = []
+                    # get the sprites in the mol builder script that match the tags
+                    for sprite in self.feedback_view.mol_view.r_sprite_list:
+                        if sprite.tag == self.mol_choice[0]:
+                            sprites.append(sprite)
+                        if sprite.tag == self.mol_choice[1]:
+                            sprites.append(sprite)
+                    # update the lead molecule in mol builder with the correct r groups
                     for sprite in sprites:
                         self.feedback_view.mol_view.picked_r = sprite  # pick the top sprite
                         self.feedback_view.mol_view.picked_r.smiles = self.feedback_view.mol_view.desc_df.loc[self.feedback_view.mol_view.desc_df[self.feedback_view.mol_view.tag] == self.feedback_view.mol_view.picked_r.tag, 'mol'].item()  # give smile
@@ -296,53 +345,27 @@ class AnalysisView(arcade.View):
                         self.feedback_view.mol_view.setup()
                         self.feedback_view.mol_view.on_draw()
                     
+                    # also update the molecule shown in the feedback view
                     for i, t in enumerate(self.mol_choice):
                         self.feedback_view.tags[i] = t
                     self.feedback_view.setup()
                     self.feedback_view.on_draw()
 
-                    self.window.show_view(self.feedback_view.mol_view)
-            
-            elif clicked[0].name == 'assays':
-                if self.mol_choice is not None:
-                    sprites = []
-                    for sprite in self.feedback_view.mol_view.r_sprite_list:
-                        if sprite.tag == self.mol_choice[0]:
-                            sprites.append(sprite)
-                        if sprite.tag == self.mol_choice[1]:
-                            sprites.append(sprite)
-                    for sprite in sprites:
-                        self.feedback_view.mol_view.picked_r = sprite  # pick the top sprite
-                        self.feedback_view.mol_view.picked_r.smiles = self.feedback_view.mol_view.desc_df.loc[self.feedback_view.mol_view.desc_df[self.feedback_view.mol_view.tag] == self.feedback_view.mol_view.picked_r.tag, 'mol'].item()  # give smile
-                        self.feedback_view.mol_view.picked_r._set_alpha(50)  # shade
-                        self.feedback_view.mol_view.update_lead()
-                        self.feedback_view.mol_view.setup()
-                        self.feedback_view.mol_view.on_draw()
-                        
-                    for i, t in enumerate(self.mol_choice):
-                        self.feedback_view.tags[i] = t
-                    self.feedback_view.setup()
-                    self.feedback_view.on_draw()
+                    # show the feedback view
                     self.window.show_view(self.feedback_view)
                     arcade.set_background_color(arcade.color.OXFORD_BLUE)
 
     def on_key_press(self, symbol: int, modifiers: int):
         """ User presses key """
-        # df containing results printed when user presses SPACE
-        if symbol == arcade.key.SPACE:  # debugging code
-            print(self.feedback_view.final_df)
-
         if symbol == arcade.key.LEFT:
             self.window.show_view(self.feedback_view)
             arcade.set_background_color(arcade.color.OXFORD_BLUE)
-        
-        if symbol == arcade.key.RIGHT:  # debugging code
-            print(self.mol_choice[0], self.mol_choice[1])
     
     def on_mouse_scroll(self, x: int, y: int, scroll_x: int, scroll_y: int):
         """Redraw the sprites lower instead of scrollling"""
 
-        for i, r in enumerate(self.card_list):
+        # change the y position of the sprites
+        for i, r in enumerate(self.mol_list):
             r.position = (r.position[0], r.position[1] + scroll_y)
         for i, r in enumerate(self.mat_list):
             r.position = (r.position[0], r.position[1] + scroll_y)
