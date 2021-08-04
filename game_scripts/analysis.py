@@ -599,6 +599,7 @@ class AnalysisView(arcade.View):
 
             # if the molecule builder button is clicked, the chosen molecule tags are passed to self.feedback_view.mol_view
             elif clicked[0].name == 'builder':
+                print(f">>>>>>DEBUG>>>>>>> Builder clicked")
                 if self.mol_choice is not None:
                     sprites = []
                     # get the sprites in the mol builder script that match the tags
@@ -654,42 +655,42 @@ class AnalysisView(arcade.View):
                     # show the feedback view
                     self.window.show_view(self.feedback_view)
                     arcade.set_background_color(arcade.color.OXFORD_BLUE)
-   
-        #check axis buttons
-        clickedxytoggle = arcade.get_sprites_at_point((x, y), self.xymat_list)
-        if len(clickedxytoggle) > 0:  # checks a button has been clicked
-            #[b._set_color(arcade.color.WHITE) for b in self.xymat_list]
-            xychoice = clickedxytoggle[0]
-            for option in self.axisToggleButton_list:
-                option.toggle()
-            xychoice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
-            xyside = xychoice.equivalant.side
-            xystate = xychoice.equivalant.state
-            if xyside == "x":
-                if xystate == "on":
-                    self.axisselectmode = "x"
-                if xystate == "off":
-                    self.axisselectmode = "y"
-            elif xyside == "y":
-                if xystate == "on":
-                    self.axisselectmode = "y"
-                if xystate == "off":
-                    self.axisselectmode = "x"
-            
+        if x > SCREEN_WIDTH/3:
+            #check axis buttons
+            clickedxytoggle = arcade.get_sprites_at_point((x, y), self.xymat_list)
+            if len(clickedxytoggle) > 0:  # checks a button has been clicked
+                #[b._set_color(arcade.color.WHITE) for b in self.xymat_list]
+                xychoice = clickedxytoggle[0]
+                for option in self.axisToggleButton_list:
+                    option.toggle()
+                xychoice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
+                xyside = xychoice.equivalant.side
+                xystate = xychoice.equivalant.state
+                if xyside == "x":
+                    if xystate == "on":
+                        self.axisselectmode = "x"
+                    if xystate == "off":
+                        self.axisselectmode = "y"
+                elif xyside == "y":
+                    if xystate == "on":
+                        self.axisselectmode = "y"
+                    if xystate == "off":
+                        self.axisselectmode = "x"
+                
 
-        #check axis buttons
-        clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
-        if len(clicked) > 0:  # checks a button has been clicked
-            [b._set_color(arcade.color.WHITE) for b in self.mat_list]
-            choice = clicked[0]
-            choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
-            choiceresult = choice.equivalant.chooseproperty()
-            if self.axisselectmode == "x":
-                self.currentx = choiceresult[1]
-            elif self.axisselectmode == "y":
-                self.currenty = choiceresult[1]
+            #check axis buttons
+            clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
+            if len(clicked) > 0:  # checks a button has been clicked
+                [b._set_color(arcade.color.WHITE) for b in self.mat_list]
+                choice = clicked[0]
+                choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
+                choiceresult = choice.equivalant.chooseproperty()
+                if self.axisselectmode == "x":
+                    self.currentx = choiceresult[1]
+                elif self.axisselectmode == "y":
+                    self.currenty = choiceresult[1]
 
-            self.plot("scatter")
+                self.plot("scatter")
 
 
     def on_key_press(self, symbol: int, modifiers: int):
