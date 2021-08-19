@@ -1,5 +1,6 @@
 import os
 import arcade
+import pandas as pd
 from combine import MolChoose
 from descriptors import get_descriptors, lipinski
 from filters import run_filters
@@ -303,6 +304,22 @@ class FeedbackView(arcade.View):
                          font_name=self.font,
                          color=arcade.color.BLACK)
 
+        # draw the top command buttons
+        arcade.draw_text('Commands',
+                         10,
+                         SCREEN_HEIGHT - 50,
+                         font_size=15,
+                         font_name=self.font,
+                         color=arcade.color.WHITE)
+
+        arcade.draw_text('Free calculations',
+                         2 / 9 * SCREEN_WIDTH + 10,
+                         SCREEN_HEIGHT - 50,
+                         font_size=15,
+                         font_name=self.font,
+                         color=arcade.color.WHITE)
+
+        self.button_list.draw()
         self.mol_sprite_list.draw()
 
         # draw text showing total balances
@@ -532,11 +549,16 @@ class FeedbackView(arcade.View):
             # the assay name, result, cost and duration are stored
 
             if choice.button in ASSAYS.keys():
-                choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
-                self.assay_choices.append(choice.button)
-                self.assay_results.append(choice.get_result())
-                self.total_cost += choice.get_cost()
-                self.total_duration.append(choice.get_duration())
+                # check the assay hasn't already been selected
+                if choice.button not in self.assay_choices:
+                    # check there is no row for the mol in the df OR if there is a row, that the selected assay hasn't been run
+                    if (self.final_df.loc[(self.final_df['atag'] == self.tags[0]) & (self.final_df['btag'] == self.tags[1]), 'atag'].values.size == 0 or
+                        pd.isnull(self.final_df.loc[(self.final_df['atag'] == self.tags[0]) & (self.final_df['btag'] == self.tags[1]), choice.button].values[0])):
+                        choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
+                        self.assay_choices.append(choice.button)
+                        self.assay_results.append(choice.get_result())
+                        self.total_cost += choice.get_cost()
+                        self.total_duration.append(choice.get_duration())
 
             # checks if the button is an action button
             elif choice.button in ACTIONS:
@@ -572,6 +594,7 @@ class FeedbackView(arcade.View):
                             self.mol_view.assay_df.loc[
                                 (self.mol_view.assay_df['atag'] == self.tags[0]) &
                                 (self.mol_view.assay_df['btag'] == self.tags[1]), a] = r
+                        self.final_df = self.mol_view.assay_df
 
                 elif choice.button == 'clear_choices':
                     # clears the selected assays and recorded data
@@ -602,6 +625,7 @@ class FeedbackView(arcade.View):
                         self.mol_view.assay_df.loc[
                             (self.mol_view.assay_df['atag'] == self.tags[0]) &
                             (self.mol_view.assay_df['btag'] == self.tags[1]), d] = v
+                    self.final_df = self.mol_view.assay_df
 
                 elif choice.button == 'run_filters':
                     choice._set_color(arcade.color.YELLOW)
@@ -621,9 +645,12 @@ class FeedbackView(arcade.View):
 
         if key == arcade.key.RIGHT:
             # navigate to view containing analysis (name can be changed)
-            self.final_df = self.mol_view.assay_df  # create df that can be passed to AnalysisView
+            # self.final_df = self.mol_view.assay_df  # create df that can be passed to AnalysisView DELETELINE
             pause = AnalysisView(self)  # passes the current view to Analysis for later
             self.window.show_view(pause)
+        
+        if key == arcade.key.SPACE:
+            print(self.final_df)
 
 
 def main():
