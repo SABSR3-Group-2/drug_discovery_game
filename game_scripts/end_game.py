@@ -24,9 +24,10 @@ MAT_WIDTH = 250
 MAT_HEIGHT = 650
 
 #Constants for spider plot
-labels=['pIC50', 'logP', 'logD', 'H_acceptors', 'H_donors']
-markers = [0, 1, 2, 3, 4, 5]
-str_markers = ["0", "1", "2", "3", "4", "5"]
+labels=['pIC50', 'logP', 'logD', 'H-Bond Acceptors', 'H-Bond Donors']
+markers = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+str_markers = ["0", "1", "2", "3", "4", "5", '6', '7', '8']
+target_data = [7.7, 3.95, 1.08, 5, 2]
 
 class EndGame(arcade.View):
     """
@@ -54,7 +55,7 @@ class EndGame(arcade.View):
 
         self.setup()
 
-    def make_radar_chart(self, stats, attribute_labels = labels, plot_markers = markers, plot_str_markers = str_markers):
+    def make_radar_chart(self, stats, attribute_labels = labels, plot_markers = markers, plot_str_markers = str_markers, target_data = target_data):
 
         labels = np.array(attribute_labels)
 
@@ -63,12 +64,18 @@ class EndGame(arcade.View):
         stats = np.concatenate((stats,[stats[0]]))
         angles = np.concatenate((angles,[angles[0]]))
 
-        fig= plt.figure(figsize=(3,3))
+        
+        target_data = np.concatenate((target_data, [target_data[0]]))
+
+        fig= plt.figure(figsize=(6,3))
         ax = fig.add_subplot(111, polar=True)
-        ax.plot(angles, stats, 'o-', linewidth=2)
+        ax.plot(angles, stats, 'o-', linewidth=2, label="GSK's Choice")
         ax.fill(angles, stats, alpha=0.25)
+        ax.plot(angles, target_data, 'o-', linewidth=2, label='Final Choice')
+        ax.fill(angles, target_data, alpha=0.25)
         ax.set_thetagrids(angles[:-1] * 180/np.pi, labels)
-        plt.yticks(markers)
+        plt.yticks(plot_markers, plot_str_markers)
+        ax.legend(loc='best', bbox_to_anchor=(1, 0.4))
         ax.grid(True)
 
         fig.savefig('Images/game_loop_images/spider_plot.png', transparent=True)
@@ -150,6 +157,7 @@ class EndGame(arcade.View):
 
         #Generate image of the selected final molecule
         mol_info = MolChoose(self.analysis_view.mol_choice[0], self.analysis_view.mol_choice[1], DataSource=os.path.join('data', 'r_group_decomp.csv')).reset_index(drop=True)
+        smiles = mol_info.at[0, 'mol']
         mol = Chem.MolFromSmiles(mol_info.at[0, 'mol'])
         d = rdMolDraw2D.MolDraw2DCairo(250, 520)
         d.drawOptions().addStereoAnnotation = True
@@ -160,17 +168,21 @@ class EndGame(arcade.View):
         self.chosen_sprite = arcade.Sprite('Images/game_loop_images/final_mol.png')
         self.chosen_sprite.position = (350, 520)
         self.card_list.append(self.chosen_sprite)
-        
 
-        #Generate numberline for pIC50
-        #self.make_numberline(mol_info)
-        #self.numberline = arcade.Sprite('Images/game_loop_images/pic50_line.png')
-        #self.numberline.position = (550, 140)
-        #self.card_list.append(self.numberline)
+        #Get descriptor information for the final chosen molecule
+        descriptor_dict = get_descriptors(smiles)
+        if mol_info.at[0, 'pic50'] not in ['Assay Failed', 'Inactive', 'Not Made']:
+            pic50 = float(mol_info.at[0, 'pic50'])
+        else:
+            pic50 = 0
+        logd = float(mol_info.at[0, 'logd'])
         
+        #List of parameters for final molecule spider plot
+        final_property_list = [pic50, descriptor_dict['logP'], logd, descriptor_dict['h_acc'], descriptor_dict['h_don']]
+        print(final_property_list)
 
         #Generate spider plot
-        self.make_radar_chart(stats=[2,3,4,4,5])
+        self.make_radar_chart(stats=final_property_list)
         self.radarplot = arcade.Sprite('Images/game_loop_images/spider_plot.png')
         self.radarplot.position = (480, 250)
         self.card_list.append(self.radarplot)
