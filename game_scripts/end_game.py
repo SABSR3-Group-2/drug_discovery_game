@@ -5,6 +5,7 @@ from game_scripts.combine import MolChoose
 from game_scripts.descriptors import get_descriptors
 from game_scripts.filters import compound_check
 from rdkit import Chem
+from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 import global_vars
 import matplotlib.pyplot as plt
@@ -22,6 +23,8 @@ CARD_WIDTH = 250
 CARD_HEIGHT = 200
 MAT_WIDTH = 250
 MAT_HEIGHT = 650
+
+CORE = 'O=C(O)C(NS(=O)(=O)c1ccccc1)'
 
 #Constants for spider plot
 labels=['pIC50', 'logP', 'logD', 'H-Bond Acceptors', 'H-Bond Donors']
@@ -141,9 +144,19 @@ class EndGame(arcade.View):
         right_mat.position = 650, 500
         self.mat_list.append(right_mat)
 
-        #Generate sprite for the molecule actually chosen
-        self.card_list = arcade.SpriteList()
+        #Align GSK choice and user choice
+        core = Chem.MolFromSmiles(CORE)
         target = Chem.MolFromSmiles('CCSCC[C@H](NS(=O)(=O)c1ccc(cc1)c2ccc(SC)cc2)C(=O)O')
+        mol_info = MolChoose(self.analysis_view.mol_choice[0], self.analysis_view.mol_choice[1], DataSource=os.path.join('data', 'r_group_decomp.csv')).reset_index(drop=True)
+        smiles = mol_info.at[0, 'mol']
+        mol = Chem.MolFromSmiles(mol_info.at[0, 'mol'])
+        AllChem.Compute2DCoords(core)
+        for m in [target, mol]:
+            _ = AllChem.GenerateDepictionMatching2DStructure(m, core)
+
+
+        #Generate sprite for the GSK choice
+        self.card_list = arcade.SpriteList()
         d = rdMolDraw2D.MolDraw2DCairo(250, 200)
         d.drawOptions().addStereoAnnotation = True
         d.drawOptions().clearBackground = False
@@ -156,9 +169,6 @@ class EndGame(arcade.View):
 
 
         #Generate image of the selected final molecule
-        mol_info = MolChoose(self.analysis_view.mol_choice[0], self.analysis_view.mol_choice[1], DataSource=os.path.join('data', 'r_group_decomp.csv')).reset_index(drop=True)
-        smiles = mol_info.at[0, 'mol']
-        mol = Chem.MolFromSmiles(mol_info.at[0, 'mol'])
         d = rdMolDraw2D.MolDraw2DCairo(250, 520)
         d.drawOptions().addStereoAnnotation = True
         d.drawOptions().clearBackground = False
