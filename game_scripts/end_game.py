@@ -72,9 +72,9 @@ class EndGame(arcade.View):
 
         fig= plt.figure(figsize=(6,3))
         ax = fig.add_subplot(111, polar=True)
-        ax.plot(angles, stats, 'o-', linewidth=2, label="GSK's Choice")
+        ax.plot(angles, stats, 'o-', linewidth=2, label="Your Choice")
         ax.fill(angles, stats, alpha=0.25)
-        ax.plot(angles, target_data, 'o-', linewidth=2, label='Final Choice')
+        ax.plot(angles, target_data, 'o-', linewidth=2, label='Final Compound')
         ax.fill(angles, target_data, alpha=0.25)
         ax.set_thetagrids(angles[:-1] * 180/np.pi, labels)
         plt.yticks(plot_markers, plot_str_markers)
