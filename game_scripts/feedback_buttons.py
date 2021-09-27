@@ -224,7 +224,7 @@ class FeedbackView(arcade.View):
         self.check_assays_run()
 
     def check_assays_run(self):
-          """ A  function to check if any new assays have been run"""
+        """ A  function to check if any new assays have been run"""
         if (len(self.mol_view.assay_df) > 0) and (len(self.assay_choices_print) == 0): #if assays have been run  and no assays have been printed to the assay view
             try:
                 row = self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])] # fine row in assays_df corosponding to current molecule

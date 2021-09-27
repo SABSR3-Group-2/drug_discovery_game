@@ -160,7 +160,7 @@ class AnalysisView(arcade.View):
     def __init__(self, feedback_view=None):
         super().__init__()
         self.feedback_view = feedback_view
-        self.final_df = feedback_view.final_df
+        #self.final_df = feedback_view.final_df
         self.button_list = None
 
         # stores the components of the 'cards'
@@ -292,9 +292,9 @@ class AnalysisView(arcade.View):
 
         #create graph
         self.cleartempgraphs()
-        print("debug a: "+str(self.feedback_view.final_df))
-        print("debug a: "+str(self.final_df))
-        self.working_graph = ReviewGraph(self.feedback_view.final_df)
+        print("debug a: "+str(self.feedback_view.mol_view.assay_df))
+        print("debug a: "+str(self.feedback_view.mol_view.assay_df))
+        self.working_graph = ReviewGraph(self.feedback_view.mol_view.assay_df)
 
         self.graph_list = arcade.SpriteList()
         main_graph = arcade.Sprite(os.path.join('Images','review','maingraph.png'))
@@ -732,8 +732,8 @@ class AnalysisView(arcade.View):
 
     def plot(self, plottype):
 
-        self.working_graph = ReviewGraph(self.feedback_view.final_df)
-        print(f">>>>>>>>>>>>>>>>> {self.feedback_view.final_df}")
+        self.working_graph = ReviewGraph(self.feedback_view.mol_view.assay_df)
+        print(f">>>>>>>>>>>>>>>>> {self.feedback_view.mol_view.assay_df}")
         self.graph_list = arcade.SpriteList()
         if plottype == "scatter":
             returnpath = self.working_graph.scatter([self.currentx,self.currenty,"tags"])
