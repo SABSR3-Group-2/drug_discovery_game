@@ -71,7 +71,6 @@ class AnalysisView(arcade.View):
         self.mol_list = None  # stores the mol sprites (the molecule images on the cards)
         self.mat_list = None  # stores the 'mats' (rectangle representing outside of the card)
         self.text_list = []  # stores the text information for each card (generated with the Card class)
-        self.graphs_list = None
 
         arcade.set_background_color(arcade.color.WHITE)
 
@@ -117,14 +116,9 @@ class AnalysisView(arcade.View):
         final_button.name = 'final'
         self.button_list.append(final_button)
 
-        self.graphs_list = arcade.SpriteList()
-        graph = arcade.Sprite((f'Images/graphs.png'))
-        graph.position = 2/3 * SCREEN_WIDTH, SCREEN_HEIGHT / 2
-        self.graphs_list.append(graph)
-
         # create the molecule sprites for the cards
         self.mol_list = arcade.SpriteList()
-        for index, row in self.feedback_view.final_df.iterrows():
+        for index, row in self.feedback_view.mol_view.assay_df.iterrows():
             # get the molecules that have been built/assayed from the final_df
             mol_info = MolChoose(row['atag'], row['btag'], DataSource=os.path.join('data', 'r_group_decomp.csv')).reset_index(drop=True)
             mol = Chem.MolFromSmiles(mol_info.at[0, 'mol'])
@@ -136,7 +130,7 @@ class AnalysisView(arcade.View):
         # create blank 'mats' to represent the outline of the cards
         # the mats will be the clickable item for each card to allow the user to select molecules
         self.mat_list = arcade.SpriteList()
-        for (index, row), i in zip(self.feedback_view.final_df.iterrows(), range(len(self.mol_list))):
+        for (index, row), i in zip(self.feedback_view.mol_view.assay_df.iterrows(), range(len(self.mol_list))):
             mat_sprite = arcade.SpriteSolidColor(width = MAT_WIDTH, height = MAT_HEIGHT, color=arcade.color.LIGHT_BLUE)
             # add tag attributes
             mat_sprite.atag = row['atag']
@@ -161,7 +155,7 @@ class AnalysisView(arcade.View):
             sprite.position = mat_coordinate_list[i]
 
         # use the Card class to create objects that store the molecule info and coordinates
-        for (index, row), coord in zip(self.feedback_view.final_df.iterrows(), mol_coordinate_list):
+        for (index, row), coord in zip(self.feedback_view.mol_view.assay_df.iterrows(), mol_coordinate_list):
             cardtext = Card(coord, row['atag'], row['btag'], row['pic50'], row['cl_mouse'], row['cl_human'], row['logd'], row['pampa'])
             self.text_list.append(cardtext)
 
@@ -171,7 +165,7 @@ class AnalysisView(arcade.View):
         """
         coordinate_list = []
 
-        n_cards = len(self.feedback_view.final_df)
+        n_cards = len(self.feedback_view.mol_view.assay_df)
 
         full_rows = int(n_sprites / 2)
         last_row = n_sprites % 2
@@ -211,7 +205,6 @@ class AnalysisView(arcade.View):
         # draw the sprites needed for the cards
         self.mat_list.draw()
         self.mol_list.draw()
-        self.graphs_list.draw()
 
         # draw the text that goes on the cards
         for c in self.text_list:
@@ -297,7 +290,7 @@ class AnalysisView(arcade.View):
         if len(clicked) > 0:  # checks a button has been clicked
             # if final choice button clicked, csv file created and end page shown
             if clicked[0].name == 'final':
-                self.feedback_view.final_df.to_csv('data/results.csv', index=False)
+                self.feedback_view.mol_view.assay_df.to_csv('data/results.csv', index=False)
                 pause = EndView(self)  # passes the current view to Analysis for later
                 self.window.show_view(pause)
 

@@ -11,7 +11,7 @@ from analysis import AnalysisView
 """
 Feedback
 """
-
+# WORK OUT HOW TO DISPLAY THE ALREADY RUN ASSAY INFORMATION WHEN YOU FIRST OPEN THE SCREEN #
 # Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -160,7 +160,6 @@ class FeedbackView(arcade.View):
 
         # stores the molecule info
         self.mol = None
-        self.final_df = None
 
         self.setup()
 
@@ -221,6 +220,19 @@ class FeedbackView(arcade.View):
             action_button = Button(self.mol, action, 0.6)
             action_button.position = (i + (i + 1)) / 18 * SCREEN_WIDTH, (SCREEN_HEIGHT - 90)
             self.button_list.append(action_button)
+        
+        self.check_assays_run()
+
+    def check_assays_run(self):
+        if (len(self.mol_view.assay_df) > 0) and (len(self.assay_choices_print) == 0):
+            try:
+                row = self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])]
+                for assay in ASSAYS.keys():
+                    if pd.isnull(row[assay].values[0]) == False:  # if there is an assay result (cell is not nan)
+                        self.assay_choices_print.append(assay)
+                        self.assay_results_print.append(row[assay].values[0])
+            except IndexError:
+                pass
 
     def split_text(self, n_words, text):
         """
@@ -304,22 +316,6 @@ class FeedbackView(arcade.View):
                          font_name=self.font,
                          color=arcade.color.BLACK)
 
-        # draw the top command buttons
-        arcade.draw_text('Commands',
-                         10,
-                         SCREEN_HEIGHT - 50,
-                         font_size=15,
-                         font_name=self.font,
-                         color=arcade.color.WHITE)
-
-        arcade.draw_text('Free calculations',
-                         2 / 9 * SCREEN_WIDTH + 10,
-                         SCREEN_HEIGHT - 50,
-                         font_size=15,
-                         font_name=self.font,
-                         color=arcade.color.WHITE)
-
-        self.button_list.draw()
         self.mol_sprite_list.draw()
 
         # draw text showing total balances
@@ -549,16 +545,25 @@ class FeedbackView(arcade.View):
             # the assay name, result, cost and duration are stored
 
             if choice.button in ASSAYS.keys():
-                # check the assay hasn't already been selected
                 if choice.button not in self.assay_choices:
-                    # check there is no row for the mol in the df OR if there is a row, that the selected assay hasn't been run
-                    if (self.final_df.loc[(self.final_df['atag'] == self.tags[0]) & (self.final_df['btag'] == self.tags[1]), 'atag'].values.size == 0 or
-                        pd.isnull(self.final_df.loc[(self.final_df['atag'] == self.tags[0]) & (self.final_df['btag'] == self.tags[1]), choice.button].values[0])):
+
+                    # if the assay df is empty or if no assays have been run on the mol, then add the chosen assay to the assay list as normal
+                    if (self.mol_view.assay_df.empty or
+                        self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), 'atag'].values.size == 0):
                         choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
                         self.assay_choices.append(choice.button)
                         self.assay_results.append(choice.get_result())
                         self.total_cost += choice.get_cost()
                         self.total_duration.append(choice.get_duration())
+
+                    # if assays have been run but not the assay that has been selected, get the information of both the assays already run and the assay to run
+                    elif pd.isnull(self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), choice.button].values[0]):
+                            choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
+                            self.check_assays_run()  # append assays already run to the assay choices and assay results
+                            self.assay_choices.append(choice.button)
+                            self.assay_results.append(choice.get_result())
+                            self.total_cost += choice.get_cost()
+                            self.total_duration.append(choice.get_duration())
 
             # checks if the button is an action button
             elif choice.button in ACTIONS:
@@ -568,11 +573,11 @@ class FeedbackView(arcade.View):
                     else:
                         # adds the results to another list to print
                         # changes buttons back to white
-                        self.assay_results_print = self.assay_results
-                        self.assay_choices_print = self.assay_choices
+                        self.assay_results_print = self.assay_results_print + self.assay_results
+                        self.assay_choices_print = self.assay_choices_print + self.assay_choices
                         [b._set_color(arcade.color.WHITE) for b in self.button_list]
                         # cost is not deducted if the molecule was not made or assayed
-                        if 'Not Made' in self.assay_results_print or 'Not Assayed' in self.assay_results_print:
+                        if 'Not Made' in self.assay_results or 'Not Assayed' in self.assay_results:
                             self.total_cost -= ASSAYS['pic50']['cost']
                             self.total_duration.remove(ASSAYS['pic50']['duration'])
                         # costs are subtracted from global variables
@@ -594,14 +599,13 @@ class FeedbackView(arcade.View):
                             self.mol_view.assay_df.loc[
                                 (self.mol_view.assay_df['atag'] == self.tags[0]) &
                                 (self.mol_view.assay_df['btag'] == self.tags[1]), a] = r
-                        self.final_df = self.mol_view.assay_df
 
                 elif choice.button == 'clear_choices':
                     # clears the selected assays and recorded data
                     # changes buttons back to white
                     [b._set_color(arcade.color.WHITE) for b in self.button_list]
-                    self.assay_results_print = []
-                    self.assay_choices_print = []
+                    # self.assay_results_print = []
+                    # self.assay_choices_print = []
                     self.assay_results = []
                     self.total_cost = 0
                     self.total_duration = []
@@ -625,7 +629,6 @@ class FeedbackView(arcade.View):
                         self.mol_view.assay_df.loc[
                             (self.mol_view.assay_df['atag'] == self.tags[0]) &
                             (self.mol_view.assay_df['btag'] == self.tags[1]), d] = v
-                    self.final_df = self.mol_view.assay_df
 
                 elif choice.button == 'run_filters':
                     choice._set_color(arcade.color.YELLOW)
@@ -645,12 +648,14 @@ class FeedbackView(arcade.View):
 
         if key == arcade.key.RIGHT:
             # navigate to view containing analysis (name can be changed)
-            # self.final_df = self.mol_view.assay_df  # create df that can be passed to AnalysisView DELETELINE
+            #self.final_df = self.mol_view.assay_df  # create df that can be passed to AnalysisView
             pause = AnalysisView(self)  # passes the current view to Analysis for later
             self.window.show_view(pause)
         
         if key == arcade.key.SPACE:
-            print(self.final_df)
+            print(self.assay_choices)
+            print(self.assay_choices_print)
+            print(self.mol_view.assay_df)
 
 
 def main():
