@@ -224,22 +224,23 @@ class FeedbackView(arcade.View):
         self.check_assays_run()
 
     def check_assays_run(self):
-        if (len(self.mol_view.assay_df) > 0) and (len(self.assay_choices_print) == 0):
+          """ A  function to check if any new assays have been run"""
+        if (len(self.mol_view.assay_df) > 0) and (len(self.assay_choices_print) == 0): #if assays have been run  and no assays have been printed to the assay view
             try:
-                row = self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])]
+                row = self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])] # fine row in assays_df corosponding to current molecule
                 for assay in ASSAYS.keys():
                     if pd.isnull(row[assay].values[0]) == False:  # if there is an assay result (cell is not nan)
-                        self.assay_choices_print.append(assay)
-                        self.assay_results_print.append(row[assay].values[0])
-            except IndexError:
+                        self.assay_choices_print.append(assay)        # add name of assay to be displayed
+                        self.assay_results_print.append(row[assay].values[0])   #add value of assay
+            except IndexError: # likely here to catch situations whereeither nothing matches the A & B tags or when an assay is being serchef for that dosent exist in mol view? - OFS
                 pass
 
     def split_text(self, n_words, text):
         """
-        Split the hover text into multiple lines so it fits on the screen.
+        Split the hover text, [text], into multiple lines of length [n_words] so it fits on the screen.
         """
-        words = text.split()
-        split = [words[i:i + n_words] for i in range(0, len(words), n_words)]
+        words = text.split()  #make words a list of each individual word in text
+        split = [words[i:i + n_words] for i in range(0, len(words), n_words)]   # join words into lines of length n_words
         split = [" ".join(lst) for lst in split]
         return split
 
