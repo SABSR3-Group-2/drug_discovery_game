@@ -11,7 +11,7 @@ from analysis import AnalysisView
 """
 Feedback
 """
-# WORK OUT HOW TO DISPLAY THE ALREADY RUN ASSAY INFORMATION WHEN YOU FIRST OPEN THE SCREEN #
+
 # Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -648,14 +648,8 @@ class FeedbackView(arcade.View):
 
         if key == arcade.key.RIGHT:
             # navigate to view containing analysis (name can be changed)
-            #self.final_df = self.mol_view.assay_df  # create df that can be passed to AnalysisView
             pause = AnalysisView(self)  # passes the current view to Analysis for later
             self.window.show_view(pause)
-        
-        if key == arcade.key.SPACE:
-            print(self.assay_choices)
-            print(self.assay_choices_print)
-            print(self.mol_view.assay_df)
 
 
 def main():

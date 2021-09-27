@@ -81,7 +81,6 @@ class AnalysisView(arcade.View):
         # Used to keep track of our scrolling
         self.view_top = SCREEN_HEIGHT
 
-        # self.scrolled = 0
         self.top_bound = 0  # the maximum y value
         self.bottom_bound = 0  # the minimum y value
 
