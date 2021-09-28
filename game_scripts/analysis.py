@@ -69,11 +69,11 @@ class Card():
         self.pampa_text = f"PAMPA: {self.pampa}"
 
 class ReviewGraph():
-    """
-    creates graphs for user to review their performace
-    """
 
     def __init__(self, Datatoplot):
+        """
+        creates graphs for user to review and compare the molecules they have investigated
+        """
         self.data = Datatoplot
         self.fig = plt.figure(figsize=[5, 5])
         self.ax = self.fig.add_subplot(111)
