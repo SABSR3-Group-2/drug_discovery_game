@@ -129,12 +129,9 @@ class ReviewGraph():
         
         tempdir = os.path.join('Images', 'temp')
         CurFiles = [f for f in listdir(tempdir) if (isfile(join(tempdir, f)) and f.startswith("TempGraph") and f.endswith(".png"))]
-        print(f"all: {CurFiles}")
         CurFiles = [s.strip("TempGraph") for s in CurFiles]
         CurFiles = [s.strip(".png") for s in CurFiles]
-        print(f"striped: {CurFiles}")
         CurFiles = [int(s) for s in CurFiles if s.isnumeric()]
-        print(f"numeric: {CurFiles}")
         if CurFiles != []:
             curMax = max(CurFiles)
         else:
@@ -291,8 +288,6 @@ class AnalysisView(arcade.View):
 
         #create graph
         self.cleartempgraphs()
-        print("debug a: "+str(self.feedback_view.mol_view.assay_df))
-        print("debug a: "+str(self.feedback_view.mol_view.assay_df))
         self.working_graph = ReviewGraph(self.feedback_view.mol_view.assay_df)
 
         self.graph_list = arcade.SpriteList()
@@ -390,7 +385,7 @@ class AnalysisView(arcade.View):
 
 
                 for pair in colproperties[col]:
-                    hcenter = SCREEN_HEIGHT - ((maxlen* buttonheight) - (i*buttonheight) - 0.5*buttonheight)
+                    hcenter = SCREEN_HEIGHT - ((maxlen* buttonheight) - (i*buttonheight) - 0.5*buttonheight+15)
                     for side in ["x", "y"]:
                         wcenter = (SCREEN_WIDTH-(SCREEN_WIDTH/3)-1.5*buttonwidth) - buttonwidth + colmodifer
                         property_button = axisButton(pair, self.working_graph, self.buttonscale)
@@ -479,12 +474,6 @@ class AnalysisView(arcade.View):
         """
         arcade.start_render()
 
-        arcade.draw_rectangle_filled(SCREEN_WIDTH * 2/3,
-                                SCREEN_HEIGHT / 2,
-                                SCREEN_WIDTH * 2/3,
-                                SCREEN_HEIGHT,
-                                color=arcade.color.OXFORD_BLUE)
-
         # draw the sprites needed for the cards
         self.card_mat_list.draw()
         self.mat_list.draw()
@@ -542,16 +531,18 @@ class AnalysisView(arcade.View):
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
         
-        arcade.draw_line(SCREEN_WIDTH/3,
-                         SCREEN_HEIGHT,
-                         SCREEN_WIDTH/3,
-                         SCREEN_HEIGHT - (self.vh/2),
-                         color=arcade.color.WHITE)
+        # arcade.draw_line(SCREEN_WIDTH/3,
+        #                  SCREEN_HEIGHT,
+        #                  SCREEN_WIDTH/3,
+        #                  SCREEN_HEIGHT - (self.vh/2),
+        #                  arcade.color.WHITE,
+        #                  5)
         arcade.draw_line(SCREEN_WIDTH/3,
                          SCREEN_HEIGHT - (self.vh/2),
                          SCREEN_WIDTH/3,
                          0,
-                         color=arcade.color.OXFORD_BLUE)
+                         arcade.color.OXFORD_BLUE,
+                         5)
 
         help_text = ["Select a molecule to investigate further or choose",
                      "your favourite molecule and end the game."]
@@ -563,6 +554,30 @@ class AnalysisView(arcade.View):
                             font_size=10,
                             font_name=self.font,
                             align='center')
+                            
+        axbuttext = ["Choose axis to change:"]
+        for i, line in enumerate(axbuttext):
+            arcade.draw_text(line,
+                            SCREEN_WIDTH-140,
+                            SCREEN_HEIGHT - 45 - i * 15,
+                            color=arcade.color.WHITE,
+                            font_size=10,
+                            font_name=self.font,
+                            align='center')
+
+
+        help_text = ["Choose Property to display:"]
+        for i, line in enumerate(help_text):
+            arcade.draw_text(line,
+                            SCREEN_WIDTH/3+15,
+                            SCREEN_HEIGHT - 15,
+                            color=arcade.color.WHITE,
+                            font_size=10,
+                            font_name=self.font,
+                            align='center')
+
+
+        
 
         # draw the button sprites
         self.button_list.draw()
@@ -587,14 +602,12 @@ class AnalysisView(arcade.View):
         """
         # check if the user has clicked on a card
         if x < SCREEN_WIDTH/3 and y < SCREEN_HEIGHT-(self.vh/2):
-            print(f">>>>>>DEBUG>>>>>>> card area clicked")
             clicked = arcade.get_sprites_at_point((x, y), self.card_mat_list)
             if len(clicked) > 0:  # checks a button has been clicked
                 [b._set_color(arcade.color.WHITE) for b in self.card_mat_list]
                 choice = clicked[0]
                 choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
-                self.mol_choice = [choice.atag, choice.btag]  # record the tags of the chosen molecule
-                print(f"\t>>>>>>DEBUG>>>>>>> card {choice.atag},{choice.btag} clicked")
+                self.mol_choice = [choice.atag, choice.btag]  # record the tags of the chosen molecule)
 
         # check if the user has clicked on a button
         clicked = arcade.get_sprites_at_point((x, y), self.button_list)
@@ -606,7 +619,6 @@ class AnalysisView(arcade.View):
                 self.window.show_view(end_view)
             # if the molecule builder button is clicked, the chosen molecule tags are passed to self.feedback_view.mol_view
             elif clicked[0].name == 'builder':
-                print(f">>>>>>DEBUG>>>>>>> Builder clicked")
                 if self.mol_choice is not None:
                     sprites = []
                     # get the sprites in the mol builder script that match the tags
@@ -635,7 +647,6 @@ class AnalysisView(arcade.View):
 
             # if the run assays button is clicked, the chosen molecule tags are again passed to both views
             elif clicked[0].name == 'assays':
-                print(f">>>>>>DEBUG>>>>>>> assays clicked")
                 if self.mol_choice is not None:
                     sprites = []
                     # get the sprites in the mol builder script that match the tags
@@ -733,7 +744,6 @@ class AnalysisView(arcade.View):
     def plot(self, plottype):
 
         self.working_graph = ReviewGraph(self.feedback_view.mol_view.assay_df)
-        print(f">>>>>>>>>>>>>>>>> {self.feedback_view.mol_view.assay_df}")
         self.graph_list = arcade.SpriteList()
         if plottype == "scatter":
             returnpath = self.working_graph.scatter([self.currentx,self.currenty,"tags"])
@@ -762,7 +772,6 @@ class axisButton(arcade.Sprite):
         :return: assay result for the chosen molecule
         :rtype: string
         """
-        print("activating "+str(self.button)+" for "+str(self.side)+" axis")
         # retrieves the appropriate column name
         if self.side == "x":
             return(['x',self.button])
