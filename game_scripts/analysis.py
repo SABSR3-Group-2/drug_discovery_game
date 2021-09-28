@@ -160,12 +160,11 @@ class AnalysisView(arcade.View):
     def __init__(self, feedback_view=None):
         super().__init__()
         self.feedback_view = feedback_view
-        #self.final_df = feedback_view.final_df
         self.button_list = None
 
         # stores the components of the 'cards'
         self.mol_list = None  # stores the mol sprites (the molecule images on the cards)
-        self.mat_list = None  # stores the 'mats' (rectangle representing outside of the card)
+        self.card_mat_list = None  # stores the 'mats' (rectangle representing outside of the card)
         self.text_list = []  # stores the text information for each card (generated with the Card class)
 
         arcade.set_background_color(arcade.color.WHITE)
@@ -247,16 +246,16 @@ class AnalysisView(arcade.View):
 
         # create blank 'mats' to represent the outline of the cards
         # the mats will be the clickable item for each card to allow the user to select molecules
-        self.mat_list = arcade.SpriteList()
+        self.card_mat_list = arcade.SpriteList()
         for (index, row), i in zip(self.feedback_view.mol_view.assay_df.iterrows(), range(len(self.mol_list))):
-            mat_sprite = arcade.SpriteSolidColor(width = MAT_WIDTH, height = MAT_HEIGHT, color=arcade.color.LIGHT_BLUE)
+            card_mat_sprite = arcade.SpriteSolidColor(width = MAT_WIDTH, height = MAT_HEIGHT, color=arcade.color.LIGHT_BLUE)
             # add tag attributes
-            mat_sprite.atag = row['atag']
-            mat_sprite.btag = row['btag']
-            self.mat_list.append(mat_sprite)
+            card_mat_sprite.atag = row['atag']
+            card_mat_sprite.btag = row['btag']
+            self.card_mat_list.append(card_mat_sprite)
 
         # create coordinates for the mat sprites
-        mat_coordinate_list = self.make_coordinates(len(self.mat_list))
+        mat_coordinate_list = self.make_coordinates(len(self.card_mat_list))
         # use the same coordinates but with a higher y value for the mol sprites
         mol_coordinate_list = []
         for coords in mat_coordinate_list:
@@ -269,7 +268,7 @@ class AnalysisView(arcade.View):
         for i, sprite in enumerate(self.mol_list):
             sprite.position = mol_coordinate_list[i]
 
-        for i, sprite in enumerate(self.mat_list):
+        for i, sprite in enumerate(self.card_mat_list):
             sprite.position = mat_coordinate_list[i]
 
         # use the Card class to create objects that store the molecule info and coordinates
@@ -408,7 +407,7 @@ class AnalysisView(arcade.View):
         if buttonson == True:
 
             if numcolls == 2:
-                colmodifer = -2.25*buttonwidthh
+                colmodifer = -2.25*buttonwidth
             if numcolls == 3:
                 colmodifer = -5*buttonwidth
             if numcolls == 7:
@@ -487,6 +486,7 @@ class AnalysisView(arcade.View):
                                 color=arcade.color.OXFORD_BLUE)
 
         # draw the sprites needed for the cards
+        self.card_mat_list.draw()
         self.mat_list.draw()
         self.mol_list.draw()
 
@@ -588,9 +588,9 @@ class AnalysisView(arcade.View):
         # check if the user has clicked on a card
         if x < SCREEN_WIDTH/3 and y < SCREEN_HEIGHT-(self.vh/2):
             print(f">>>>>>DEBUG>>>>>>> card area clicked")
-            clicked = arcade.get_sprites_at_point((x, y), self.mat_list)
+            clicked = arcade.get_sprites_at_point((x, y), self.card_mat_list)
             if len(clicked) > 0:  # checks a button has been clicked
-                [b._set_color(arcade.color.WHITE) for b in self.mat_list]
+                [b._set_color(arcade.color.WHITE) for b in self.card_mat_list]
                 choice = clicked[0]
                 choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
                 self.mol_choice = [choice.atag, choice.btag]  # record the tags of the chosen molecule
@@ -715,7 +715,7 @@ class AnalysisView(arcade.View):
         # change the y position of the sprites
         for i, r in enumerate(self.mol_list):
             r.position = (r.position[0], r.position[1] + scroll_y)
-        for i, r in enumerate(self.mat_list):
+        for i, r in enumerate(self.card_mat_list):
             r.position = (r.position[0], r.position[1] + scroll_y)
         
         # change the y position of the card text
