@@ -561,24 +561,34 @@ class FeedbackView(arcade.View):
 
             if choice.button in ASSAYS.keys():
                 if choice.button not in self.assay_choices:
+                    
+                    # if the user has run out of time or money, they cannot run any more assays
+                    if (global_vars.balance <= 0) or (global_vars.time <= 0):
+                        print('You have run out of resources. You cannot run any more assays.')
+                    
+                    # if the user does not have enough time or money remaining for that assay, they cannot run the assay
+                    elif (global_vars.balance - choice.get_cost() < 0) or (global_vars.time - choice.get_duration() < 0):
+                        print('You do not have enough resources to run that assay.')
 
-                    # if the assay df is empty or if no assays have been run on the mol, then add the chosen assay to the assay list as normal
-                    if (self.mol_view.assay_df.empty or
-                        self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), 'atag'].values.size == 0):
-                        choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
-                        self.assay_choices.append(choice.button)
-                        self.assay_results.append(choice.get_result())
-                        self.total_cost += choice.get_cost()  # tally the cost and duration of the selected assays
-                        self.total_duration.append(choice.get_duration())
-
-                    # if assays have been run but not the assay that has been selected, get the information of both the assays already run and the assay to run
-                    elif pd.isnull(self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), choice.button].values[0]):
+                    # if the user has the time and money required for the assay, they can select it
+                    else:
+                        # if the assay df is empty or if no assays have been run on the mol, then add the chosen assay to the assay list as normal
+                        if (self.mol_view.assay_df.empty or
+                            self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), 'atag'].values.size == 0):
                             choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
-                            self.check_assays_run()  # append assays already run to the assay choices and assay results
                             self.assay_choices.append(choice.button)
                             self.assay_results.append(choice.get_result())
-                            self.total_cost += choice.get_cost()
+                            self.total_cost += choice.get_cost()  # tally the cost and duration of the selected assays
                             self.total_duration.append(choice.get_duration())
+
+                        # if assays have been run but not the assay that has been selected, get the information of both the assays already run and the assay to run
+                        elif pd.isnull(self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), choice.button].values[0]):
+                                choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
+                                self.check_assays_run()  # append assays already run to the assay choices and assay results
+                                self.assay_choices.append(choice.button)
+                                self.assay_results.append(choice.get_result())
+                                self.total_cost += choice.get_cost()
+                                self.total_duration.append(choice.get_duration())
 
             # checks if the button is an action button
             elif choice.button in ACTIONS:
