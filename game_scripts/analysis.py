@@ -531,16 +531,18 @@ class AnalysisView(arcade.View):
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
         
-        arcade.draw_line(SCREEN_WIDTH/3,
-                         SCREEN_HEIGHT,
-                         SCREEN_WIDTH/3,
-                         SCREEN_HEIGHT - (self.vh/2),
-                         color=arcade.color.WHITE)
+        # arcade.draw_line(SCREEN_WIDTH/3,
+        #                  SCREEN_HEIGHT,
+        #                  SCREEN_WIDTH/3,
+        #                  SCREEN_HEIGHT - (self.vh/2),
+        #                  arcade.color.WHITE,
+        #                  5)
         arcade.draw_line(SCREEN_WIDTH/3,
                          SCREEN_HEIGHT - (self.vh/2),
                          SCREEN_WIDTH/3,
                          0,
-                         color=arcade.color.OXFORD_BLUE)
+                         arcade.color.OXFORD_BLUE,
+                         5)
 
         help_text = ["Select a molecule to investigate further or choose",
                      "your favourite molecule and end the game."]
