@@ -124,11 +124,11 @@ class FeedbackView(arcade.View):
         # list to hold the mol sprite
         self.mol_sprite_list = None
 
-        # tracks the assays chosen, the results and results to print
-        self.assay_choices = None
-        self.assay_results = None
-        self.assay_results_print = None
-        self.assay_choices_print = None
+        # tracks the assays chosen and the results
+        self.assay_choices = None  # stores the assays chosen by the player
+        self.assay_results = None  # stores the assay results of assays chosen
+        self.assay_choices_print = None  # stores the assays to be displayed (i.e. all assays already run)
+        self.assay_results_print = None  # stores the assay results to be displayed (as above)
 
         # track the total cost and duration of the assays selected
         self.total_cost = None
@@ -152,7 +152,7 @@ class FeedbackView(arcade.View):
             else:
                 self.tags[i] = t.tag
 
-        # track which sprite we're near for displaying help
+        # track which sprite we're near for displaying help text
         self.hovered = None
         self.hover_time = 0
         self.location = (0, 0)
@@ -177,6 +177,22 @@ class FeedbackView(arcade.View):
         x_slot_width = SCREEN_WIDTH / 5
         x_slot = (sprite_no * x_slot_width) - (x_slot_width / 2) + x_slot_width
         return x_slot, y_slot
+
+    def check_assays_run(self):
+        """
+        Function to check which assays have already been run so that the information is displayed
+        (prevents user from trying to run assays twice). Checks the df containing all the assay info
+        for the R group tags and the assays run.
+        """
+        if (len(self.mol_view.assay_df) > 0) and (len(self.assay_choices_print) == 0):  # if assays have been run and no assays have been printed to the assay view
+            try:
+                row = self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])] # fine row in assays_df corosponding to current molecule
+                for assay in ASSAYS.keys():
+                    if pd.isnull(row[assay].values[0]) == False:  # if there is an assay result (cell is not nan)
+                        self.assay_choices_print.append(assay)        # add name of assay to be displayed
+                        self.assay_results_print.append(row[assay].values[0])   #add value of assay
+            except IndexError: # likely here to catch situations whereeither nothing matches the A & B tags or when an assay is being serchef for that dosent exist in mol view? - OFS
+                pass
 
     def setup(self):
         """
@@ -220,27 +236,24 @@ class FeedbackView(arcade.View):
             action_button = Button(self.mol, action, 0.6)
             action_button.position = (i + (i + 1)) / 18 * SCREEN_WIDTH, (SCREEN_HEIGHT - 90)
             self.button_list.append(action_button)
-        
-        self.check_assays_run()
 
-    def check_assays_run(self):
-          """ A  function to check if any new assays have been run"""
-        if (len(self.mol_view.assay_df) > 0) and (len(self.assay_choices_print) == 0): #if assays have been run  and no assays have been printed to the assay view
-            try:
-                row = self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])] # fine row in assays_df corosponding to current molecule
-                for assay in ASSAYS.keys():
-                    if pd.isnull(row[assay].values[0]) == False:  # if there is an assay result (cell is not nan)
-                        self.assay_choices_print.append(assay)        # add name of assay to be displayed
-                        self.assay_results_print.append(row[assay].values[0])   #add value of assay
-            except IndexError: # likely here to catch situations whereeither nothing matches the A & B tags or when an assay is being serchef for that dosent exist in mol view? - OFS
-                pass
+        # run function when the screen is first loaded to check which assays have already been run for this molecule
+        self.check_assays_run()
 
     def split_text(self, n_words, text):
         """
         Split the hover text, [text], into multiple lines of length [n_words] so it fits on the screen.
+
+        :param n_words: the number of words to put on each line
+        :type n_words: int
+        :param text: the help text to appear when hovering over the button
+        :type text: string
+
+        :return: a list of strings representing each line of text
+        :rtype: list
         """
-        words = text.split()  #make words a list of each individual word in text
-        split = [words[i:i + n_words] for i in range(0, len(words), n_words)]   # join words into lines of length n_words
+        words = text.split()  # make words a list of each individual word in text
+        split = [words[i:i + n_words] for i in range(0, len(words), n_words)]  # join words into lines of length n_words
         split = [" ".join(lst) for lst in split]
         return split
 
@@ -317,6 +330,7 @@ class FeedbackView(arcade.View):
                          font_name=self.font,
                          color=arcade.color.BLACK)
 
+        # draw the chosen molecule
         self.mol_sprite_list.draw()
 
         # draw text showing total balances
@@ -370,7 +384,7 @@ class FeedbackView(arcade.View):
                          font_name=self.font,
                          color=arcade.color.BLACK)
 
-        # draw the instructions text
+        # draw the instructions text (separated into lines so that they fit on the screen)
         instructions = ['Welcome to the feedback screen. Here you',
                         'can run assays on your chosen molecule,',
                         'calculate descriptors and run substructure',
@@ -554,7 +568,7 @@ class FeedbackView(arcade.View):
                         choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
                         self.assay_choices.append(choice.button)
                         self.assay_results.append(choice.get_result())
-                        self.total_cost += choice.get_cost()
+                        self.total_cost += choice.get_cost()  # tally the cost and duration of the selected assays
                         self.total_duration.append(choice.get_duration())
 
                     # if assays have been run but not the assay that has been selected, get the information of both the assays already run and the assay to run
@@ -570,6 +584,7 @@ class FeedbackView(arcade.View):
             elif choice.button in ACTIONS:
                 if choice.button == 'run_assays':
                     if self.assay_results == []:
+                        # if no assays have been selected, then pass
                         pass
                     else:
                         # adds the results to another list to print
