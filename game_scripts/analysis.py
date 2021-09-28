@@ -129,12 +129,9 @@ class ReviewGraph():
         
         tempdir = os.path.join('Images', 'temp')
         CurFiles = [f for f in listdir(tempdir) if (isfile(join(tempdir, f)) and f.startswith("TempGraph") and f.endswith(".png"))]
-        print(f"all: {CurFiles}")
         CurFiles = [s.strip("TempGraph") for s in CurFiles]
         CurFiles = [s.strip(".png") for s in CurFiles]
-        print(f"striped: {CurFiles}")
         CurFiles = [int(s) for s in CurFiles if s.isnumeric()]
-        print(f"numeric: {CurFiles}")
         if CurFiles != []:
             curMax = max(CurFiles)
         else:
@@ -291,8 +288,6 @@ class AnalysisView(arcade.View):
 
         #create graph
         self.cleartempgraphs()
-        print("debug a: "+str(self.feedback_view.mol_view.assay_df))
-        print("debug a: "+str(self.feedback_view.mol_view.assay_df))
         self.working_graph = ReviewGraph(self.feedback_view.mol_view.assay_df)
 
         self.graph_list = arcade.SpriteList()
@@ -587,14 +582,12 @@ class AnalysisView(arcade.View):
         """
         # check if the user has clicked on a card
         if x < SCREEN_WIDTH/3 and y < SCREEN_HEIGHT-(self.vh/2):
-            print(f">>>>>>DEBUG>>>>>>> card area clicked")
             clicked = arcade.get_sprites_at_point((x, y), self.card_mat_list)
             if len(clicked) > 0:  # checks a button has been clicked
                 [b._set_color(arcade.color.WHITE) for b in self.card_mat_list]
                 choice = clicked[0]
                 choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
-                self.mol_choice = [choice.atag, choice.btag]  # record the tags of the chosen molecule
-                print(f"\t>>>>>>DEBUG>>>>>>> card {choice.atag},{choice.btag} clicked")
+                self.mol_choice = [choice.atag, choice.btag]  # record the tags of the chosen molecule)
 
         # check if the user has clicked on a button
         clicked = arcade.get_sprites_at_point((x, y), self.button_list)
@@ -606,7 +599,6 @@ class AnalysisView(arcade.View):
                 self.window.show_view(end_view)
             # if the molecule builder button is clicked, the chosen molecule tags are passed to self.feedback_view.mol_view
             elif clicked[0].name == 'builder':
-                print(f">>>>>>DEBUG>>>>>>> Builder clicked")
                 if self.mol_choice is not None:
                     sprites = []
                     # get the sprites in the mol builder script that match the tags
@@ -635,7 +627,6 @@ class AnalysisView(arcade.View):
 
             # if the run assays button is clicked, the chosen molecule tags are again passed to both views
             elif clicked[0].name == 'assays':
-                print(f">>>>>>DEBUG>>>>>>> assays clicked")
                 if self.mol_choice is not None:
                     sprites = []
                     # get the sprites in the mol builder script that match the tags
@@ -733,7 +724,6 @@ class AnalysisView(arcade.View):
     def plot(self, plottype):
 
         self.working_graph = ReviewGraph(self.feedback_view.mol_view.assay_df)
-        print(f">>>>>>>>>>>>>>>>> {self.feedback_view.mol_view.assay_df}")
         self.graph_list = arcade.SpriteList()
         if plottype == "scatter":
             returnpath = self.working_graph.scatter([self.currentx,self.currenty,"tags"])
@@ -762,7 +752,6 @@ class axisButton(arcade.Sprite):
         :return: assay result for the chosen molecule
         :rtype: string
         """
-        print("activating "+str(self.button)+" for "+str(self.side)+" axis")
         # retrieves the appropriate column name
         if self.side == "x":
             return(['x',self.button])
