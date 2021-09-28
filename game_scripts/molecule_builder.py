@@ -94,6 +94,9 @@ class MolView(arcade.View):
         ]
         self.assay_df = pd.DataFrame(columns=self.col_names)
 
+        # stores the path to the font file
+        self.font = os.path.join('fonts', 'arial.ttf')
+
     def get_num_vectors(self):
         """Deduces the number of vectors on the scaffold molecule from the scaffold smile"""
         vecs = re.findall('\[\*\:\d+\]', Chem.MolToSmiles(self.scaffold))
@@ -225,7 +228,7 @@ class MolView(arcade.View):
             coord = self.r_sprite_list[i].position
             value_coord = [f'{float(r):.0f}', coord[0], coord[1] - 55]
             arcade.draw_text(value_coord[0], value_coord[1], value_coord[2],
-                             color=arcade.color.BLACK, align="center", font_size=11)
+                             color=arcade.color.BLACK, align="center", font_size=11, font_name=self.font)
 
     def draw_hover(self):
 
@@ -244,7 +247,7 @@ class MolView(arcade.View):
         loc = (self.hovered.position[0] + 30, self.hovered.position[1] - 30)  # where to draw it
 
         # Create the text sprite
-        text_sprite = arcade.draw_text(text, loc[0], loc[1], color=arcade.color.BLACK, font_size=10)
+        text_sprite = arcade.draw_text(text, loc[0], loc[1], color=arcade.color.BLACK, font_size=10, font_name=self.font)
 
         # Draw the background
         width = text_sprite.width
@@ -339,10 +342,10 @@ class MolView(arcade.View):
                                      color=arcade.color.OXFORD_BLUE)
 
         arcade.draw_text('Molecule Builder', int(SCREEN_WIDTH*0.59), SCREEN_HEIGHT - 50, color=arcade.color.WHITE,
-                         font_size=30)
+                         font_size=30, font_name=self.font)
 
         arcade.draw_text(f'Displaying: R{ord(self.tag[0].lower()) - 96}', 10, SCREEN_HEIGHT - self.vh * 0.5 - 20,
-                         color=arcade.color.OXFORD_BLUE, font_size=11)
+                         color=arcade.color.OXFORD_BLUE, font_size=11, font_name=self.font)
 
         instructions = ['Welcome to the Drug Discovery Game. Above you can see the starting scaffold',
                         'with the vectors marked by starred numbers. Select r groups from the scrol-',
@@ -352,7 +355,7 @@ class MolView(arcade.View):
                         'Change views by using the right and left keys on the keyboard.']
 
         for i, t in enumerate(instructions):
-            arcade.draw_text(t, INVENTORY_WIDTH + 15, SCREEN_HEIGHT / 5 - (i + 1) * 20, color=arcade.color.OXFORD_BLUE)
+            arcade.draw_text(t, INVENTORY_WIDTH + 15, SCREEN_HEIGHT / 5 - (i + 1) * 20, color=arcade.color.OXFORD_BLUE, font_name=self.font)
 
         # Delineate boundaries
         arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT, INVENTORY_WIDTH, 0, arcade.color.OXFORD_BLUE, 5)
