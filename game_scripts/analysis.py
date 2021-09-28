@@ -385,7 +385,7 @@ class AnalysisView(arcade.View):
 
 
                 for pair in colproperties[col]:
-                    hcenter = SCREEN_HEIGHT - ((maxlen* buttonheight) - (i*buttonheight) - 0.5*buttonheight)
+                    hcenter = SCREEN_HEIGHT - ((maxlen* buttonheight) - (i*buttonheight) - 0.5*buttonheight+15)
                     for side in ["x", "y"]:
                         wcenter = (SCREEN_WIDTH-(SCREEN_WIDTH/3)-1.5*buttonwidth) - buttonwidth + colmodifer
                         property_button = axisButton(pair, self.working_graph, self.buttonscale)
@@ -474,12 +474,6 @@ class AnalysisView(arcade.View):
         """
         arcade.start_render()
 
-        arcade.draw_rectangle_filled(SCREEN_WIDTH * 2/3,
-                                SCREEN_HEIGHT / 2,
-                                SCREEN_WIDTH * 2/3,
-                                SCREEN_HEIGHT,
-                                color=arcade.color.OXFORD_BLUE)
-
         # draw the sprites needed for the cards
         self.card_mat_list.draw()
         self.mat_list.draw()
@@ -558,6 +552,30 @@ class AnalysisView(arcade.View):
                             font_size=10,
                             font_name=self.font,
                             align='center')
+                            
+        axbuttext = ["Choose axis to change:"]
+        for i, line in enumerate(axbuttext):
+            arcade.draw_text(line,
+                            SCREEN_WIDTH-140,
+                            SCREEN_HEIGHT - 45 - i * 15,
+                            color=arcade.color.WHITE,
+                            font_size=10,
+                            font_name=self.font,
+                            align='center')
+
+
+        help_text = ["Choose Property to display:"]
+        for i, line in enumerate(help_text):
+            arcade.draw_text(line,
+                            SCREEN_WIDTH/3+15,
+                            SCREEN_HEIGHT - 15,
+                            color=arcade.color.WHITE,
+                            font_size=10,
+                            font_name=self.font,
+                            align='center')
+
+
+        
 
         # draw the button sprites
         self.button_list.draw()
