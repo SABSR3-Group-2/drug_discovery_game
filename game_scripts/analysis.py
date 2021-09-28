@@ -178,7 +178,7 @@ class AnalysisView(arcade.View):
         self.currentx = "pic50"
         self.currenty = "logP"
         self.axisselectmode = "x"
-        self.properties = ["logP", "pic50", "cl_mouse", "cl_human", "logd", "pampa", "MW", "logP", "TPSA", "HA", "h_acc", "h_don", "rings"]
+        self.properties = ["logP", "pic50", "cl_mouse", "cl_human", "logd", "pampa", "MW", "TPSA", "HA", "h_acc", "h_don", "rings"]
 
         
         ### Cards Init ##
@@ -204,6 +204,7 @@ class AnalysisView(arcade.View):
     def setup(self):
         self.setupCards()
         self.setupGraph()
+        self.plot("scatter") # reproduces the graph to avoid legacy graphs being displayed
 
     def setupCards(self):
         """
@@ -310,7 +311,7 @@ class AnalysisView(arcade.View):
             self.mat_list = arcade.SpriteList()
 
             # setup button collumns
-            numcolls = 7
+            numcolls = 6
             colproperties = []
             for col in range(numcolls):
                 colproperties.append([])
@@ -357,13 +358,13 @@ class AnalysisView(arcade.View):
                     if col == 0:
                         colmodifer = -5*buttonwidth
                     elif col == 1:
-                        colmodifer = -2.5*buttonwidth
+                        colmodifer = -3*buttonwidth
                     elif col == 2:
-                        colmodifer = 0
+                        colmodifer = -1*buttonwidth
                     elif col == 3:
-                        colmodifer = 2.5*buttonwidth
+                        colmodifer = 1*buttonwidth
                     elif col == 4:
-                        colmodifer = 2.5*buttonwidth
+                        colmodifer = 3*buttonwidth
                     else:
                         colmodifer = 5*buttonwidth
 
@@ -391,7 +392,7 @@ class AnalysisView(arcade.View):
                         property_button = axisButton(pair, self.working_graph, self.buttonscale)
                         property_button.position = wcenter, hcenter
                         self.axisbutton_list.append(property_button)
-                        mat_sprite = arcade.SpriteSolidColor(width = int(buttonwidth), height = int(buttonheight), color=arcade.color.LIGHT_BLUE)
+                        mat_sprite = arcade.SpriteSolidColor(width = 2*int(buttonwidth), height = int(buttonheight), color=arcade.color.LIGHT_BLUE)
                         mat_sprite.position = wcenter,hcenter
                         mat_sprite.value = pair
                         mat_sprite.side = side
