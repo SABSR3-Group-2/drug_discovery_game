@@ -20,7 +20,7 @@ SCREEN_HEIGHT = 650
 SCREEN_TITLE = "The Final Selection"
 
 CARD_WIDTH = 250
-CARD_HEIGHT = 300
+CARD_HEIGHT = 310
 MAT_WIDTH = 250
 MAT_HEIGHT = 650
 MAT_Y_COORD = 530
@@ -74,7 +74,8 @@ class EndGame(arcade.View):
         self.chosen_sprite = None
         self.numberline = None
         self.target_sprite = None
-        self.text_list = []
+        self.choice_text_list = []
+        self.target_text_list = []
         self.radarplot = None
 
         # stores the path to the font file
@@ -108,13 +109,10 @@ class EndGame(arcade.View):
         # it is in the circle.
         for label, angle in zip(ax.get_xticklabels(), angles):
             if angle == 0:
-                print('left', label)
                 label.set_horizontalalignment('left')
             elif angle in (2.5132741228718345, 3.7699111843077517):
-                print('right', label)
                 label.set_horizontalalignment('right')
             else:
-                print(label)
                 label.set_horizontalalignment('center')
 
         plt.yticks(plot_markers, plot_str_markers)
@@ -177,13 +175,21 @@ class EndGame(arcade.View):
         #Create the placeholders for the two 'card mats'
         self.mat_list = arcade.SpriteList()
 
-        left_mat = arcade.SpriteSolidColor(CARD_WIDTH, CARD_HEIGHT, arcade.color.LIGHT_BLUE)
+        left_mat = arcade.SpriteSolidColor(CARD_WIDTH, CARD_HEIGHT, arcade.color.OXFORD_BLUE)
         left_mat.position = LEFT_MAT_X_COORD, MAT_Y_COORD
         self.mat_list.append(left_mat)
 
-        right_mat = arcade.SpriteSolidColor(CARD_WIDTH, CARD_HEIGHT, arcade.color.LIGHT_BLUE)
+        left_background = arcade.SpriteSolidColor(CARD_WIDTH - 20, 150, arcade.color.WHITE)
+        left_background.position = LEFT_MAT_X_COORD, 545
+        self.mat_list.append(left_background)
+
+        right_mat = arcade.SpriteSolidColor(CARD_WIDTH, CARD_HEIGHT, arcade.color.OXFORD_BLUE)
         right_mat.position = RIGHT_MAT_X_COORD, MAT_Y_COORD
         self.mat_list.append(right_mat)
+
+        right_background = arcade.SpriteSolidColor(CARD_WIDTH - 20, 150, arcade.color.WHITE)
+        right_background.position = RIGHT_MAT_X_COORD, 545
+        self.mat_list.append(right_background)
 
         #Align Roche choice and user choice
         core = Chem.MolFromSmiles(CORE)
@@ -201,6 +207,7 @@ class EndGame(arcade.View):
         d = rdMolDraw2D.MolDraw2DCairo(250, 200)
         d.drawOptions().addStereoAnnotation = True
         d.drawOptions().clearBackground = False
+        #d.drawOptions().setBackgroundColour((1, 1, 1))
         d.DrawMolecule(target)
         d.FinishDrawing()
         d.WriteDrawingText('Images/game_loop_images/target_mol.png')
@@ -233,7 +240,6 @@ class EndGame(arcade.View):
         
         #List of parameters for final molecule spider plot
         final_property_list = [pic50, logd, mouse_clearance, human_clearance, permeability]
-        print(final_property_list)
 
         #Generate spider plot
         self.make_radar_chart(stats=final_property_list)
@@ -243,7 +249,9 @@ class EndGame(arcade.View):
 
         #generate text list
         pic50 = mol_info.at[0, 'pic50']
-        self.text_list = ['pIC50: {}'.format(pic50), 'pIC50: 7.7']
+        self.choice_text_list = [f'pIC50: {mol_info.at[0, "pic50"]}', f'logD: {logd}', f'Mouse clearance: {mol_info.at[0, "clearance_mouse"]}', f'Human clearance: {mol_info.at[0, "clearance_human"]}', f'Permeability: {mol_info.at[0, "pampa"]}']
+        self.target_text_list = ['pIC50: 7.7', 'logD: 1.08', 'Mouse clearance: low (<5.6)', 'Human clearance: low (<12)', 'Permeability: medium - high']
+        
 
     def on_draw(self):
         """Render the screen"""
@@ -258,12 +266,17 @@ class EndGame(arcade.View):
         self.card_list.draw()
 
         #Drawing box titles
-        arcade.draw_text('Your Choice', 300, 620, color=arcade.color.BLACK, font_size=15)
-        arcade.draw_text("Roche's Choice", 590, 620, color=arcade.color.BLACK, font_size=15)
+        arcade.draw_text('Your Choice', 300, 620, color=arcade.color.WHITE, font_size=15)
+        arcade.draw_text("Roche's Choice", 590, 620, color=arcade.color.WHITE, font_size=15)
 
-        #Draw in pIC50 Data
-        arcade.draw_text(self.text_list[0], 240, 420, color=arcade.color.BLACK, font_size=10)
-        arcade.draw_text(self.text_list[1], 540, 420, color=arcade.color.BLACK, font_size=10)
+        #Draw in choice Data
+        for counter, item in enumerate(self.choice_text_list):
+            arcade.draw_text(item, 240, 450 - counter*17, color=arcade.color.WHITE, font_size=10)
+
+        #Draw in target data
+        for counter, item in enumerate(self.target_text_list):
+            arcade.draw_text(item, 545, 450 - counter*17, color=arcade.color.WHITE, font_size=10)
+        
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
