@@ -1,7 +1,5 @@
 """
 Make molecules from a scaffold and r groups.
-
-To do:
 """
 import arcade
 import re
