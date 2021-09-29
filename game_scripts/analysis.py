@@ -12,7 +12,8 @@ from matplotlib import pyplot as plt
 import os
 from os import listdir
 from os.path import isfile, join
-from end_game_screen import EndView
+from end_game import EndGame
+
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 650
@@ -619,7 +620,7 @@ class AnalysisView(arcade.View):
             # if final choice button clicked, csv file created and end page shown
             if clicked[0].name == 'final':
                 self.feedback_view.mol_view.assay_df.to_csv('data/results.csv', index=False)
-                end_view = EndView(self)  # passes the current view to Analysis for later
+                end_view = EndGame(self)  # passes the current view to Analysis for later
                 self.window.show_view(end_view)
 
             # if the molecule builder button is clicked, the chosen molecule tags are passed to self.feedback_view.mol_view (and self.feedback_view)
