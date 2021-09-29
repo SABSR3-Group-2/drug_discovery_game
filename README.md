@@ -3,13 +3,25 @@
 # The Drug Discovery Game
 
 The Drug Discovery Game is an interactive game exploring the process of drug discovery based on actual data from drugs in clinical trials or on the market. Players grow a core fragment from pre-defined vectors, guided by biophysical and pharmacological assay data. The aim is to develop a final compound within a specified budget with a potency close to that of the published compound. This serves as both an educative tool for training medicinal chemists in robust decision making, but also as a tool for training machine learning algorithms in the decisions made by pharmaceutical research scientists. It is developed by researchers from the University of Oxford in collaboration with scientists from Roche.
-Latest documentation at: https://drug-discovery-game.readthedocs.io/en/latest/ **Documentation not currently working**
+Latest documentation at: https://drug-discovery-game.readthedocs.io/en/latest/
 ## Installation
 
-Currently the project is not pip-installable, but this functionality will be added in due course.
+If you don't already have git installed on your machine, you can follow the steps in this <a href="https://www.atlassian.com/git/tutorials/install-git">tutorial</a> to get started.
+
+If you do have git installed run, open your terminal, move to the directory you want to install the repo and run:
+
+`git clone https://github.com/SABSR3-Group-2/drug_discovery_game.git` 
+
+Following successful cloning, navigate to the root directory by running:
+
+`cd drug_discovery_game`
 
 ## Creating a Virtual Environment
+It's recommended that you set up a virtual environment to install the dependencies in. We recommend installing <a href="https://docs.conda.io/en/latest/miniconda.html">miniconda</a> version=4.9.2 and then setting up a virtual environment by running something like:
 
+`conda env create --name dd_game --file environment.yml`
+
+This should install all the dependencies necessary for the game to run.
 ## Usage
 
 At the moment, this is very much a minimum viable product (MVP), however it is in constant and continual development, and this repository will be updated frequently.

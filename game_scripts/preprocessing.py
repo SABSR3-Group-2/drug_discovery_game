@@ -23,13 +23,3 @@ def preprocess(raw_data, scaffold):
     print(f'Saving processed data to file: {raw_data}_processed')
     processed_data_df.to_csv(f'{raw_data}_processed.csv', encoding='utf-8', index=False)
 
-
-if len(sys.argv) < 3:  # throw error
-    print("Please make sure you have provided both the raw_data path and the scaffold smile string")
-else:
-    sys.argv[1].rstrip().lstrip()
-    sys.argv[2].rstrip().lstrip()
-    preprocess(sys.argv[1], sys.argv[2])
-
-
-
