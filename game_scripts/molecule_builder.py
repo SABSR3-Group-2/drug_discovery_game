@@ -1,7 +1,5 @@
 """
 Make molecules from a scaffold and r groups.
-
-To do:
 """
 import arcade
 import re
@@ -9,6 +7,7 @@ import os
 import pandas as pd
 import time
 from rdkit import Chem
+from rdkit import RDLogger
 from rdkit.Chem.Draw import rdMolDraw2D
 from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
@@ -42,7 +41,7 @@ class MolView(arcade.View):
         # Call the parent class and set up the window
         super().__init__()
         self.feedback_view = feedback_view
-
+        RDLogger.DisableLog('rdApp.*')  # don't print warning message for hydrogen removal
         # Initial scaffold molecule
         self.scaffold = Chem.MolFromSmiles('O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]')  # |$;;;;;;;;;;;;R2;;;R1$|')
         self.num_vecs = self.get_num_vectors()  # get an integer value for how many vectors there are
@@ -92,6 +91,9 @@ class MolView(arcade.View):
             'MW', 'logP', 'TPSA', 'HA', 'h_acc', 'h_don', 'rings'
         ]
         self.assay_df = pd.DataFrame(columns=self.col_names)
+
+        # stores the path to the font file
+        self.font = os.path.join('fonts', 'arial.ttf')
 
     def get_num_vectors(self):
         """Deduces the number of vectors on the scaffold molecule from the scaffold smile"""
@@ -224,7 +226,7 @@ class MolView(arcade.View):
             coord = self.r_sprite_list[i].position
             value_coord = [f'{float(r):.0f}', coord[0], coord[1] - 55]
             arcade.draw_text(value_coord[0], value_coord[1], value_coord[2],
-                             color=arcade.color.BLACK, align="center", font_size=11)
+                             color=arcade.color.BLACK, align="center", font_size=11, font_name=self.font)
 
     def draw_hover(self):
 
@@ -243,7 +245,7 @@ class MolView(arcade.View):
         loc = (self.hovered.position[0] + 30, self.hovered.position[1] - 30)  # where to draw it
 
         # Create the text sprite
-        text_sprite = arcade.draw_text(text, loc[0], loc[1], color=arcade.color.BLACK, font_size=10)
+        text_sprite = arcade.draw_text(text, loc[0], loc[1], color=arcade.color.BLACK, font_size=10, font_name=self.font)
 
         # Draw the background
         width = text_sprite.width
@@ -325,11 +327,23 @@ class MolView(arcade.View):
         self.draw_values()
 
         # Draw the menu bar
-        arcade.draw_rectangle_filled(INVENTORY_WIDTH / 2,
+        # arcade.draw_rectangle_filled(INVENTORY_WIDTH / 2,
+        #                              SCREEN_HEIGHT,
+        #                              INVENTORY_WIDTH,
+        #                              self.vh,
+        #                              color=arcade.color.OXFORD_BLUE)
+
+        arcade.draw_rectangle_filled(SCREEN_WIDTH / 2,
                                      SCREEN_HEIGHT,
-                                     INVENTORY_WIDTH,
+                                     SCREEN_WIDTH,
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
+
+        arcade.draw_text('Molecule Builder', int(SCREEN_WIDTH*0.59), SCREEN_HEIGHT - 50, color=arcade.color.WHITE,
+                         font_size=30, font_name=self.font)
+
+        arcade.draw_text(f'Displaying: R{ord(self.tag[0].lower()) - 96}', 10, SCREEN_HEIGHT - self.vh * 0.5 - 20,
+                         color=arcade.color.OXFORD_BLUE, font_size=11, font_name=self.font)
 
         instructions = ['Welcome to the Drug Discovery Game. Above you can see the starting scaffold',
                         'with the vectors marked by starred numbers. Select r groups from the scrol-',
@@ -339,11 +353,12 @@ class MolView(arcade.View):
                         'Change views by using the right and left keys on the keyboard.']
 
         for i, t in enumerate(instructions):
-            arcade.draw_text(t, INVENTORY_WIDTH + 15, SCREEN_HEIGHT / 5 - (i + 1) * 20, color=arcade.color.OXFORD_BLUE)
+            arcade.draw_text(t, INVENTORY_WIDTH + 15, SCREEN_HEIGHT / 5 - (i + 1) * 20, color=arcade.color.OXFORD_BLUE, font_name=self.font)
 
         # Delineate boundaries
-        arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT, INVENTORY_WIDTH, 0, arcade.color.OXFORD_BLUE)
-        arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT / 5, SCREEN_WIDTH, SCREEN_HEIGHT / 5, arcade.color.OXFORD_BLUE)
+        arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT, INVENTORY_WIDTH, 0, arcade.color.OXFORD_BLUE, 5)
+        arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT / 5, SCREEN_WIDTH, SCREEN_HEIGHT / 5,
+                         arcade.color.OXFORD_BLUE, 5)
 
         # Draw the filters
         self.filter_sprite_list.draw()
@@ -395,8 +410,10 @@ class MolView(arcade.View):
         # Change inventory
         clicked = arcade.get_sprites_at_point((x, y), self.buttons)
         if len(clicked) > 0:
+            [f._set_color(arcade.color.WHITE) for f in self.buttons]
             if clicked[-1] == self.buttons[1]:  # if right arrow
                 if ord(self.tag[0]) - 96 < self.num_vecs:  # not out of range
+                    clicked[-1]._set_color(arcade.color.RED)
                     self.setup_sprites(tag=f'{chr(ord(self.tag[0]) + 1)}tag', feat=self.feature)
                 else:
                     pass
@@ -404,6 +421,7 @@ class MolView(arcade.View):
                 if self.tag[0] == 'a':
                     pass
                 else:
+                    clicked[-1]._set_color(arcade.color.RED)
                     self.setup_sprites(tag=f'{chr(ord(self.tag[0]) - 1)}tag', feat=self.feature)
             else:
                 pass
