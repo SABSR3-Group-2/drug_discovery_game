@@ -27,10 +27,34 @@ MAT_HEIGHT = 650
 CORE = 'O=C(O)C(NS(=O)(=O)c1ccccc1)'
 
 #Constants for spider plot
-labels=['pIC50', 'logP', 'logD', 'H-Bond Acceptors', 'H-Bond Donors']
+labels=['pIC50', 'logD', 'Mouse Clearance', 'Human Clearance', 'Permeability']
 markers = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 str_markers = ["0", "1", "2", "3", "4", "5", '6', '7', '8']
-target_data = [7.7, 3.95, 1.08, 5, 2]
+target_data = [7.7, 1.08, 1, 1, 7]
+
+#Dictionaries converting non-numerical assay results into numerical approximate values
+clearance_dict = {
+    'low (< 5.6)': 1,
+    'medium (5.6-30.5)': 4,
+    'low (< 3.7)': 1, 
+    'good':1,
+    'high (> 30.5)': 7,
+    'fair': 4,
+    'poor': 7,
+    'low (< 12)': 1,
+    'medium (12-44)': 4,
+    'medium (5.6-30.5)':4
+}
+pampa_dict = {
+    'neg':0,
+    'poor':1,
+    'low': 2.5,
+    'fair':5.5,
+    'med2high':5.5,
+    'good':6.5,
+    'best':8
+}
+
 
 class EndGame(arcade.View):
     """
@@ -144,7 +168,7 @@ class EndGame(arcade.View):
         right_mat.position = 650, 500
         self.mat_list.append(right_mat)
 
-        #Align GSK choice and user choice
+        #Align Roche choice and user choice
         core = Chem.MolFromSmiles(CORE)
         target = Chem.MolFromSmiles('CCSCC[C@H](NS(=O)(=O)c1ccc(cc1)c2ccc(SC)cc2)C(=O)O')
         mol_info = MolChoose(self.analysis_view.mol_choice[0], self.analysis_view.mol_choice[1], DataSource=os.path.join('data', 'r_group_decomp.csv')).reset_index(drop=True)
@@ -155,7 +179,7 @@ class EndGame(arcade.View):
             _ = AllChem.GenerateDepictionMatching2DStructure(m, core)
 
 
-        #Generate sprite for the GSK choice
+        #Generate sprite for the Roche choice
         self.card_list = arcade.SpriteList()
         d = rdMolDraw2D.MolDraw2DCairo(250, 200)
         d.drawOptions().addStereoAnnotation = True
@@ -186,9 +210,12 @@ class EndGame(arcade.View):
         else:
             pic50 = 0
         logd = float(mol_info.at[0, 'logd'])
+        mouse_clearance = clearance_dict[mol_info.at[0, 'clearance_mouse']]
+        human_clearance = clearance_dict[mol_info.at[0, 'clearance_human']]
+        permeability = pampa_dict[mol_info.at[0, 'pampa']]
         
         #List of parameters for final molecule spider plot
-        final_property_list = [pic50, descriptor_dict['logP'], logd, descriptor_dict['h_acc'], descriptor_dict['h_don']]
+        final_property_list = [pic50, logd, mouse_clearance, human_clearance, permeability]
         print(final_property_list)
 
         #Generate spider plot
@@ -215,7 +242,7 @@ class EndGame(arcade.View):
 
         #Drawing box titles
         arcade.draw_text('Your Choice', 310, 580, color=arcade.color.BLACK)
-        arcade.draw_text("GSK's Choice", 610, 580, color=arcade.color.BLACK)
+        arcade.draw_text("Roche Choice", 610, 580, color=arcade.color.BLACK)
 
         #Draw in pIC50 Data
         arcade.draw_text(self.text_list[0], 240, 420, color=arcade.color.BLACK,
