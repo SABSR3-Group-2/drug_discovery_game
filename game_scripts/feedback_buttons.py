@@ -1,3 +1,6 @@
+"""
+Run assays and get information on molecules.
+"""
 import os
 import arcade
 import pandas as pd
@@ -7,10 +10,6 @@ from filters import run_filters
 from rdkit import Chem
 import global_vars
 from analysis import AnalysisView
-
-"""
-Feedback
-"""
 
 # Constants
 SCREEN_WIDTH = 1000
@@ -111,7 +110,7 @@ class Button(arcade.Sprite):
 
 class FeedbackView(arcade.View):
     """
-    Main application class
+    Feedback view class
     """
     def __init__(self, mol_view=None):
         # call the parent class and set up the window
@@ -186,12 +185,12 @@ class FeedbackView(arcade.View):
         """
         if (len(self.mol_view.assay_df) > 0) and (len(self.assay_choices_print) == 0):  # if assays have been run and no assays have been printed to the assay view
             try:
-                row = self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])] # fine row in assays_df corosponding to current molecule
+                row = self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1])] # find row in assay_df corosponding to current molecule
                 for assay in ASSAYS.keys():
                     if pd.isnull(row[assay].values[0]) == False:  # if there is an assay result (cell is not nan)
-                        self.assay_choices_print.append(assay)        # add name of assay to be displayed
-                        self.assay_results_print.append(row[assay].values[0])   #add value of assay
-            except IndexError: # likely here to catch situations whereeither nothing matches the A & B tags or when an assay is being serchef for that dosent exist in mol view? - OFS
+                        self.assay_choices_print.append(assay)  # add name of assay to be displayed
+                        self.assay_results_print.append(row[assay].values[0])  # add value of assay
+            except IndexError:  # catch situations where there is no row in the df matching the A and B tags (no assays have been run on that mol)
                 pass
 
     def setup(self):
@@ -199,6 +198,7 @@ class FeedbackView(arcade.View):
         Function to set up the feedback view. Creates the molecule and button sprites
         and sets their positions.
         """
+        # initialise the variables
         self.button_list = arcade.SpriteList()
         self.assay_results = []
         self.assay_choices = []
@@ -210,7 +210,7 @@ class FeedbackView(arcade.View):
         self.filter_results = {}
         self.mol_sprite_list = arcade.SpriteList()
 
-        # retrieve molecule information using the r group tags
+        # retrieve molecule information from the input df using the r group tags
         for tag in self.tags:
             if 'A' in tag:
                 atag = tag
@@ -294,6 +294,14 @@ class FeedbackView(arcade.View):
 
             # draw the text
             text_sprite.draw()
+
+    def add_units(self, descs):
+        for key, val in descs.items():  # round to 1 dp
+            if key == 'MW':
+                descs[key] = str(val) + ' Da'
+            if key == 'TPSA':
+                descs[key] = str(val) + ' Å\u00b2'
+        return descs
 
     def on_draw(self):
         """
@@ -471,7 +479,9 @@ class FeedbackView(arcade.View):
                          font_size=15,
                          font_name=self.font)
 
-        for i, (desc, val) in enumerate(self.descriptor_results.items()):
+        desc_dict = self.descriptor_results.copy()  # copy dictionary
+        desc_dict = self.add_units(desc_dict)  # add units to MW and TPSA
+        for i, (desc, val) in enumerate(desc_dict.items()):
             arcade.draw_text(DESC_NAMES[desc],
                              SCREEN_WIDTH * 1 / 3 + 10,
                              SCREEN_HEIGHT - 240 - (i * 20),
@@ -560,7 +570,7 @@ class FeedbackView(arcade.View):
             # the assay name, result, cost and duration are stored
 
             if choice.button in ASSAYS.keys():
-                if choice.button not in self.assay_choices:
+                if choice.button not in self.assay_choices:  # check the assay hasn't already been clicked
                     
                     # if the user has run out of time or money, they cannot run any more assays
                     if (global_vars.balance <= 0) or (global_vars.time <= 0):
@@ -581,7 +591,7 @@ class FeedbackView(arcade.View):
                             self.total_cost += choice.get_cost()  # tally the cost and duration of the selected assays
                             self.total_duration.append(choice.get_duration())
 
-                        # if assays have been run but not the assay that has been selected, get the information of both the assays already run and the assay to run
+                        # if assays have been run but not the assay that has been selected, get the information of both the assays already run and the assay to run (so all info can be displayed)
                         elif pd.isnull(self.mol_view.assay_df.loc[(self.mol_view.assay_df['atag'] == self.tags[0]) & (self.mol_view.assay_df['btag'] == self.tags[1]), choice.button].values[0]):
                                 choice._set_color(arcade.color.YELLOW)  # selected buttons are changed to yellow
                                 self.check_assays_run()  # append assays already run to the assay choices and assay results
@@ -597,7 +607,7 @@ class FeedbackView(arcade.View):
                         # if no assays have been selected, then pass
                         pass
                     else:
-                        # adds the results to another list to print
+                        # adds the results to the list to display
                         # changes buttons back to white
                         self.assay_results_print = self.assay_results_print + self.assay_results
                         self.assay_choices_print = self.assay_choices_print + self.assay_choices
@@ -621,6 +631,7 @@ class FeedbackView(arcade.View):
                                 (self.mol_view.assay_df['btag'] == self.tags[1])]) == 0:
                             self.mol_view.assay_df = self.mol_view.assay_df.append(
                                 {'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
+                        # add the assay data to the df row
                         for a, r in zip(self.assay_choices_print, self.assay_results_print):
                             self.mol_view.assay_df.loc[
                                 (self.mol_view.assay_df['atag'] == self.tags[0]) &
@@ -630,8 +641,6 @@ class FeedbackView(arcade.View):
                     # clears the selected assays and recorded data
                     # changes buttons back to white
                     [b._set_color(arcade.color.WHITE) for b in self.button_list]
-                    # self.assay_results_print = []
-                    # self.assay_choices_print = []
                     self.assay_results = []
                     self.total_cost = 0
                     self.total_duration = []
@@ -651,6 +660,7 @@ class FeedbackView(arcade.View):
                             (self.mol_view.assay_df['btag'] == self.tags[1])]) == 0:
                         self.mol_view.assay_df = self.mol_view.assay_df.append(
                             {'atag': self.tags[0], 'btag': self.tags[1]}, ignore_index=True)
+                    # add the descriptor data to the df
                     for d, v in zip(self.mol_view.filters, self.descriptor_results.values()):
                         self.mol_view.assay_df.loc[
                             (self.mol_view.assay_df['atag'] == self.tags[0]) &
@@ -665,12 +675,13 @@ class FeedbackView(arcade.View):
         Allow the user to navigate between views using L and R keys
         """
         if key == arcade.key.LEFT:
-            if global_vars.balance > 0:
+            # only allow the user to navigate back to the mol builder if they have enough money/time
+            if (global_vars.balance > 0) & (global_vars.time > 0):
                 # navigate back to molecule builder view
                 self.window.show_view(self.mol_view)
                 arcade.set_background_color(arcade.color.WHITE)
             else:
-                print('no more attempts left')
+                print('No more attempts left')
 
         if key == arcade.key.RIGHT:
             # navigate to view containing analysis (name can be changed)
