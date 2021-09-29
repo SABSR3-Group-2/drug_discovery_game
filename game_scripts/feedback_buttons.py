@@ -296,6 +296,9 @@ class FeedbackView(arcade.View):
             text_sprite.draw()
 
     def add_units(self, descs):
+        """
+        Function adds units to molecular weight and TPSA in the descriptor results.
+        """
         for key, val in descs.items():  # round to 1 dp
             if key == 'MW':
                 descs[key] = str(val) + ' Da'
