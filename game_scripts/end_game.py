@@ -20,9 +20,12 @@ SCREEN_HEIGHT = 650
 SCREEN_TITLE = "The Final Selection"
 
 CARD_WIDTH = 250
-CARD_HEIGHT = 200
+CARD_HEIGHT = 300
 MAT_WIDTH = 250
 MAT_HEIGHT = 650
+MAT_Y_COORD = 530
+LEFT_MAT_X_COORD = 350
+RIGHT_MAT_X_COORD = 650
 
 CORE = 'O=C(O)C(NS(=O)(=O)c1ccccc1)'
 
@@ -94,16 +97,30 @@ class EndGame(arcade.View):
         
         target_data = np.concatenate((target_data, [target_data[0]]))
 
-        fig= plt.figure(figsize=(6,3))
+        fig= plt.figure(figsize=(6,3.5))
         ax = fig.add_subplot(111, polar=True)
         ax.plot(angles, stats, 'o-', linewidth=2, label="Your Choice")
         ax.fill(angles, stats, alpha=0.25)
         ax.plot(angles, target_data, 'o-', linewidth=2, label='Final Compound')
         ax.fill(angles, target_data, alpha=0.25)
         ax.set_thetagrids(angles[:-1] * 180/np.pi, labels)
+        # Go through labels and adjust alignment based on where
+        # it is in the circle.
+        for label, angle in zip(ax.get_xticklabels(), angles):
+            if angle == 0:
+                print('left', label)
+                label.set_horizontalalignment('left')
+            elif angle in (2.5132741228718345, 3.7699111843077517):
+                print('right', label)
+                label.set_horizontalalignment('right')
+            else:
+                print(label)
+                label.set_horizontalalignment('center')
+
         plt.yticks(plot_markers, plot_str_markers)
-        ax.legend(loc='best', bbox_to_anchor=(1, 0.4))
+        ax.legend(loc='best', bbox_to_anchor=(0.4, 0))
         ax.grid(True)
+        plt.tight_layout()
 
         fig.savefig('Images/game_loop_images/spider_plot.png', transparent=True)
 
@@ -161,11 +178,11 @@ class EndGame(arcade.View):
         self.mat_list = arcade.SpriteList()
 
         left_mat = arcade.SpriteSolidColor(CARD_WIDTH, CARD_HEIGHT, arcade.color.LIGHT_BLUE)
-        left_mat.position = 350, 500
+        left_mat.position = LEFT_MAT_X_COORD, MAT_Y_COORD
         self.mat_list.append(left_mat)
 
         right_mat = arcade.SpriteSolidColor(CARD_WIDTH, CARD_HEIGHT, arcade.color.LIGHT_BLUE)
-        right_mat.position = 650, 500
+        right_mat.position = RIGHT_MAT_X_COORD, MAT_Y_COORD
         self.mat_list.append(right_mat)
 
         #Align Roche choice and user choice
@@ -188,7 +205,7 @@ class EndGame(arcade.View):
         d.FinishDrawing()
         d.WriteDrawingText('Images/game_loop_images/target_mol.png')
         self.target_sprite = arcade.Sprite('Images/game_loop_images/target_mol.png')
-        self.target_sprite.position = (650, 520)
+        self.target_sprite.position = (RIGHT_MAT_X_COORD, MAT_Y_COORD + 20)
         self.card_list.append(self.target_sprite)
 
 
@@ -200,7 +217,7 @@ class EndGame(arcade.View):
         d.FinishDrawing()
         d.WriteDrawingText('Images/game_loop_images/final_mol.png')
         self.chosen_sprite = arcade.Sprite('Images/game_loop_images/final_mol.png')
-        self.chosen_sprite.position = (350, 520)
+        self.chosen_sprite.position = (LEFT_MAT_X_COORD, MAT_Y_COORD + 20)
         self.card_list.append(self.chosen_sprite)
 
         #Get descriptor information for the final chosen molecule
@@ -221,7 +238,7 @@ class EndGame(arcade.View):
         #Generate spider plot
         self.make_radar_chart(stats=final_property_list)
         self.radarplot = arcade.Sprite('Images/game_loop_images/spider_plot.png')
-        self.radarplot.position = (480, 250)
+        self.radarplot.position = (250, 200)
         self.card_list.append(self.radarplot)
 
         #generate text list
@@ -241,13 +258,12 @@ class EndGame(arcade.View):
         self.card_list.draw()
 
         #Drawing box titles
-        arcade.draw_text('Your Choice', 310, 580, color=arcade.color.BLACK)
-        arcade.draw_text("Roche Choice", 610, 580, color=arcade.color.BLACK)
+        arcade.draw_text('Your Choice', 300, 620, color=arcade.color.BLACK, font_size=15)
+        arcade.draw_text("Roche's Choice", 590, 620, color=arcade.color.BLACK, font_size=15)
 
         #Draw in pIC50 Data
-        arcade.draw_text(self.text_list[0], 240, 420, color=arcade.color.BLACK,
-                            font_size=20)
-        arcade.draw_text(self.text_list[1], 540, 420, color=arcade.color.BLACK, font_size=20)
+        arcade.draw_text(self.text_list[0], 240, 420, color=arcade.color.BLACK, font_size=10)
+        arcade.draw_text(self.text_list[1], 540, 420, color=arcade.color.BLACK, font_size=10)
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
