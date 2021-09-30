@@ -610,6 +610,7 @@ class AnalysisView(arcade.View):
         if x < SCREEN_WIDTH/3 and y < SCREEN_HEIGHT-(self.vh/2):  # if the clicked sprite is within the cards region of the screen
             clicked = arcade.get_sprites_at_point((x, y), self.card_mat_list)
             if len(clicked) > 0:  # checks a card has been clicked
+                [b._set_color(arcade.color.WHITE) for b in self.card_mat_list]
                 choice = clicked[0]
                 choice._set_color(arcade.color.YELLOW)  # selected cards are changed to yellow
                 self.mol_choice = [choice.atag, choice.btag]  # record the tags of the chosen molecule
