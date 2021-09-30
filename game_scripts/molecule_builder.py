@@ -402,10 +402,11 @@ class MolView(arcade.View):
                 self.update_lead()
                 self.setup()
                 self.on_draw()
-            self.picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1]  # pick the top sprite
-            self.picked_r.smiles = self.desc_df.loc[
-                self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
-            self.picked_r._set_alpha(50)  # shade
+            else:  # if no r group already selected, update picked_r
+                self.picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1]  # pick the top sprite
+                self.picked_r.smiles = self.desc_df.loc[
+                    self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
+                self.picked_r._set_alpha(50)  # shade
 
         # Change inventory
         clicked = arcade.get_sprites_at_point((x, y), self.buttons)
