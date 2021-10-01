@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         conda update -n base -c defaults conda        
-        $CONDA/bin/conda env update --name base --file final_env.yml
+        $CONDA/bin/conda env update --file reqs2.txt --name base
         conda install -c conda-forge rdkit
     - name: Run tests
       run: |
