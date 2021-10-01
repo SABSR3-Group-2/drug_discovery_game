@@ -1,19 +1,17 @@
 """
 Make molecules from a scaffold and r groups.
-
-To do:
 """
 import arcade
 import re
 import os
 import pandas as pd
-import time
 from rdkit import Chem
 from rdkit import RDLogger
 from rdkit.Chem.Draw import rdMolDraw2D
 from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
 import textwrap
+import global_vars
 
 # Cleanse the images generated in previous rounds
 for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
@@ -345,13 +343,25 @@ class MolView(arcade.View):
         arcade.draw_text(f'Displaying: R{ord(self.tag[0].lower()) - 96}', 10, SCREEN_HEIGHT - self.vh * 0.5 - 20,
                          color=arcade.color.OXFORD_BLUE, font_size=11)
 
+        current_balance = f'Total Balance: ${global_vars.balance}'
+        arcade.draw_text(current_balance, SCREEN_WIDTH - 7*len(current_balance), SCREEN_HEIGHT - self.vh * 0.5 - 20,
+                         color=arcade.color.OXFORD_BLUE, font_size=11)
+
+        current_time = f'Time remaining: {global_vars.time} weeks'
+        arcade.draw_text(current_time, SCREEN_WIDTH - 7*len(current_time), SCREEN_HEIGHT - self.vh * 0.5 - 40,
+                         color=arcade.color.OXFORD_BLUE, font_size=11)
+
         instructions = ['Welcome to the Drug Discovery Game. Above you can see the starting scaffold',
                         'with the vectors marked by starred numbers. Select r groups from the scrol-',
                         'lable inventory on the left by double clicking to add to the scaffold. You can ',
                         'filter the r groups (descending) by clicking the filter buttons at the top. To see',
                         'the different sets of r groups available for each vector, click the arrows. ',
                         'Change views by using the right and left keys on the keyboard.']
-        inst = "Welcome to the Drug Discovery Game. Above you can see the starting scaffold with the vectors marked by starred numbers. Select r groups from the scrollable inventory on the left by double clicking to add to the scaffold. You can filter the r groups (descending) by clicking the filter buttons at the top. To see the different sets of r groups available for each vector, click the arrows. Change views by using the right and left keys on the keyboard."
+        inst = "Welcome to the Drug Discovery Game. Above you can see the starting scaffold with the vectors marked " \
+               "by starred numbers. Select r groups from the scrollable inventory on the left by double clicking to " \
+               "add to the scaffold. You can filter the r groups (descending) by clicking the filter buttons at the " \
+               "top. To see the different sets of r groups available for each vector, click the arrows. Change views " \
+               "by using the right and left keys on the keyboard. "
         instructions = textwrap.fill(inst, 78)
         instructions = instructions.split(sep='\n')
         for i, t in enumerate(instructions):
