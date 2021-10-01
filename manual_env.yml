@@ -1,3 +1,4 @@
+name: dd_game
 channels:
   - conda-forge
   - anaconda-fusion
