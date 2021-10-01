@@ -30,7 +30,7 @@ def main():
                       "\n"
                       "\n[3] If your data has not yet been preprocessed, please close the game and "
                       "follow the steps in the README."
-                      "\n----------------------------------------------------------------------------------------------------------------")
+                      "\n----------------------------------------------------------------------------------------------------------------\n")
     if len(usr_input) < 3:  # start the game
         print("Game starting with default data...")
         pass

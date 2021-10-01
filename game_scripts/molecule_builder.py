@@ -13,6 +13,7 @@ from rdkit import RDLogger
 from rdkit.Chem.Draw import rdMolDraw2D
 from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
+import textwrap
 
 # Cleanse the images generated in previous rounds
 for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
@@ -350,7 +351,9 @@ class MolView(arcade.View):
                         'filter the r groups (descending) by clicking the filter buttons at the top. To see',
                         'the different sets of r groups available for each vector, click the arrows. ',
                         'Change views by using the right and left keys on the keyboard.']
-
+        inst = "Welcome to the Drug Discovery Game. Above you can see the starting scaffold with the vectors marked by starred numbers. Select r groups from the scrollable inventory on the left by double clicking to add to the scaffold. You can filter the r groups (descending) by clicking the filter buttons at the top. To see the different sets of r groups available for each vector, click the arrows. Change views by using the right and left keys on the keyboard."
+        instructions = textwrap.fill(inst, 78)
+        instructions = instructions.split(sep='\n')
         for i, t in enumerate(instructions):
             arcade.draw_text(t, INVENTORY_WIDTH + 15, SCREEN_HEIGHT / 5 - (i + 1) * 20, color=arcade.color.OXFORD_BLUE)
 
