@@ -38,7 +38,7 @@ class Button(arcade.Sprite):
     def __init__(self, mol, button, scale=1):
         # hold the button name and image
         self.button = button
-        self.image_file_name = os.path.join('Images', 'button_pngs', f'{self.button}.png')
+        self.image_file_name = os.path.join('images', 'button_pngs', f'{self.button}.png')
 
         # get molecule information
         self.chosen_mol = mol
@@ -220,7 +220,7 @@ class FeedbackView(arcade.View):
         self.mol = self.mol.reset_index(drop=True)
 
         # make the molecule sprite using the saved image
-        mol_sprite = arcade.Sprite(os.path.join('Images', 'game_loop_images',
+        mol_sprite = arcade.Sprite(os.path.join('images', 'game_loop_images',
                                                 f'scaffold{self.mol_view.round_count}.png'))
         mol_sprite.position = (SCREEN_WIDTH - (SCREEN_WIDTH / 6)), (SCREEN_HEIGHT - 150)
         self.mol_sprite_list.append(mol_sprite)

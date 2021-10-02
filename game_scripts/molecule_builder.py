@@ -14,9 +14,9 @@ import textwrap
 import global_vars
 
 # Cleanse the images generated in previous rounds
-for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
+for f_name in os.listdir(os.path.join('images', 'game_loop_images')):
     if f_name[-4:] == '.png':
-        os.remove(os.path.join('Images', 'game_loop_images', f_name))
+        os.remove(os.path.join('images', 'game_loop_images', f_name))
 
 # Screen title and size
 SCREEN_WIDTH = 1000
@@ -204,7 +204,7 @@ class MolView(arcade.View):
         self.desc_df = desc_df  # for use in key press()
 
         for file in desc_df[tag].unique():
-            r_sprite = arcade.Sprite(f'Images/r_group_pngs/{file}.png', MOL_SCALING)
+            r_sprite = arcade.Sprite(f'images/r_group_pngs/{file}.png', MOL_SCALING)
             r_sprite.tag = file  # assign the tag to the r sprite object for later ID
             self.r_sprite_list.append(r_sprite)
 
@@ -279,13 +279,13 @@ class MolView(arcade.View):
         d.drawOptions().clearBackground = False
         d.DrawMolecule(self.lead)
         d.FinishDrawing()
-        d.WriteDrawingText('Images/game_loop_images/scaffold{}.png'.format(self.round_count))
+        d.WriteDrawingText('images/game_loop_images/scaffold{}.png'.format(self.round_count))
 
         # Create the sprite lists
         self.scaffold_list = arcade.SpriteList()
 
         # Set up the scaffold, placing it at the centre of the screen
-        self.scaffold_sprite = arcade.Sprite('Images/game_loop_images/scaffold{}.png'.format(self.round_count),
+        self.scaffold_sprite = arcade.Sprite('images/game_loop_images/scaffold{}.png'.format(self.round_count),
                                              CHARACTER_SCALING)
         self.scaffold_sprite.position = (int(SCREEN_WIDTH * 0.75), SCREEN_HEIGHT * 0.5)
         self.scaffold_list.append(self.scaffold_sprite)
@@ -301,18 +301,18 @@ class MolView(arcade.View):
         # Read in filter sprites
         self.filter_sprite_list = arcade.SpriteList(use_spatial_hash=False)
         for i, f in enumerate(self.filters):  # create and position a button for each filter
-            filter_sprite = arcade.Sprite(f'Images/filter_pngs/{f}.png', FILTER_SCALING)
+            filter_sprite = arcade.Sprite(f'images/filter_pngs/{f}.png', FILTER_SCALING)
             filter_sprite.position = (self.vw * (0.7 * i + 1), SCREEN_HEIGHT - 30)
             filter_sprite.tag = f
             self.filter_sprite_list.append(filter_sprite)
 
         # Set up inventory navigation button sprites
         self.buttons = arcade.SpriteList(use_spatial_hash=True)
-        button = arcade.Sprite(os.path.join('Images', 'filter_pngs', 'left_arrow.png'), FILTER_SCALING / 2)
+        button = arcade.Sprite(os.path.join('images', 'filter_pngs', 'left_arrow.png'), FILTER_SCALING / 2)
         button.position = (self.vw * 0.3, SCREEN_HEIGHT - 30)
         button.tag = 'left'
         self.buttons.append(button)
-        button = arcade.Sprite(os.path.join('Images', 'filter_pngs', 'right_arrow.png'), FILTER_SCALING / 2)
+        button = arcade.Sprite(os.path.join('images', 'filter_pngs', 'right_arrow.png'), FILTER_SCALING / 2)
         button.position = (INVENTORY_WIDTH - self.vw * 0.3, SCREEN_HEIGHT - 30)
         button.tag = 'right'
         self.buttons.append(button)
