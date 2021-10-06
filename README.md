@@ -20,7 +20,7 @@ Following successful cloning, navigate to the root directory by running:
 It's recommended that you set up a virtual environment to install the dependencies in. We recommend installing 
 <a href="https://docs.conda.io/en/latest/miniconda.html">miniconda</a> version=4.9.2 and then setting up a virtual environment by running something like:
 
-`conda env create --name dd_game --file environment.yml`
+`conda env create --name dd_game --file final_env.yml`
 
 This should install all the dependencies necessary for the game to run.
 
