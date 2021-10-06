@@ -61,7 +61,7 @@ The game is built around 4 windows:
 <li>Molecule building</li>
 <li>Virtual assaying</li>
 <li>Analysis</li>
-<li>Game Over</li>
+<li>Final Feedback</li>
 </ul>
 
 ### Molecule Builder
@@ -82,6 +82,11 @@ Five different experimental assays are available, shown along the bottom of the 
 On the left-hand side of the screen are cards representing all the molecules that you have built and assayed so far along with their assay data. You can select molecules that you'd like to investigate further by clicking on the card and navigating to the other views using the 'Molecule builder' and 'Run assays' buttons at the top. On the right-hand side of the screen is a graph that displays calculated or assayed properties of the molecules that you have built. You can change what to display on each axis by selecting the X and Y buttons and selecting different properties. Data points will only appear if they descriptors have been calculated or the assays run for that particular molecule.
 
 If you have decided on your favourite molecule, you can end the game by selecting the 'Final molecule' button. This will result in the final feedback screen being displayed. All of the data from the molecules and assays that you have run are saved in a csv file called `results.csv`, located in the data folder.
+
+### Final Feedback
+
+This window compares your chosen final molecule to that chosen by the expert medicinal chemists from Roche, and gives you feedback on your choices. A spider plot compares the critical properties in the brief for both molecules, and where your molecule falls short feedback is given on how it
+can be improved.
 
 ## Contributions
 
