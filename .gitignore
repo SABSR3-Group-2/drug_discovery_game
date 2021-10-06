@@ -28,10 +28,12 @@ share/python-wheels/
 MANIFEST
 
 # temporary images
+
 images/game_loop_images/*
 images/button_pngs/chosen_mol.png
 images/review/maingraph.png
 images/temp/TempGraph1.png
+
 # temporary files
 /game_scripts/tmp_r_groups.txt
 /data/results.csv

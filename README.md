@@ -59,7 +59,7 @@ The game is built around 4 windows:
 <li>Molecule building</li>
 <li>Virtual assaying</li>
 <li>Analysis</li>
-<li>Game Over</li>
+<li>Final Feedback</li>
 </ul>
 You start the game with £100,000 and 30 weeks, running assays on your molecules will reduce both of these. The game ends
 when you run out of budget, time or if you are happy with the molecule you have made and decide to end the game.
@@ -99,6 +99,11 @@ will only appear if they descriptors have been calculated or the assays run for 
 If you have decided on your favourite molecule, you can end the game by selecting the 'Final molecule' button. This will
 result in the final feedback screen being displayed. All of the data from the molecules and assays that you have run are
 saved in a csv file called `results.csv`, located in the data folder.
+
+### Final Feedback
+
+This window compares your chosen final molecule to that chosen by the expert medicinal chemists from Roche, and gives you feedback on your choices. A spider plot compares the critical properties in the brief for both molecules, and where your molecule falls short feedback is given on how it
+can be improved.
 
 ## Contributions
 
