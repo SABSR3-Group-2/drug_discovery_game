@@ -27,10 +27,10 @@ def remove_h(r):
 
 
 def read_mols(filename, scaffold):
-    """ Reads the original csv and extracts the molecules, tags and pIC50 values. With large files the
+    """Reads the original csv and extracts the molecules, tags and pIC50 values. With large files the
     R group decomposition step can take a long time. Recommended to write the output to a file.
 
-    :param filename: path to the .csv file containing the data e.g. 2010 ACS MedChemLett SI.csv
+    :param filename: path to the .csv file containing the data e.g. `data/pickett_data.csv`
     :type filename: str
     :param scaffold: the core of the molecules as a Smile
     :type scaffold: Smile string

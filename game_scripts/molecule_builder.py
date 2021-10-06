@@ -5,12 +5,13 @@ import arcade
 import re
 import os
 import pandas as pd
-import time
 from rdkit import Chem
 from rdkit import RDLogger
 from rdkit.Chem.Draw import rdMolDraw2D
 from descriptors import get_descriptors
 from feedback_buttons import FeedbackView
+import textwrap
+import global_vars
 
 # Cleanse the images generated in previous rounds
 for f_name in os.listdir(os.path.join('Images', 'game_loop_images')):
@@ -345,13 +346,27 @@ class MolView(arcade.View):
         arcade.draw_text(f'Displaying: R{ord(self.tag[0].lower()) - 96}', 10, SCREEN_HEIGHT - self.vh * 0.5 - 20,
                          color=arcade.color.OXFORD_BLUE, font_size=11, font_name=self.font)
 
+        current_balance = f'Total Balance: ${global_vars.balance}'
+        arcade.draw_text(current_balance, SCREEN_WIDTH - 7*len(current_balance), SCREEN_HEIGHT - self.vh * 0.5 - 20,
+                         color=arcade.color.OXFORD_BLUE, font_size=11)
+
+        current_time = f'Time remaining: {global_vars.time} weeks'
+        arcade.draw_text(current_time, SCREEN_WIDTH - 7*len(current_time), SCREEN_HEIGHT - self.vh * 0.5 - 40,
+                         color=arcade.color.OXFORD_BLUE, font_size=11)
+
         instructions = ['Welcome to the Drug Discovery Game. Above you can see the starting scaffold',
                         'with the vectors marked by starred numbers. Select r groups from the scrol-',
                         'lable inventory on the left by double clicking to add to the scaffold. You can ',
                         'filter the r groups (descending) by clicking the filter buttons at the top. To see',
                         'the different sets of r groups available for each vector, click the arrows. ',
                         'Change views by using the right and left keys on the keyboard.']
-
+        inst = "Welcome to the Drug Discovery Game. Above you can see the starting scaffold with the vectors marked " \
+               "by starred numbers. Select r groups from the scrollable inventory on the left by double clicking to " \
+               "add to the scaffold. You can filter the r groups (descending) by clicking the filter buttons at the " \
+               "top. To see the different sets of r groups available for each vector, click the arrows. Change views " \
+               "by using the right and left keys on the keyboard. "
+        instructions = textwrap.fill(inst, 78)
+        instructions = instructions.split(sep='\n')
         for i, t in enumerate(instructions):
             arcade.draw_text(t, INVENTORY_WIDTH + 15, SCREEN_HEIGHT / 5 - (i + 1) * 20, color=arcade.color.OXFORD_BLUE, font_name=self.font)
 
@@ -402,10 +417,11 @@ class MolView(arcade.View):
                 self.update_lead()
                 self.setup()
                 self.on_draw()
-            self.picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1]  # pick the top sprite
-            self.picked_r.smiles = self.desc_df.loc[
-                self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
-            self.picked_r._set_alpha(50)  # shade
+            else:  # if no r group already selected, update picked_r
+                self.picked_r = arcade.get_sprites_at_point((x, y), self.r_sprite_list)[-1]  # pick the top sprite
+                self.picked_r.smiles = self.desc_df.loc[
+                    self.desc_df[self.tag] == self.picked_r.tag, 'mol'].item()  # give smile
+                self.picked_r._set_alpha(50)  # shade
 
         # Change inventory
         clicked = arcade.get_sprites_at_point((x, y), self.buttons)

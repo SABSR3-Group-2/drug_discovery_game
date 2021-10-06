@@ -20,18 +20,25 @@ CURSOR_SCALING = 1
 
 def main():
     """Starts the game"""
-    usr_input = input("\n-------------------------------------------------"
-                      "\nWelcome to The Drug Discovery Game."
-                      "\n-------------------------------------------------"
-                      "\nIf your data is already processed, press ENTER to start the game."
-                      "\nOtherwise, type the path to the raw data csv file in the data directory (e.g. my_raw_data.csv)"
-                      "and then press ENTER.")
+    usr_input = input("\n----------------------------------------------------------------------------------------------------------------"
+                      "\n Welcome to The Drug Discovery Game"
+                      "\n----------------------------------------------------------------------------------------------------------------"
+                      "\n[1] To quick start using the default MMP-12 inhibitor data, press ENTER."
+                      "\n"
+                      "\n[2] If you wish to use alternative data which has already been preprocessed, type the file "
+                      "name and press ENTER. \n \te.g. my_data.csv (the file must be in the 'data' directory)."
+                      "\n"
+                      "\n[3] If your data has not yet been preprocessed, please close the game and "
+                      "follow the steps in the README."
+                      "\n----------------------------------------------------------------------------------------------------------------\n")
     if len(usr_input) < 3:  # start the game
+        print("Game starting with default data...")
         pass
 
     elif re.findall(r'\.csv', usr_input):  # user has provided raw data, now prompt for the scaffold
-        scaffold = input("Please provide SMILE string of your scaffold (e.g. O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)[*:1]) "
-                         "and then press ENTER")
+        scaffold = input("\nPlease provide SMILE string of your scaffold (e.g. O=C(O)C(NS(=O)(=O)c1ccc([*:2])cc1)["
+                         "*:1]) and then press ENTER\n")
+
         if len(scaffold) < 3:  # user did not provide scaffold correctly
             raise ValueError('Scaffold entered incorrectly')
         else:

@@ -1,5 +1,5 @@
 from rdkit import Chem
-from rdkit.Chem import FilterCatalog
+# from rdkit.Chem import FilterCatalog
 from rdkit.Chem.FilterCatalog import *
 
 
