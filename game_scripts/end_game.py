@@ -1,9 +1,11 @@
 import os
 import numpy as np
 import arcade
+import textwrap
 from game_scripts.combine import MolChoose
 from game_scripts.descriptors import get_descriptors
 from game_scripts.filters import compound_check
+from feedback_dict import feedback_clearance, feedback_lipophilicity, feedback_pic50
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
@@ -179,7 +181,7 @@ class EndGame(arcade.View):
         left_mat.position = LEFT_MAT_X_COORD, MAT_Y_COORD
         self.mat_list.append(left_mat)
 
-        left_background = arcade.SpriteSolidColor(CARD_WIDTH - 20, 150, arcade.color.WHITE)
+        left_background = arcade.SpriteSolidColor(CARD_WIDTH - 10, 150, arcade.color.WHITE)
         left_background.position = LEFT_MAT_X_COORD, 545
         self.mat_list.append(left_background)
 
@@ -187,7 +189,7 @@ class EndGame(arcade.View):
         right_mat.position = RIGHT_MAT_X_COORD, MAT_Y_COORD
         self.mat_list.append(right_mat)
 
-        right_background = arcade.SpriteSolidColor(CARD_WIDTH - 20, 150, arcade.color.WHITE)
+        right_background = arcade.SpriteSolidColor(CARD_WIDTH - 10, 150, arcade.color.WHITE)
         right_background.position = RIGHT_MAT_X_COORD, 545
         self.mat_list.append(right_background)
 
@@ -207,7 +209,6 @@ class EndGame(arcade.View):
         d = rdMolDraw2D.MolDraw2DCairo(250, 200)
         d.drawOptions().addStereoAnnotation = True
         d.drawOptions().clearBackground = False
-        #d.drawOptions().setBackgroundColour((1, 1, 1))
         d.DrawMolecule(target)
         d.FinishDrawing()
         d.WriteDrawingText('Images/game_loop_images/target_mol.png')
@@ -217,7 +218,7 @@ class EndGame(arcade.View):
 
 
         #Generate image of the selected final molecule
-        d = rdMolDraw2D.MolDraw2DCairo(250, 520)
+        d = rdMolDraw2D.MolDraw2DCairo(250, 200)
         d.drawOptions().addStereoAnnotation = True
         d.drawOptions().clearBackground = False
         d.DrawMolecule(mol)
@@ -252,6 +253,27 @@ class EndGame(arcade.View):
         self.choice_text_list = [f'pIC50: {mol_info.at[0, "pic50"]}', f'logD: {logd}', f'Mouse clearance: {mol_info.at[0, "clearance_mouse"]}', f'Human clearance: {mol_info.at[0, "clearance_human"]}', f'Permeability: {mol_info.at[0, "pampa"]}']
         self.target_text_list = ['pIC50: 7.7', 'logD: 1.08', 'Mouse clearance: low (<5.6)', 'Human clearance: low (<12)', 'Permeability: medium - high']
         
+        #Generate feedback text
+        pic50 = float(pic50)
+        if pic50 < 6.5:
+            pic50_feedback = 'low'
+        else:
+            pic50_feedback = 'good'
+
+        if 0.95 < logd <1.15:
+            logd_feedback = 'good'
+        elif logd < 0.95:
+            logd_feedback = 'low'
+        else:
+            logd_feedback = 'high'
+
+        if human_clearance != 1:
+            clearance_feedback = 'high'
+        else:
+            clearance_feedback = 'low'
+
+        self.feedback = [feedback_pic50[pic50_feedback], feedback_lipophilicity[logd_feedback], feedback_clearance[clearance_feedback]]
+        
 
     def on_draw(self):
         """Render the screen"""
@@ -266,8 +288,8 @@ class EndGame(arcade.View):
         self.card_list.draw()
 
         #Drawing box titles
-        arcade.draw_text('Your Choice', 300, 620, color=arcade.color.WHITE, font_size=15)
-        arcade.draw_text("Roche's Choice", 590, 620, color=arcade.color.WHITE, font_size=15)
+        arcade.draw_text('Your Choice', 300, 628, color=arcade.color.WHITE, font_size=15)
+        arcade.draw_text("Roche's Choice", 590, 628, color=arcade.color.WHITE, font_size=15)
 
         #Draw in choice Data
         for counter, item in enumerate(self.choice_text_list):
@@ -276,7 +298,13 @@ class EndGame(arcade.View):
         #Draw in target data
         for counter, item in enumerate(self.target_text_list):
             arcade.draw_text(item, 545, 450 - counter*17, color=arcade.color.WHITE, font_size=10)
-        
+
+        #Draw in feedback text
+        feedback = ""
+        for item in self.feedback:
+            string = textwrap.fill(item, 70)
+            feedback += string + '\n' + '\n'
+        arcade.draw_text(feedback, 500, 100, color=arcade.color.BLACK)
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
