@@ -72,6 +72,8 @@ the right arrow at the top of the page to view the second inventory of fragments
 clicking the arrows at the top. When you have a molecule you are happy with press the `right` arrow key to advance to 
 the next window.
 
+![](images/gifs_for_readme/MoleculeBuilder.gif)
+
 ### 2. Virtual Assaying
 
 In this window, you can get experimental and calculated data for your chosen molecule. Free calculations are available 
