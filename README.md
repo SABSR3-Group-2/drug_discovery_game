@@ -43,7 +43,7 @@ create an output csv in `data/` with a name in the format `my_raw_data_processed
 
 Ensuring you are in the root directory and have the dependencies installed, type the following into your terminal to start the game:
 
-`python -m game_scripts/gameloop.py`
+`python game_scripts/gameloop.py`
 
 If you want to use the default MMP12 dataset, simply press `ENTER` as instructed to start the game.
 
