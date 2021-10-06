@@ -72,7 +72,7 @@ the right arrow at the top of the page to view the second inventory of fragments
 clicking the arrows at the top. When you have a molecule you are happy with press the `right` arrow key to advance to 
 the next window.
 
-![](images/gifs_for_readme/mol_builder2.gif)
+![](images/gifs_for_readme/mol_builder_short.gif)
 
 ### 2. Virtual Assaying
 
@@ -88,6 +88,8 @@ your total balance and time, shown on the right. You cannot run the same assays 
 Once you have run assays or calculated properties for a chosen molecule, this data will be recorded and displayed in the 
 final analysis screen. You can move between the molecule builder and analysis screens using the `left` and `right` 
 arrows, respectively.
+
+![](images/gifs_for_readme/assay.gif)
 
 ### 3. Analysis
 
