@@ -34,7 +34,7 @@ navigate to `game_scripts/select_mols.py` and at the bottom of `read_mols()` cha
 Ensuring you are in the root directory and replacing the two arguments with the name of your data file and the smile string for your scaffold,
 run the preprocessing pipeline by typing a command like the following into your terminal:
 
-`python -m game_scripts/preprocessing.py my_raw_data.csv OC(=Ccc210)`
+`python game_scripts/preprocessing.py my_raw_data.csv OC(=Ccc210)`
 
 The preprocessing can take quite some time (the default data takes ~20 mins on a 2015 MacBook Pro). Once it is finished it will
 create an output csv in `data/` with a name in the format `my_raw_data_processed.csv`. You can now start the game.
