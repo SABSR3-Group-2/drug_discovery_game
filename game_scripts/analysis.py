@@ -127,9 +127,9 @@ class ReviewGraph():
             plt.annotate(datavalues[2], (datavalues[0][i], datavalues[1][i]))
         self.title=str(self.axisnames[1])+" against "+str(self.axisnames[0])
         self.formatgraph()
-        plt.savefig(os.path.join("Images","review","maingraph.png"), facecolor='white', transparent=False)
+        plt.savefig(os.path.join("images","review","maingraph.png"), facecolor='white', transparent=False)
         
-        tempdir = os.path.join('Images', 'temp')
+        tempdir = os.path.join('images', 'temp')
         CurFiles = [f for f in listdir(tempdir) if (isfile(join(tempdir, f)) and f.startswith("TempGraph") and f.endswith(".png"))]
         CurFiles = [s.strip("TempGraph") for s in CurFiles]
         CurFiles = [s.strip(".png") for s in CurFiles]
@@ -138,9 +138,9 @@ class ReviewGraph():
             curMax = max(CurFiles)
         else:
             curMax = 0
-        plt.savefig(os.path.join("Images","temp",f"TempGraph{curMax+1}.png"), facecolor='white', transparent=False)
-        #return(os.path.join("Images","review",f"maingraph.png"))
-        return(os.path.join("Images","temp",f"TempGraph{curMax+1}.png"))
+        plt.savefig(os.path.join("images","temp",f"TempGraph{curMax+1}.png"), facecolor='white', transparent=False)
+        #return(os.path.join("images","review",f"maingraph.png"))
+        return(os.path.join("images","temp",f"TempGraph{curMax+1}.png"))
 
 
     def formatgraph(self):
@@ -223,19 +223,19 @@ class AnalysisView(arcade.View):
         self.button_list = arcade.SpriteList()
 
         # create a button to allow user to explore a chosen molecule in the molecule_buidler
-        builder_button = arcade.Sprite(f'Images/button_pngs/mol_builder.png', 0.5)
+        builder_button = arcade.Sprite(f'images/button_pngs/mol_builder.png', 0.5)
         builder_button.position = (MENU_WIDTH * 1/6), SCREEN_HEIGHT - 70
         builder_button.name = 'builder'
         self.button_list.append(builder_button)
 
         # create a button to allow the user to run more assays on a chosen molecule in feedback_buttons
-        assays_button = arcade.Sprite(f'Images/button_pngs/run_assays.png', 0.5)
+        assays_button = arcade.Sprite(f'images/button_pngs/run_assays.png', 0.5)
         assays_button.position = (MENU_WIDTH * 3/6), SCREEN_HEIGHT - 70
         assays_button.name = 'assays'
         self.button_list.append(assays_button)
 
         # create the final mol button to allow the user to finish the game
-        final_button = arcade.Sprite(f'Images/button_pngs/final_choice.png', 0.226)
+        final_button = arcade.Sprite(f'images/button_pngs/final_choice.png', 0.226)
         final_button.position = (MENU_WIDTH * 5/6), SCREEN_HEIGHT - 70
         final_button.name = 'final'
         self.button_list.append(final_button)
@@ -245,9 +245,9 @@ class AnalysisView(arcade.View):
         for index, row in self.feedback_view.mol_view.assay_df.iterrows():  # iterate through assayed molecules in final df
             mol_info = MolChoose(row['atag'], row['btag'], DataSource=os.path.join('data', 'r_group_decomp.csv')).reset_index(drop=True)  # get the molecule info from the original df
             mol = Chem.MolFromSmiles(mol_info.at[0, 'mol'])  # get RDKit mol from SMILES
-            Chem.Draw.MolToFile(mol, 'Images/game_loop_images/selected_mol{}.png'.format(index),
+            Chem.Draw.MolToFile(mol, 'images/game_loop_images/selected_mol{}.png'.format(index),
                             size=(CARD_WIDTH, CARD_HEIGHT), imageType=None)  # save image of the molecule to file
-            card_sprite = arcade.Sprite('Images/game_loop_images/selected_mol{}.png'.format(index), scale=1)  # create sprites of the molecules
+            card_sprite = arcade.Sprite('images/game_loop_images/selected_mol{}.png'.format(index), scale=1)  # create sprites of the molecules
             self.mol_list.append(card_sprite)
 
         # create blank 'mats' to represent the outline of the cards
@@ -290,7 +290,7 @@ class AnalysisView(arcade.View):
         """
         # # create end button
         # self.end_button_list = arcade.SpriteList()
-        # end_button = arcade.Sprite(os.path.join("Images","button_pngs","end_game_blue.png"), 0.5)
+        # end_button = arcade.Sprite(os.path.join("images","button_pngs","end_game_blue.png"), 0.5)
         # end_button.position = SCREEN_WIDTH - 50, 30
         # end_button.name = 'end'
         # self.end_button_list.append(end_button)
@@ -301,7 +301,7 @@ class AnalysisView(arcade.View):
         self.working_graph = ReviewGraph(self.feedback_view.mol_view.assay_df)
 
         self.graph_list = arcade.SpriteList()
-        main_graph = arcade.Sprite(os.path.join('Images','review','maingraph.png'))
+        main_graph = arcade.Sprite(os.path.join('images','review','maingraph.png'))
         main_graph.position = (SCREEN_WIDTH-(SCREEN_WIDTH/3))/2+(SCREEN_WIDTH/3)-(SCREEN_WIDTH/20), (SCREEN_HEIGHT*0.4)
         main_graph.name = 'maingraph'
         self.graph_list.append(main_graph)
@@ -438,7 +438,7 @@ class AnalysisView(arcade.View):
                 self.xymat_list.append(togmat_sprite)
 
     def cleartempgraphs(self):
-        tempdir = os.path.join('Images', 'temp')
+        tempdir = os.path.join('images', 'temp')
         filestorm = [join(tempdir, f) for f in listdir(tempdir) if (isfile(join(tempdir, f)) and f.startswith("TempGraph") and f.endswith(".png"))]
         for filetorm in filestorm:
             if os.path.exists(filetorm):
@@ -767,7 +767,7 @@ class axisButton(arcade.Sprite):
         # hold the button name and image
         self.button = option
         self.side = "x" #remove this line
-        self.image_file_name = os.path.join('Images', 'axisbuttons', f'{self.button}.png')
+        self.image_file_name = os.path.join('images', 'axisbuttons', f'{self.button}.png')
         self.linkedgraph = graph
 
         # call the parent class
@@ -801,7 +801,7 @@ class xyToggleButton(arcade.Sprite):
 
 
         # Load Textures        
-        self.image_file_folder = os.path.join('Images', 'axisbuttons', f'{self.side}')
+        self.image_file_folder = os.path.join('images', 'axisbuttons', f'{self.side}')
 
         #Load textures
         self.texture_off = arcade.load_texture(os.path.join(self.image_file_folder, f'{self.side}_off.png') )
@@ -823,7 +823,7 @@ class xyToggleButton(arcade.Sprite):
             self.state = 'off'
         elif self.state == 'off':
             self.state = 'on'
-        #self.image_file_name = os.path.join('Images', 'axisbuttons', f'{self.side}_{self.state}.png') 
+        #self.image_file_name = os.path.join('images', 'axisbuttons', f'{self.side}_{self.state}.png')
         self.update(self.state)
         #return([self.side, self.state, self.image_file_name])
     

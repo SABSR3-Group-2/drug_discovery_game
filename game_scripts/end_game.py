@@ -1,10 +1,10 @@
 import os
 import numpy as np
 import arcade
+from combine import MolChoose
+from descriptors import get_descriptors
+from filters import compound_check
 import textwrap
-from game_scripts.combine import MolChoose
-from game_scripts.descriptors import get_descriptors
-from game_scripts.filters import compound_check
 from feedback_dict import feedback_clearance, feedback_lipophilicity, feedback_pic50
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -122,7 +122,7 @@ class EndGame(arcade.View):
         ax.grid(True)
         plt.tight_layout()
 
-        fig.savefig('Images/game_loop_images/spider_plot.png', transparent=True)
+        fig.savefig('images/game_loop_images/spider_plot.png', transparent=True)
 
         return
 
@@ -160,7 +160,7 @@ class EndGame(arcade.View):
         
 
         plt.axis('off')
-        fig.savefig('Images/game_loop_images/pic50_line.png', transparent=True)
+        fig.savefig('images/game_loop_images/pic50_line.png', transparent=True)
 
     def setup(self):
         """
@@ -169,7 +169,7 @@ class EndGame(arcade.View):
 
          # create end button
         self.button_list = arcade.SpriteList()
-        end_button = arcade.Sprite(f'Images/button_pngs/end_game_blue.png', 0.5)
+        end_button = arcade.Sprite(f'images/button_pngs/end_game_blue.png', 0.5)
         end_button.position = SCREEN_WIDTH/2 , 50
         end_button.name = 'end'
         self.button_list.append(end_button)
@@ -211,8 +211,8 @@ class EndGame(arcade.View):
         d.drawOptions().clearBackground = False
         d.DrawMolecule(target)
         d.FinishDrawing()
-        d.WriteDrawingText('Images/game_loop_images/target_mol.png')
-        self.target_sprite = arcade.Sprite('Images/game_loop_images/target_mol.png')
+        d.WriteDrawingText('images/game_loop_images/target_mol.png')
+        self.target_sprite = arcade.Sprite('images/game_loop_images/target_mol.png')
         self.target_sprite.position = (RIGHT_MAT_X_COORD, MAT_Y_COORD + 20)
         self.card_list.append(self.target_sprite)
 
@@ -223,8 +223,8 @@ class EndGame(arcade.View):
         d.drawOptions().clearBackground = False
         d.DrawMolecule(mol)
         d.FinishDrawing()
-        d.WriteDrawingText('Images/game_loop_images/final_mol.png')
-        self.chosen_sprite = arcade.Sprite('Images/game_loop_images/final_mol.png')
+        d.WriteDrawingText('images/game_loop_images/final_mol.png')
+        self.chosen_sprite = arcade.Sprite('images/game_loop_images/final_mol.png')
         self.chosen_sprite.position = (LEFT_MAT_X_COORD, MAT_Y_COORD + 20)
         self.card_list.append(self.chosen_sprite)
 
@@ -244,7 +244,7 @@ class EndGame(arcade.View):
 
         #Generate spider plot
         self.make_radar_chart(stats=final_property_list)
-        self.radarplot = arcade.Sprite('Images/game_loop_images/spider_plot.png')
+        self.radarplot = arcade.Sprite('images/game_loop_images/spider_plot.png')
         self.radarplot.position = (250, 200)
         self.card_list.append(self.radarplot)
 
