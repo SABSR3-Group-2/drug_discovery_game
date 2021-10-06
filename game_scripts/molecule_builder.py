@@ -246,7 +246,8 @@ class MolView(arcade.View):
         loc = (self.hovered.position[0] + 30, self.hovered.position[1] - 30)  # where to draw it
 
         # Create the text sprite
-        text_sprite = arcade.draw_text(text, loc[0], loc[1], color=arcade.color.BLACK, font_size=10, font_name=self.font)
+        text_sprite = arcade.draw_text(text, loc[0], loc[1], color=arcade.color.BLACK, font_size=10,
+                                       font_name=self.font)
 
         # Draw the background
         width = text_sprite.width
@@ -340,39 +341,41 @@ class MolView(arcade.View):
                                      self.vh,
                                      color=arcade.color.OXFORD_BLUE)
 
-        arcade.draw_text('Molecule Builder', int(SCREEN_WIDTH*0.59), SCREEN_HEIGHT - 50, color=arcade.color.WHITE,
+        arcade.draw_text('Molecule Builder', int(SCREEN_WIDTH * 0.59), SCREEN_HEIGHT - 50, color=arcade.color.WHITE,
                          font_size=30, font_name=self.font)
 
         arcade.draw_text(f'Displaying: R{ord(self.tag[0].lower()) - 96}', 10, SCREEN_HEIGHT - self.vh * 0.5 - 20,
                          color=arcade.color.OXFORD_BLUE, font_size=11, font_name=self.font)
 
         current_balance = f'Total Balance: ${global_vars.balance}'
-        arcade.draw_text(current_balance, SCREEN_WIDTH - 7*len(current_balance), SCREEN_HEIGHT - self.vh * 0.5 - 20,
+        arcade.draw_text(current_balance, SCREEN_WIDTH - 7 * len(current_balance), SCREEN_HEIGHT - self.vh * 0.5 - 20,
                          color=arcade.color.OXFORD_BLUE, font_size=11)
 
         current_time = f'Time remaining: {global_vars.time} weeks'
-        arcade.draw_text(current_time, SCREEN_WIDTH - 7*len(current_time), SCREEN_HEIGHT - self.vh * 0.5 - 40,
+        arcade.draw_text(current_time, SCREEN_WIDTH - 7 * len(current_time), SCREEN_HEIGHT - self.vh * 0.5 - 40,
                          color=arcade.color.OXFORD_BLUE, font_size=11)
 
-        instructions = ['Welcome to the Drug Discovery Game. Above you can see the starting scaffold',
-                        'with the vectors marked by starred numbers. Select r groups from the scrol-',
-                        'lable inventory on the left by double clicking to add to the scaffold. You can ',
-                        'filter the r groups (descending) by clicking the filter buttons at the top. To see',
-                        'the different sets of r groups available for each vector, click the arrows. ',
-                        'Change views by using the right and left keys on the keyboard.']
-        inst = "Welcome to the Drug Discovery Game. Above you can see the starting scaffold with the vectors marked " \
-               "by starred numbers. Select r groups from the scrollable inventory on the left by double clicking to " \
-               "add to the scaffold. You can filter the r groups (descending) by clicking the filter buttons at the " \
-               "top. To see the different sets of r groups available for each vector, click the arrows. Change views " \
-               "by using the right and left keys on the keyboard. "
-        instructions = textwrap.fill(inst, 78)
+        # inst = "Welcome to the Drug Discovery Game. Above you can see the starting scaffold with the vectors marked
+        # " \ "by starred numbers. Select r groups from the scrollable inventory on the left by double clicking to "
+        # \ "add to the scaffold. You can filter the r groups (descending) by clicking the filter buttons at the " \
+        # "top. To see the different sets of r groups available for each vector, click the arrows. Change views " \
+        # "by using the right and left keys on the keyboard. "
+
+        profile = f'MMP-12 is an 18 kDa, monomeric enzyme implicated in emphysema and ' \
+                  f'asthma, and has been identified ' \
+                  f'as a target with therapeutic potential. Your job is to design a potent inhibitor of MMP12 with' \
+                  f' good lipophilicity, medium to high permeability, and good metabolic stability. You have ' \
+                  f'{global_vars.time} weeks and ${global_vars.balance} to design, assay, and screen your ' \
+                  f'molecules. At the end you will have to pick a final molecule to take forward.'
+        instructions = textwrap.fill(profile, 71)
         instructions = instructions.split(sep='\n')
         for i, t in enumerate(instructions):
-            arcade.draw_text(t, INVENTORY_WIDTH + 15, SCREEN_HEIGHT / 5 - (i + 1) * 20, color=arcade.color.OXFORD_BLUE, font_name=self.font)
+            arcade.draw_text(t, INVENTORY_WIDTH + 15, SCREEN_HEIGHT / 4 - (i + 1.5) * 20, color=arcade.color.OXFORD_BLUE
+                             , font_name=self.font)
 
         # Delineate boundaries
         arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT, INVENTORY_WIDTH, 0, arcade.color.OXFORD_BLUE, 5)
-        arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT / 5, SCREEN_WIDTH, SCREEN_HEIGHT / 5,
+        arcade.draw_line(INVENTORY_WIDTH, SCREEN_HEIGHT / 4, SCREEN_WIDTH, SCREEN_HEIGHT / 4,
                          arcade.color.OXFORD_BLUE, 5)
 
         # Draw the filters
