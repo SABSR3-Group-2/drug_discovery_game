@@ -30,6 +30,8 @@ MANIFEST
 # temporary images
 Images/game_loop_images/*
 Images/button_pngs/chosen_mol.png
+Images/temp/*
+Images/review/*
 # temporary files
 /game_scripts/tmp_r_groups.txt
 /data/results.csv
