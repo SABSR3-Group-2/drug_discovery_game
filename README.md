@@ -100,7 +100,7 @@ If you have decided on your favourite molecule, you can end the game by selectin
 result in the final feedback screen being displayed. All of the data from the molecules and assays that you have run are
 saved in a csv file called `results.csv`, located in the data folder.
 
-### Final Feedback
+### 4. Final Feedback
 
 This window compares your chosen final molecule to that chosen by the expert medicinal chemists from Roche, and gives you feedback on your choices. A spider plot compares the critical properties in the brief for both molecules, and where your molecule falls short feedback is given on how it
 can be improved.
