@@ -2,8 +2,6 @@
 
 # The Drug Discovery Game
 
-![](images/gifs_for_readme/Screenshot%202021-10-06%20at%2019.01.40.png)
-
 The Drug Discovery Game is an interactive game exploring the process of drug discovery based on actual data from drugs in clinical trials or on the market. Players grow a core fragment from pre-defined vectors, guided by biophysical and pharmacological assay data. The aim is to develop a final compound within a specified budget with a potency close to that of the published compound. This serves as both an educative tool for training medicinal chemists in robust decision making, but also as a tool for training machine learning algorithms in the decisions made by pharmaceutical research scientists. It is developed by researchers from the University of Oxford in collaboration with scientists from Roche.
 Latest documentation at: https://drug-discovery-game.readthedocs.io/en/latest/
 ## Installation
@@ -122,3 +120,5 @@ We are always very keen to hear your comments, thoughts and suggestions. Do plea
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
+
+![](images/gifs_for_readme/Screenshot%202021-10-06%20at%2019.01.40.png)
