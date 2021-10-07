@@ -231,16 +231,16 @@ class EndGame(arcade.View):
         #Get descriptor information for the final chosen molecule
         descriptor_dict = get_descriptors(smiles)
         if mol_info.at[0, 'pic50'] not in ['Assay Failed', 'Inactive', 'Not Made']:
-            pic50 = float(mol_info.at[0, 'pic50'])
+            self.pic50 = float(mol_info.at[0, 'pic50'])
         else:
-            pic50 = 0
-        logd = float(mol_info.at[0, 'logd'])
-        mouse_clearance = clearance_dict[mol_info.at[0, 'clearance_mouse']]
-        human_clearance = clearance_dict[mol_info.at[0, 'clearance_human']]
-        permeability = pampa_dict[mol_info.at[0, 'pampa']]
+            self.pic50 = 0
+        self.logd = float(mol_info.at[0, 'logd'])
+        self.mouse_clearance = clearance_dict[mol_info.at[0, 'clearance_mouse']]
+        self.human_clearance = clearance_dict[mol_info.at[0, 'clearance_human']]
+        self.permeability = pampa_dict[mol_info.at[0, 'pampa']]
         
         #List of parameters for final molecule spider plot
-        final_property_list = [pic50, logd, mouse_clearance, human_clearance, permeability]
+        final_property_list = [self.pic50, self.logd, self.mouse_clearance, self.human_clearance, self.permeability]
 
         #Generate spider plot
         self.make_radar_chart(stats=final_property_list)
@@ -250,24 +250,23 @@ class EndGame(arcade.View):
 
         #generate text list
         pic50 = mol_info.at[0, 'pic50']
-        self.choice_text_list = [f'pIC50: {mol_info.at[0, "pic50"]}', f'logD: {logd}', f'Mouse clearance: {mol_info.at[0, "clearance_mouse"]}', f'Human clearance: {mol_info.at[0, "clearance_human"]}', f'Permeability: {mol_info.at[0, "pampa"]}']
+        self.choice_text_list = [f'pIC50: {mol_info.at[0, "pic50"]}', f'logD: {self.logd}', f'Mouse clearance: {mol_info.at[0, "clearance_mouse"]}', f'Human clearance: {mol_info.at[0, "clearance_human"]}', f'Permeability: {mol_info.at[0, "pampa"]}']
         self.target_text_list = ['pIC50: 7.7', 'logD: 1.08', 'Mouse clearance: low (<5.6)', 'Human clearance: low (<12)', 'Permeability: medium - high']
         
         #Generate feedback text
-        pic50 = float(pic50)
-        if pic50 < 6.5:
+        if self.pic50 < 6.5:
             pic50_feedback = 'low'
         else:
             pic50_feedback = 'good'
 
-        if 0.95 < logd <1.15:
+        if 0.95 < self.logd <1.15:
             logd_feedback = 'good'
-        elif logd < 0.95:
+        elif self.logd < 0.95:
             logd_feedback = 'low'
         else:
             logd_feedback = 'high'
 
-        if human_clearance != 1:
+        if self.human_clearance != 1:
             clearance_feedback = 'high'
         else:
             clearance_feedback = 'low'
