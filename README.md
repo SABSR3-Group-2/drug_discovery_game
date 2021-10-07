@@ -20,7 +20,7 @@ Following successful cloning, navigate to the root directory by running:
 It's recommended that you set up a virtual environment to install the dependencies in. We recommend installing 
 <a href="https://docs.conda.io/en/latest/miniconda.html">miniconda</a> version=4.9.2 and then setting up a virtual environment by running something like:
 
-`conda env create --name dd_game --file environment.yml`
+`conda env create --name dd_game --file final_env.yml`
 
 This should install all the dependencies necessary for the game to run.
 
@@ -34,7 +34,7 @@ navigate to `game_scripts/select_mols.py` and at the bottom of `read_mols()` cha
 Ensuring you are in the root directory and replacing the two arguments with the name of your data file and the smile string for your scaffold,
 run the preprocessing pipeline by typing a command like the following into your terminal:
 
-`python -m game_scripts/preprocessing.py my_raw_data.csv OC(=Ccc210)`
+`python game_scripts/preprocessing.py my_raw_data.csv OC(=Ccc210)`
 
 The preprocessing can take quite some time (the default data takes ~20 mins on a 2015 MacBook Pro). Once it is finished it will
 create an output csv in `data/` with a name in the format `my_raw_data_processed.csv`. You can now start the game.
@@ -43,7 +43,7 @@ create an output csv in `data/` with a name in the format `my_raw_data_processed
 
 Ensuring you are in the root directory and have the dependencies installed, type the following into your terminal to start the game:
 
-`python -m game_scripts/gameloop.py`
+`python game_scripts/gameloop.py`
 
 If you want to use the default MMP12 dataset, simply press `ENTER` as instructed to start the game.
 
@@ -72,6 +72,8 @@ the right arrow at the top of the page to view the second inventory of fragments
 clicking the arrows at the top. When you have a molecule you are happy with press the `right` arrow key to advance to 
 the next window.
 
+![](images/gifs_for_readme/mol_builder_short.gif)
+
 ### 2. Virtual Assaying
 
 In this window, you can get experimental and calculated data for your chosen molecule. Free calculations are available 
@@ -87,6 +89,8 @@ Once you have run assays or calculated properties for a chosen molecule, this da
 final analysis screen. You can move between the molecule builder and analysis screens using the `left` and `right` 
 arrows, respectively.
 
+![](images/gifs_for_readme/assay.gif)
+
 ### 3. Analysis
 
 On the left-hand side of the screen are cards representing all the molecules that you have built and assayed so far 
@@ -100,10 +104,14 @@ If you have decided on your favourite molecule, you can end the game by selectin
 result in the final feedback screen being displayed. All of the data from the molecules and assays that you have run are
 saved in a csv file called `results.csv`, located in the data folder.
 
-### Final Feedback
+![](images/gifs_for_readme/analysis.gif)
+
+### 4. Final Feedback
 
 This window compares your chosen final molecule to that chosen by the expert medicinal chemists from Roche, and gives you feedback on your choices. A spider plot compares the critical properties in the brief for both molecules, and where your molecule falls short feedback is given on how it
 can be improved.
+
+![](images/gifs_for_readme/Screenshot%202021-10-07%20at%2009.08.32.png)
 
 ## Contributions
 
@@ -116,3 +124,5 @@ We are always very keen to hear your comments, thoughts and suggestions. Do plea
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
+
+![](images/gifs_for_readme/Screenshot%202021-10-06%20at%2019.01.40.png)
